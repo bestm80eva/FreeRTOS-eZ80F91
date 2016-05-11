@@ -289,7 +289,7 @@ void init_uart( UARTID_t port, BaseType_t baudrate, uint8_t databits, uint8_t st
 	
 	uart[port].recerr = UART_ERR_NONE;
 	
-	UART0_IER = 0;
+	SETUART(IER, port,0);
 	
 	if(port)
 		set_vector(UART1_IVECT, isr_uart1);
