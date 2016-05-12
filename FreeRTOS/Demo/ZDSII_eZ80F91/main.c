@@ -148,7 +148,7 @@ int main( void )
 	BaseType_t	res = pdPASS;
 	rtc_t	rtc;
 	TickType_t xTimeNow;
-
+	
 	/* Seed the random number generator. */
 	xTimeNow = xTaskGetTickCount();
 	prvSRand( ( uint32_t ) xTimeNow );
@@ -161,15 +161,10 @@ int main( void )
 	initRTC();
 #endif
 
-#if INCLUDE_LED5x7	== 1
-	initLED5x7();
-	res = xTaskCreate( TaskLED, "TaskLED", configMINIMAL_STACK_SIZE, (void *)portMAX_DELAY,  LED5x7_PRIORITY, NULL);
-#endif
-
 #if INCLUDE_BUTTONS == 1
 	initButtons();
 #endif
-	
+
 	/* Initialise the RTOS's TCP/IP stack.  The tasks that use the network
     are created in the vApplicationIPNetworkEventHook() hook function
     below.  The hook function is called when the network connects. */
@@ -183,7 +178,13 @@ int main( void )
 	// Demo Sysinfo 
 	// Connect putty 115200,8,1,n (ansi terminal) to get the status informations
 	res = xTaskCreate( sysinfo, "SysInfo", configMINIMAL_STACK_SIZE*2, (void *)portMAX_DELAY,  tskIDLE_PRIORITY + 1, NULL);
-	
+
+
+#if INCLUDE_LED5x7	== 1
+	initLED5x7();
+	res = xTaskCreate( TaskLED, "TaskLED", configMINIMAL_STACK_SIZE, (void *)portMAX_DELAY,  LED5x7_PRIORITY, NULL);
+#endif
+
     vTaskStartScheduler();
 
     return res;

@@ -136,9 +136,9 @@
  *----------------------------------------------------------*/
 
 #if INCLUDE_LED5x7 == 1 
-#define LED5x7_FRAMES	pdMS_TO_TICKS(4)	// display refresch delay 
-#define LED5x7_SHIFTT	pdMS_TO_TICKS(60)	// LED5x7_FRAMES delays between shifts
-#define LED5x7_CDELAY	pdMS_TO_TICKS(300)	// LED5x7_FRAMES deleys between letters
+#define LED5x7_FRAMES	 10 //pdMS_TO_TICKS(10)	// display refresch delay 
+#define LED5x7_SHIFTT	 60 //pdMS_TO_TICKS(60)	// LED5x7_FRAMES delays between shifts
+#define LED5x7_CDELAY	600 //pdMS_TO_TICKS(300)	// LED5x7_FRAMES deleys between letters
 #define LED5x7_QUEUES	80					// chars on queue
 #define LED5x7_PRIORITY (configTIMER_TASK_PRIORITY-1) 
 #endif	/* INCLUDE_LED5x7 */

@@ -35,6 +35,7 @@
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCP-related-CLI-commands.c</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\Sample-CLI-commands.c</file>
 <file filter-key="">.\CLI-commands.c</file>
+<file filter-key="">..\..\Source\portable\ZDS II\eZ80\switcher.asm</file>
 </files>
 
 <!-- configuration information -->
@@ -291,13 +292,6 @@
 
 <!-- breakpoint information -->
 <breakpoints>
-<breakpoint temporary="false" enabled="true" >
-<line-number>51</line-number>
-<pathname>C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\src\boot\common\vectors24.asm</pathname>
-<address>3</address>
-<command></command>
-<preserve-type>0</preserve-type>
-</breakpoint>
 </breakpoints>
 
 </project>

@@ -1,3 +1,4 @@
+COMMENT #
 /*
     FreeRTOS V9.0.0rc2 - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
@@ -77,147 +78,93 @@
 	Environmen and comes WITHOUT ANY WARRANTY to you!
 	
 	
-	File: 	port.c
+	File: 	switcher.asm
+			save and restor processor context 
 			Part of FreeRTOS Port for the eZ80F91 Development Kit eZ80F910300ZCOG
 			See www.zilog.com for desciption.
-
+			uart, console and faramted printout driver
 
 	Developer:
 	JSIE	 Juergen Sievers <JSievers@NadiSoft.de>
 
-	150804:	JSIE Start this port.
+	160412:	JSIE removed from port.c implemented in assembler
 	
 */
-#include "FreeRTOS.h"
-#include "task.h"
+#
 
-/*-----------------------------------------------------------*/
-void	vPortYield();
-void	vPortYieldFromTick();
+	.assume	ADL=1
+	xref   	_pxCurrentTCB		;current task control block
+    xref	_vTaskSwitchContext
+	xref	_xTaskIncrementTick
+	xref	_prvSetupTimerInterrupt
 	
-/* The address of the pxCurrentTCB variable, */
-typedef void tskTCB;
-extern volatile tskTCB * volatile pxCurrentTCB;
+	xdef	_vPortYield
+	xdef	_vPortYieldFromTick
+	xdef 	_xPortStartScheduler
 
-/*-----------------------------------------------------------*/
+; Save processor context on current TCB
+PUSHALL MACRO
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	PUSH	IX
+	PUSH	IY
+	EX		AF,	AF'
+	EXX
+	PUSH	AF
+	PUSH	BC
+	PUSH	DE
+	PUSH	HL
+	LD		IX,	0
+	ADD		IX,	SP
+	LD		HL,	(_pxCurrentTCB)	
+	LD		(HL),	IX
+	MACEND
 
-/*
- * Setup timer.
- */
-void prvSetupTimerInterrupt( void )
-{
-    void * set_vector(unsigned int vector,void (*hndlr)(void));
-	unsigned char tmp;
+; Restor processor context from current TCB
+POPALL	MACRO
+	LD		HL,	(_pxCurrentTCB)	
+	LD		HL,	(HL)
+	LD		SP,	HL
+	POP		HL
+	POP		DE
+	POP		BC
+	POP		AF
+	EXX
+	EX		AF,	AF'
+	POP		IY
+	POP		IX
+	POP		HL
+	POP		DE
+	POP		BC
+	POP		AF
+	MACEND
 
-    /* set Timer interrupt vector */
-    set_vector(TIMER_VECTOR, vPortYieldFromTick);
+	SEGMENT CODE
 
-    TMR0_DR_H = (configCPU_CLOCK_HZ / 16UL / configTICK_RATE_HZ) >> 8;
-    TMR0_DR_L = (configCPU_CLOCK_HZ / 16UL / configTICK_RATE_HZ) & 0xFF;
+; Setup scheduler timer and restor processor to current PCB	
+_xPortStartScheduler:
+    call	_prvSetupTimerInterrupt
+	POPALL
+	RET
 
-    tmp = TMR0_IIR;
-    TMR0_CTL = 0x0F;
-    TMR0_IER = 0x01;
-}
+; Manual switch context
+_vPortYield:
+	PUSHALL
+	call	_vTaskSwitchContext
+	LD		HL,	(_pxCurrentTCB)	
+	POPALL
+	RET
 
-/*-----------------------------------------------------------*/
+; Scheduler triggert context switch
+_vPortYieldFromTick:
+	PUSHALL
+	IN0		A,	(62h)	; ack timer interrupt
+	call	_xTaskIncrementTick
+	call	_vTaskSwitchContext
+	POPALL
+	EI
+	RETI
 
-/*
- * Setup valid stack-frame for a new task and return top of frame.
- */
-
-StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters ) PRIVILEGED_FUNCTION
-{
-    /* Place the parameter on the stack in the expected location. */
-    *pxTopOfStack-- = ( StackType_t ) pvParameters;
-
-    /* Place the task return address on stack. Not used*/
-    *pxTopOfStack-- = ( StackType_t ) 0x000000;
-
-    /* The start of the task code will be popped off the stack last, so place
-    it on first. */
-    *pxTopOfStack-- = ( StackType_t ) pxCode;
-
-    /* Now the registers. */
-    *pxTopOfStack-- = ( StackType_t ) 0xAFAFAF;  /* AF  */
-	*pxTopOfStack-- = ( StackType_t ) 0xBCBCBC;  /* BC  */
-    *pxTopOfStack-- = ( StackType_t ) 0xDEDEDE;  /* DE  */
-    *pxTopOfStack-- = ( StackType_t ) 0xEFEFEF;  /* HL  */
-	*pxTopOfStack-- = ( StackType_t ) 0x111111;  /* IX  */
-    *pxTopOfStack-- = ( StackType_t ) 0x222222;  /* IY  */
-    *pxTopOfStack-- = ( StackType_t ) 0xFAFAFA;  /* AF' */
-    *pxTopOfStack-- = ( StackType_t ) 0xCBCBCB;  /* BC' */
-    *pxTopOfStack-- = ( StackType_t ) 0xEDEDED;  /* DE' */
-    *pxTopOfStack   = ( StackType_t ) 0xFEFEFE;  /* HL' */
-    return pxTopOfStack;
-}
-
-/*-----------------------------------------------------------*/
-// Start the scheduler and the first (current) task	
-BaseType_t xPortStartScheduler( void );
-
-/*-----------------------------------------------------------*/
-
-void vPortEndScheduler( void )
-{
-    /* It is unlikely that the eZ80 port will require this function as there
-    is nothing to return to.  If this is required - stop the tick ISR then
-    return back to main. */
-	asm("di");
-	asm("slp");
-}
-/*-----------------------------------------------------------*/
-
-
-static UINT32 ulNextRand = 0x12345678;
-
-/* You are right its a little engine MPU but the compiler 
-   does not be able to handle the existing FreeRTOS macro
- */  
-UINT32 portFreeRTOS_htonl( UINT32 ulIn ) 											
-{
-											// aabbccdd
-	return  (ulIn << 24UL) 				|	// dd000000
-			(ulIn <<  8UL) & 0xFF0000UL |	// ddcc0000
-			(ulIn >>  8UL) & 0xFF00UL 	|	// ddccbb00
-			(ulIn >> 24UL);					// ddccbbaa
-}
-
-UINT16 portFreeRTOS_htons( UINT16 usIn ) 											
-{
-	return (usIn >> 8U) | (usIn << 8U);
-}
-	
-UINT32 uxRand( void )
-{
-	static const UINT32 ulMultiplier = 0x375a4e35UL; 
-	static const UINT32 ulIncrement  = 7UL;
-
-	/* Utility function to generate a pseudo random number. */
-	ulNextRand = ulMultiplier * ulNextRand + ulIncrement;
-	return ulNextRand;
-}
-
-
-void prvSRand( UBaseType_t ulSeed )
-{
-	/* Utility function to seed the pseudo random number generator. */
-	ulNextRand = ulSeed;
-	uxRand();
-}
-
-
-int strcasecmp(const char *s1, const char *s2)
-{
-	char c1=*s1,c2=*s2;
-	
-	while(*s1++ && *s2++)
-	{
-		c1 = *s1 - ((*s1 >= 'a' && *s1 <= 'z') ? ('a' + 'A') : 0);
-		c2 = *s2 - ((*s2 >= 'a' && *s2 <= 'z') ? ('a' + 'A') : 0);
-		if(c1 != c2)
-			break;
-	}
-	return c1-c2;
-}
-
+	END

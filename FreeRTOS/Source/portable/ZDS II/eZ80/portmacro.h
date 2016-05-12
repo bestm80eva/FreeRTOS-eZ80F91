@@ -91,7 +91,6 @@
 
 #ifndef PORTMACRO_H
 #define PORTMACRO_H
-//#include <stdint.h>		// types used by 
 
 /*-----------------------------------------------------------
  * Port specific definitions.  
