@@ -36,7 +36,7 @@
 <file filter-key="">..\..\Source\portable\ZDS II\eZ80\switcher.asm</file>
 <file filter-key="">.\ez80_leds.c</file>
 <file filter-key="">..\..\Source\include\portable.h</file>
-<file filter-key="">.\MAIN.C</file>
+<file filter-key="">.\main.c</file>
 </files>
 
 <!-- configuration information -->
