@@ -1,4 +1,4 @@
-<project type="Executable" project-type="Standard" configuration="Debug-Ram" created-by="05031803" modified-by="d:5.2.0:11111601" ZDSII="ZDS - eZ80Acclaim! 5.2.1 (Build 12102401)">
+<project type="Executable" project-type="Standard" configuration="Debug-Flash" created-by="05031803" modified-by="d:5.2.0:11111601" ZDSII="ZDS - eZ80Acclaim! 5.2.1 (Build 12102401)">
 <cpu>EZ80F91</cpu>
 
 <!-- file information -->
