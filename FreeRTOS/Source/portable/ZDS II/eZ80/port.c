@@ -104,21 +104,8 @@ extern volatile tskTCB * volatile pxCurrentTCB;
 /*
  * Setup timer.
  */
-void prvSetupTimerInterrupt( void )
-{
-    void * set_vector(unsigned int vector,void (*hndlr)(void));
-	unsigned char tmp;
-
-    /* set Timer interrupt vector */
-    set_vector(TIMER_VECTOR, vPortYieldFromTick);
-
-    TMR0_DR_H = (configCPU_CLOCK_HZ / 16UL / configTICK_RATE_HZ) >> 8;
-    TMR0_DR_L = (configCPU_CLOCK_HZ / 16UL / configTICK_RATE_HZ) & 0xFF;
-
-    tmp = TMR0_IIR;
-    TMR0_CTL = 0x0F;
-    TMR0_IER = 0x01;
-}
+const unsigned ticks = configCPU_CLOCK_HZ / 16UL / configTICK_RATE_HZ;
+void prvSetupTimerInterrupt( void );
 
 /*-----------------------------------------------------------*/
 
@@ -129,26 +116,26 @@ void prvSetupTimerInterrupt( void )
 StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t pxCode, void *pvParameters ) PRIVILEGED_FUNCTION
 {
     /* Place the parameter on the stack in the expected location. */
-    *pxTopOfStack-- = ( StackType_t ) pvParameters;
+    *--pxTopOfStack = ( StackType_t ) pvParameters;
 
     /* Place the task return address on stack. Not used*/
-    *pxTopOfStack-- = ( StackType_t ) 0x000000;
+    *--pxTopOfStack = ( StackType_t ) 0;
 
     /* The start of the task code will be popped off the stack last, so place
     it on first. */
-    *pxTopOfStack-- = ( StackType_t ) pxCode;
+    *--pxTopOfStack = ( StackType_t ) pxCode;
 
     /* Now the registers. */
-    *pxTopOfStack-- = ( StackType_t ) 0xAFAFAF;  /* AF  */
-	*pxTopOfStack-- = ( StackType_t ) 0xBCBCBC;  /* BC  */
-    *pxTopOfStack-- = ( StackType_t ) 0xDEDEDE;  /* DE  */
-    *pxTopOfStack-- = ( StackType_t ) 0xEFEFEF;  /* HL  */
-	*pxTopOfStack-- = ( StackType_t ) 0x111111;  /* IX  */
-    *pxTopOfStack-- = ( StackType_t ) 0x222222;  /* IY  */
-    *pxTopOfStack-- = ( StackType_t ) 0xFAFAFA;  /* AF' */
-    *pxTopOfStack-- = ( StackType_t ) 0xCBCBCB;  /* BC' */
-    *pxTopOfStack-- = ( StackType_t ) 0xEDEDED;  /* DE' */
-    *pxTopOfStack   = ( StackType_t ) 0xFEFEFE;  /* HL' */
+    *--pxTopOfStack = ( StackType_t ) 0xAFAFAF;  /* AF  */
+	*--pxTopOfStack = ( StackType_t ) 0xBCBCBC;  /* BC  */
+    *--pxTopOfStack = ( StackType_t ) 0xDEDEDE;  /* DE  */
+    *--pxTopOfStack = ( StackType_t ) 0xEFEFEF;  /* HL  */
+	*--pxTopOfStack = ( StackType_t ) 0x111111;  /* IX  */
+    *--pxTopOfStack = ( StackType_t ) 0x222222;  /* IY  */
+    *--pxTopOfStack = ( StackType_t ) 0xFAFAFA;  /* AF' */
+    *--pxTopOfStack = ( StackType_t ) 0xCBCBCB;  /* BC' */
+    *--pxTopOfStack = ( StackType_t ) 0xEDEDED;  /* DE' */
+    *--pxTopOfStack = ( StackType_t ) 0xFEFEFE;  /* HL' */
     return pxTopOfStack;
 }
 

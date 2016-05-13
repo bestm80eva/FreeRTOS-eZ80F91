@@ -83,6 +83,11 @@ heap_4 can be used. */
 #include "NetworkInterface.h"
 #include "NetworkBufferManagement.h"
 
+#if 1
+void *pvPortMallocAlligned(size_t xWantedSize, unsigned alignment);
+#define pvPortMalloc(x)	pvPortMallocAlligned(x,4);
+#endif
+
 /* For an Ethernet interrupt to be able to obtain a network buffer there must
 be at least this number of buffers available. */
 #define ipINTERRUPT_BUFFER_GET_THRESHOLD	( 3 )

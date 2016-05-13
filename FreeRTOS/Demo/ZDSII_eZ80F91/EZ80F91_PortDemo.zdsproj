@@ -3,13 +3,11 @@
 
 <!-- file information -->
 <files>
-<file filter-key="">.\main.c</file>
 <file filter-key="">..\..\Source\list.c</file>
 <file filter-key="">..\..\Source\queue.c</file>
 <file filter-key="">..\..\Source\tasks.c</file>
 <file filter-key="">..\..\Source\portable\ZDS II\eZ80\port.c</file>
 <file filter-key="">.\FreeRTOSConfig.h</file>
-<file filter-key="">.\ez80_leds.c</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_UDP_IP.c</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_ARP.c</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_DHCP.c</file>
@@ -36,6 +34,9 @@
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\Sample-CLI-commands.c</file>
 <file filter-key="">.\CLI-commands.c</file>
 <file filter-key="">..\..\Source\portable\ZDS II\eZ80\switcher.asm</file>
+<file filter-key="">.\ez80_leds.c</file>
+<file filter-key="">..\..\Source\include\portable.h</file>
+<file filter-key="">.\MAIN.C</file>
 </files>
 
 <!-- configuration information -->
@@ -141,7 +142,7 @@
 <option name="linkconfig" type="string" change-action="build">Standard</option>
 <option name="flashinfo" type="string" change-action="build">0-1FF</option>
 <option name="ram" type="string" change-action="build">B7E000-BFFFFF</option>
-<option name="rom" type="string" change-action="build">0-07FFFF,100000-1FFFFF</option>
+<option name="rom" type="string" change-action="build">0-07FFFF</option>
 <option name="extio" type="string" change-action="build">0-FFFF</option>
 <option name="intio" type="string" change-action="build">0-FF</option>
 </options>
@@ -288,6 +289,7 @@
 <watch-element expression="xTickCount" />
 <watch-element expression="uxTopReadyPriority" />
 <watch-element expression="pxReadyTasksLists" />
+<watch-element expression="aa" />
 </watch-elements>
 
 <!-- breakpoint information -->

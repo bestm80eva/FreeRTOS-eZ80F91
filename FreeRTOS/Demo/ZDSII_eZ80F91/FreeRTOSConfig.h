@@ -136,9 +136,9 @@
  *----------------------------------------------------------*/
 
 #if INCLUDE_LED5x7 == 1 
-#define LED5x7_FRAMES	 10 //pdMS_TO_TICKS(10)	// display refresch delay 
-#define LED5x7_SHIFTT	 60 //pdMS_TO_TICKS(60)	// LED5x7_FRAMES delays between shifts
-#define LED5x7_CDELAY	600 //pdMS_TO_TICKS(300)	// LED5x7_FRAMES deleys between letters
+#define LED5x7_FRAMES	pdMS_TO_TICKS(  5)	// display refresch delay 
+#define LED5x7_SHIFTT	pdMS_TO_TICKS( 60)	// LED5x7_FRAMES delays between shifts
+#define LED5x7_CDELAY	pdMS_TO_TICKS(300)	// LED5x7_FRAMES deleys between letters
 #define LED5x7_QUEUES	80					// chars on queue
 #define LED5x7_PRIORITY (configTIMER_TASK_PRIORITY-1) 
 #endif	/* INCLUDE_LED5x7 */
@@ -211,7 +211,7 @@ void myAssert(int x);
 #define configMAX_TASK_NAME_LEN                 16
 #define configUSE_16_BIT_TICKS                  0
 #define configUSE_24_BIT_TICKS					1	/* standard wide on eZ80 MPU */
-#define configIDLE_SHOULD_YIELD                 1
+#define configIDLE_SHOULD_YIELD                 0
 #define configUSE_TASK_NOTIFICATIONS            1
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             1
@@ -222,7 +222,7 @@ void myAssert(int x);
 #define configUSE_TIME_SLICING                  0
 #define configUSE_NEWLIB_REENTRANT              0
 #define configENABLE_BACKWARD_COMPATIBILITY     0
-#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS 0
 
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         1

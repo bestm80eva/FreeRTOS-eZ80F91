@@ -156,7 +156,7 @@ int main( void )
 #if INCLUDE_CONSOLE == 1 || INCLUDE_MODEM == 1  		// Include serial port 0 or serial port 1
 	initSerial();
 #endif
-	
+
 #if INCLUDE_RTC	== 1		// Include Realtime Clock
 	initRTC();
 #endif
@@ -185,7 +185,7 @@ int main( void )
 	res = xTaskCreate( TaskLED, "TaskLED", configMINIMAL_STACK_SIZE, (void *)portMAX_DELAY,  LED5x7_PRIORITY, NULL);
 #endif
 
-    vTaskStartScheduler();
+	vTaskStartScheduler();
 
     return res;
 }

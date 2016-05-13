@@ -152,8 +152,8 @@ itself. */
 
 /* The following endian values are used by FreeRTOS+ components, not FreeRTOS
 itself. */
-#define pdFREERTOS_LITTLE_ENDIAN	0
-#define pdFREERTOS_BIG_ENDIAN		1
+#define pdFREERTOS_LITTLE_ENDIAN	1
+#define pdFREERTOS_BIG_ENDIAN		0
 
 #endif /* PROJDEFS_H */
 

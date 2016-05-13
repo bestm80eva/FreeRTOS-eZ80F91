@@ -155,7 +155,7 @@ typedef portTickType		TickType_t;
 #define portTICK_PERIOD_MS       ( ( portTickType ) 1000 / configTICK_RATE_HZ )
 #define portTICK_MS(x)			 ( (x) * portTICK_PERIOD_MS)
 #define portBYTE_ALIGNMENT       4	
-#define TIMER_VECTOR             0x54
+
 /*-----------------------------------------------------------*/
 
 /* Kernel utilities. */

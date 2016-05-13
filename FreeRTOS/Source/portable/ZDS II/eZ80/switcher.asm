@@ -91,16 +91,21 @@ COMMENT #
 	
 */
 #
+	include	ez80f91.inc
 
 	.assume	ADL=1
 	xref   	_pxCurrentTCB		;current task control block
     xref	_vTaskSwitchContext
 	xref	_xTaskIncrementTick
 	xref	_prvSetupTimerInterrupt
+	xref	_set_vector
+	xref	_ticks
 	
 	xdef	_vPortYield
-	xdef	_vPortYieldFromTick
+	;xdef	_vPortYieldFromTick
 	xdef 	_xPortStartScheduler
+
+TIMER0_IVECT	equ		54h
 
 ; Save processor context on current TCB
 PUSHALL MACRO
@@ -145,26 +150,48 @@ POPALL	MACRO
 
 ; Setup scheduler timer and restor processor to current PCB	
 _xPortStartScheduler:
-    call	_prvSetupTimerInterrupt
-	POPALL
-	RET
+	DI
+	LD		A,	0
+	OUT0	(TMR0_IER),A
 
-; Manual switch context
+	LD		BC,	_vPortYieldFromTick
+	PUSH	BC
+	LD		BC,	TIMER0_IVECT
+	PUSH	BC
+	CALL	_set_vector
+	POP		BC
+	POP		BC
+
+	LD		HL,	(_ticks)
+	LD		A,	H
+	OUT0	(TMR0_DR_H),	A
+	LD		A,	L
+	OUT0	(TMR0_DR_L),	A
+	IN0		A,	(TMR0_IIR)
+	LD		A,	15
+	OUT0	(TMR0_CTL),	A
+	LD		A,	1
+	OUT0	(TMR0_IER),A
+	JR		xr
+
+; Manual triggert switch context
 _vPortYield:
+	DI
 	PUSHALL
 	call	_vTaskSwitchContext
-	LD		HL,	(_pxCurrentTCB)	
-	POPALL
+xr:	POPALL
+	EI
 	RET
 
-; Scheduler triggert context switch
+; Scheduler timer interrupt triggert context switch
 _vPortYieldFromTick:
 	PUSHALL
-	IN0		A,	(62h)	; ack timer interrupt
+	IN0		A,	(TMR0_IIR)	; ack timer interrupt
 	call	_xTaskIncrementTick
 	call	_vTaskSwitchContext
 	POPALL
 	EI
 	RETI
+
 
 	END
