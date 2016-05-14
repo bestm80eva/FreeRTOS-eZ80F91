@@ -69,6 +69,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+typedef uint32_t time_t;
+
+
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -80,12 +83,12 @@
 #include "FreeRTOS_DNS.h"
 #include "FreeRTOS_Stream_Buffer.h"
 
-#include "ff_headers.h"
+//#include "ff_headers.h"
 
 #include "NTPDemo.h"
 #include "ntpClient.h"
 
-#include "date_and_time.h"
+//#include "date_and_time.h"
 
 enum EStatus {
 	EStatusLookup,
@@ -238,9 +241,10 @@ static void prvSwapFields( struct SNtpPacket *pxPacket)
 	pxPacket->transmitTimestamp.fraction = FreeRTOS_htonl( pxPacket->transmitTimestamp.fraction );
 }
 /*-----------------------------------------------------------*/
-
 static void prvNTPPacketInit( )
 {
+	time_t uxSecs;
+	
 	memset (&xNTPPacket, '\0', sizeof xNTPPacket);
 
 	xNTPPacket.flags = 0xDB;				/* value 0xDB : mode 3 (client), version 3, leap indicator unknown 3 */
@@ -250,7 +254,7 @@ static void prvNTPPacketInit( )
 	xNTPPacket.rootDispersion = 0x0008CAC8;	/* 0x0008CAC8 = 8.7912  seconds */
 
 	/* use the recorded NTP time */
-	time_t uxSecs = FreeRTOS_time( NULL );/* apTime may be NULL, returns seconds */
+	uxSecs = FreeRTOS_time( NULL );/* apTime may be NULL, returns seconds */
 
 	xNTPPacket.referenceTimestamp.seconds = uxSecs;	/* Current time */
 	xNTPPacket.transmitTimestamp.seconds = uxSecs + 3;

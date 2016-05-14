@@ -18,7 +18,7 @@ typedef union _SNtpFlags  SNtpFlags;
 /**
  * 64-bit NTP timestamp.
  */
-struct __attribute__ ((__packed__)) _SNtpTimestamp {
+struct /*SIE: __attribute__ ((__packed__)) */ _SNtpTimestamp {
   /** Number of seconds passed since Jan 1 1900, in big-endian format. */
   quint32 seconds;
 

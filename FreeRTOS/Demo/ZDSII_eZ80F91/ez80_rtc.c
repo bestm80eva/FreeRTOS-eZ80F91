@@ -211,7 +211,7 @@ void setDate(uint8_t day, uint8_t mon, uint16_t year)
 	p.d.r.DOM = day;
 	p.d.r.MON = mon;
 	p.d.r.CEN = year/100;
-	p.d.r.CEN = year%100;
+	p.d.r.YR  = year%100;
 	p.flg = (1 << RID_DOM) | (1 << RID_MON) | (1 << RID_CEN) | (1 << RID_YR); 
 	setRTC(&p);
 }
@@ -233,5 +233,11 @@ uint8_t initRTC()
 {
 	uint8_t res = RTC_CTRL;
 	RTC_CTRL = 0;
+	if(chkRTCPowerLost())
+	{
+		setDate(14, 5, 2016);
+		setTime(2, 15, 0);
+	}
+		
 	return res;
 }

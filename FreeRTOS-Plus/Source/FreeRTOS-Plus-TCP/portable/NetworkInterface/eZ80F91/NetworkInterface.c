@@ -149,12 +149,13 @@ determine how many packet buffers remain in the Rx buffer.
 #define _rwp ((_tSEMAC_DescTbl*) (emacram + EmacRwp))
 #define _trp ((_tSEMAC_DescTbl*) (emacram + EmacTrp))
 #define _rrp ((_tSEMAC_DescTbl*) (emacram + EmacRrp))
-static _tSEMAC_DescTbl* _twp;
 
 
 /*******************************************************************************
 *                            LOCALE VARIABLES
 *******************************************************************************/
+
+static _tSEMAC_DescTbl* _twp;
 
 static const int8_t aucMAC_Address[6] = { EMAC_MAC };
 
