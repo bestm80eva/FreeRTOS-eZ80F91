@@ -310,11 +310,12 @@ static void prvReadTime( struct SNtpPacket * pxPacket )
 	else
 	{
 		/* Less than or equal to 5 second difference. */
-		pcTimeUnit = "ms";
+		
 		uint32_t ulLowest = ( uxCurrentSeconds <= uxPreviousSeconds ) ? uxCurrentSeconds : uxPreviousSeconds;
 		int32_t iCurMS = 1000 * ( uxCurrentSeconds - ulLowest ) + uxCurrentMS;
 		int32_t iPrevMS = 1000 * ( uxPreviousSeconds - ulLowest ) + uxPreviousMS;
 		ilDiff = iCurMS - iPrevMS;
+		pcTimeUnit = "ms";
 	}
 	uxCurrentSeconds -= iTimeZone;
 
