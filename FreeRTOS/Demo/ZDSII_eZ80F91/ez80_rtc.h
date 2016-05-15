@@ -149,7 +149,7 @@ void setAlarm(alarm_t alarm,uint16_t flag, uint8_t dow, uint8_t hrs, uint8_t min
 char *getsAlarm(char *s, size_t sz);
 void setTime(uint8_t hrs, uint8_t min, uint8_t sec);
 char *getsTime(char *s, size_t sz);
-void setDate(uint8_t day, uint8_t mon, uint16_t year);
+void setDate(uint8_t dow, uint8_t day, uint8_t mon, uint16_t year);
 char *getsDate(char *s, size_t sz);
 uint8_t initRTC();
 

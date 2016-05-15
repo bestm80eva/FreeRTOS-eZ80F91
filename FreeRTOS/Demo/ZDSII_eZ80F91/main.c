@@ -103,6 +103,7 @@
 #include "FreeRTOS_CLI.h"
 #include "NetworkInterface.h"
 
+#include "time.h"
 #include "ez80_rtc.h"
 #include "ez80_tty.h"
 #include "ez80_leds.h"
@@ -113,6 +114,7 @@ void prvSRand( uint32_t );
 
 void vStartTCPCommandInterpreterTask( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPriority );
 void vRegisterSampleCLICommands( void );
+void vRegisterTCPCLICommands( void );
 
 void vApplicationIdleHook( void );
 void xApplicationDNSQueryHook(){}
@@ -170,6 +172,7 @@ int main( void )
     below.  The hook function is called when the network connects. */
 	res = FreeRTOS_IPInit( ucIPAddress, ucNetMask, ucGatewayAddress, ucDNSServerAddress, ucMACAddress );
     vRegisterSampleCLICommands();
+	vRegisterTCPCLICommands();
 	vRegisterMonitorCLICommands();
 	
 	// Commandline interface (Telnet port 5010)
@@ -183,6 +186,10 @@ int main( void )
 #if INCLUDE_LED5x7	== 1
 	initLED5x7();
 	res = xTaskCreate( TaskLED, "TaskLED", configMINIMAL_STACK_SIZE, (void *)portMAX_DELAY,  LED5x7_PRIORITY, NULL);
+#endif
+
+#if INCLUDE_SNTP == 1
+	vStartNTPTask(configMINIMAL_STACK_SIZE, tskIDLE_PRIORITY + 2 );
 #endif
 
 	vTaskStartScheduler();
@@ -207,6 +214,7 @@ void TaskLED( void *pvParameters )
 		strcat(line5x7," - ");
 		getsTime(line5x7+strlen(line5x7),sizeof(line5x7) - strlen(line5x7));
 		idx = 0;
+		uart_printf(UART_1,"line5x7");
 		while(idx < strlen(line5x7))
 		{
 			idx += LED5x7_puts(line5x7+idx,ticks);

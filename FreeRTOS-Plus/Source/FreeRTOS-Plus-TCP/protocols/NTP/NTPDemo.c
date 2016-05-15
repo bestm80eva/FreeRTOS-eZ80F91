@@ -63,17 +63,16 @@
  *
  */
 
+
+/* FreeRTOS includes. */
+#include "FreeRTOS.h"
+#if INCLUDE_SNTP == 1
+
 /* Standard includes. */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
-typedef uint32_t time_t;
-
-
-/* FreeRTOS includes. */
-#include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
 
@@ -82,7 +81,7 @@ typedef uint32_t time_t;
 #include "FreeRTOS_Sockets.h"
 #include "FreeRTOS_DNS.h"
 #include "FreeRTOS_Stream_Buffer.h"
-
+#include <time.h>
 //#include "ff_headers.h"
 
 #include "NTPDemo.h"
@@ -473,3 +472,4 @@ struct freertos_sockaddr xAddress;
 	}
 }
 /*-----------------------------------------------------------*/
+#endif /* INCLUDE_SNTP */

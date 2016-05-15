@@ -87,7 +87,7 @@ connected. */
 /* Set to 1 to print out debug messages.  If ipconfigHAS_DEBUG_PRINTF is set to
 1 then FreeRTOS_debug_printf should be defined to the function used to print
 out the debugging messages. */
-#define ipconfigHAS_DEBUG_PRINTF	0
+#define ipconfigHAS_DEBUG_PRINTF	1
 #if( ipconfigHAS_DEBUG_PRINTF == 1 )
 	#define FreeRTOS_debug_printf(X)	printf X
 #endif
@@ -96,7 +96,7 @@ out the debugging messages. */
 FreeRTOS_netstat() command, and ping replies.  If ipconfigHAS_PRINTF is set to 1
 then FreeRTOS_printf should be set to the function used to print out the
 messages. */
-#define ipconfigHAS_PRINTF			0
+#define ipconfigHAS_PRINTF			1
 #if( ipconfigHAS_PRINTF == 1 )
 	#define FreeRTOS_printf(X)			printf X
 #endif
@@ -351,6 +351,9 @@ disconnecting stage will timeout after a period of non-activity. */
 #define ipconfigTCP_KEEP_ALIVE_INTERVAL		( 20 ) /* in seconds */
 
 #define portINLINE 
+
+#define	ipconfigSUPPORT_SIGNALS	1
+#define	ipconfigDNS_USE_CALLBACKS 1
 
 //#define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM 1
 //#define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM 1

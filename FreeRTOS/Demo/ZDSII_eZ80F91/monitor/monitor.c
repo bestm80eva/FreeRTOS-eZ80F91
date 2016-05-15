@@ -255,7 +255,7 @@ void sys_buttoninfo()
 	
 	lockcons();
 	printf( ANSI_SCUR ANSI_COFF);
-	printf( ANSI_SATT(0,34,43) ANSI_GXY(55,10) " Plattform buttons                              ");
+	printf( ANSI_SATT(0,34,43) ANSI_GXY(55,10) " Platform buttons                               ");
 	
 	att = old.lastisp != but->lastisp ? ANSI_SATT(1,31,40):ANSI_SATT(0,32,40);
 	old.lastisp = but->lastisp;
@@ -283,7 +283,7 @@ void sys_buttoninfo()
 void sysinfo(void* param)
 {
 	lockcons();
-	printf(ANSI_NORM ANSI_CLRS ANSI_SATT(0,34,47) ANSI_GXY(1,1)  " FreeRTOS " FREERTOS " Demo V" VERSION " on ZiLOG\'s " DEVKIT " Kit / " ZIDE ANSI_DEOL);
+	printf(ANSI_NORM ANSI_CLRS ANSI_SATT(0,34,47) ANSI_GXY(1,1)  " FreeRTOS " tskKERNEL_VERSION_NUMBER " Demo V" VERSION " on ZiLOG\'s " DEVKIT " Kit / " ZIDE ANSI_DEOL);
 	printf(                    ANSI_SATT(0,34,47) ANSI_GXY(1,2)  " Autor " AUTOR " www.NadiSoft.de <" AUTORMAIL ">" ANSI_DEOL ANSI_NORM);
 	unlockcons();
 
@@ -305,23 +305,13 @@ static char *skipws(const char*s)
 	return s;
 }
 
-static long getnum(const char** s)
+static uint24_t getnum(const char* s)
 {
-	long res = 0;
+	uint24_t res = 0;
 	int base = 10;
 	int negativ = 0;
-	char *tmp = skipws(*s);
+	char *tmp = skipws(s);
 		
-	if(*tmp == '-')
-	{
-		negativ = 1;
-		tmp++;
-	}
-	else if(*tmp == '+')
-		tmp++;
-	
-	tmp = skipws(tmp);
-	
 	if(*tmp == '0')
 	{
 		tmp++;
@@ -352,12 +342,7 @@ static long getnum(const char** s)
 		} 
 		break;
 	}
-	
-	if(negativ)
-		res = -res;
-	
-	*s = skipws(tmp);
-	
+
 	return res;
 }
 
@@ -381,7 +366,7 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 	
 	size_t sz;
 	char * tmp;
-	long num;
+	uint24_t num;
 	char ascii[25];
 	char *pascii;
 		
@@ -399,38 +384,23 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 			{
 				dumpfmt = (dumptfmt_t) x;
 				lastsize = counter = 256;
-				param = skipws(param+1);
+				param =  FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
 			}
 		}
 		
 		// start addr
 		if(param && *param)
 		{
-			num = getnum(&param);
-			if(num < 0 || num > 0xFFFFFFL)
-			{
-				snprintf(pcWriteBuffer,xWriteBufferLen,"Invalid start-adresse");
-				return pdFALSE;
-			}
+			num = getnum(param);
 			curraddr = (int8_t*) num;
+			param =  FreeRTOS_CLIGetParameter(pcCommandString, 3, &length);
 		}
 
 		// show elements
 		if(param && *param)
 		{
-			num = getnum(&param);
-			if(num < 0)
-			{
-				num = -num;
-				if(num < 0 || num > 0xFFFFFFL)
-				{
-					snprintf(pcWriteBuffer,xWriteBufferLen,"Invalid end-adresse");
-					return pdFALSE;
-				}
-				counter = (int8_t*)num - curraddr;
-			}
-			else
-				counter = num;
+			num = getnum(param);
+			counter = num;
 			lastsize = counter;
 		}
 		
@@ -486,7 +456,7 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 static const CLI_Command_Definition_t xMemoryDump =
 	{
 		"dump", /* The command string to type. */
-		"\t dump [b|w|d] [start-adr] [count] Dumps count items at startt-addr.",
+		"dump [b|w|d] [start-adr] [count]\n\tDumps count items (b=byte, w=word16, l=word24) at startt-addr.",
 		prvDumpCommand, /* The function to run. */
 		-1 /* No parameters are expected. */
 	};

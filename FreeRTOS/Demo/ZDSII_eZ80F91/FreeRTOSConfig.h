@@ -115,6 +115,7 @@
 #define INCLUDE_EMAC	1		// Include Ethernet Driver
 #define INCLUDE_MONITOR	1		// Include Demo-Monitor
 #define INCLUDE_RTC		1		// Include Realtime Clock
+#define INCLUDE_SNTP	0		// NTP Client
 
 #define MKQUOTE(x)	#x
 #define MKVERSION(x)	MKQUOTE(x)
@@ -123,7 +124,6 @@
 #define ZIDE		"ZDS II Acclaim! 5.2.1"
 #define AUTOR		"Juergen Sievers"
 #define AUTORMAIL	"JSievers@NadiSoft.de"
-#define FREERTOS	MKVERSION(FREERTOSVERSION)
 #define VERSION		MKVERSION(DEMOVERSION)
 /*-----------------------------------------------------------
  * Application specific definitions.
@@ -193,7 +193,8 @@ void myAssert(int x);
 #define configINCLUDE_TRACE_RELATED_CLI_COMMANDS 0
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE		256
 #define configINCLUDE_QUERY_HEAP_COMMAND 		1
-
+#define configINCLUDE_DEMO_DEBUG_STATS 			0
+#define ipconfigSUPPORT_OUTGOING_PINGS			1
 
 /*
  * Start of FreeRTOS configuration stuff

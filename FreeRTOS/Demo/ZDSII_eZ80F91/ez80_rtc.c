@@ -90,14 +90,139 @@
 	
 */
 #include "FreeRTOS.h"
+#include "task.h"
 #include "ez80_tty.h"
-#include "ez80_rtc.h"#include <eZ80F91.h>
+#include "ez80_rtc.h"
+
+#include "time.h"#include <eZ80F91.h>
 
 // Define Months and Daysconst char *const dow[7] = {"Mo","Di","Mi","Do","Fr","Sa","So"};
 const char *const mon[12]= {"Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
 #define RTCREG(x) (*(volatile unsigned char __INTIO *)(0xE0 + (x)))
 
+//1st january 2000 is 946681200 secondes after Epoch.
+
+static const unsigned short days[4][12] =
+{
+    {   0,  31,  60,  91, 121, 152, 182, 213, 244, 274, 305, 335},
+    { 366, 397, 425, 456, 486, 517, 547, 578, 609, 639, 670, 700},
+    { 731, 762, 790, 821, 851, 882, 912, 943, 974,1004,1035,1065},
+    {1096,1127,1155,1186,1216,1247,1277,1308,1339,1369,1400,1430},
+};
+
+time_t iTimeZone = 0;
+
+unsigned int date_time_to_epoch( rtc_t* date_time)
+{
+    unsigned int second = date_time->d.buff[RID_SEC];  // 0-59
+    unsigned int minute = date_time->d.buff[RID_MIN];  // 0-59
+    unsigned int hour   = date_time->d.buff[RID_HRS];    // 0-23
+    unsigned int day    = date_time->d.buff[RID_DOM]-1;   // 0-30
+    unsigned int month  = date_time->d.buff[RID_MON]-1; // 0-11
+    unsigned int year   = date_time->d.buff[RID_YR];    // 0-99
+    return (((year/4*(365*4+1)+days[year%4][month]+day)*24+hour)*60+minute)*60+second;
+}
+
+
+void epoch_to_date_time(rtc_t* date_time, time_t epoch)
+{
+	unsigned int years;
+	unsigned int year;
+	unsigned int month;
+	
+    date_time->d.buff[RID_SEC] = epoch % 60; 
+	epoch /= 60;
+    date_time->d.buff[RID_MIN] = epoch % 60; 
+	epoch /= 60;
+    date_time->d.buff[RID_HRS] = epoch % 24; 
+	epoch /= 24;
+
+    years = epoch / (365 * 4 + 1) * 4; 
+	epoch %= 365 * 4 + 1;
+
+    for (year = 3; year > 0; year--)
+    {
+        if (epoch >= days[year][0])
+            break;
+    }
+
+    
+    for (month = 11; month > 0; month--)
+    {
+        if (epoch >= days[year][month])
+            break;
+    }
+
+    date_time->d.buff[RID_YR]  = years + year;
+    date_time->d.buff[RID_MON] = month + 1;
+    date_time->d.buff[RID_DOM] = (epoch - days[year][month] + 1) % 100;
+	date_time->d.buff[RID_CEN] = (epoch - days[year][month] + 1) / 100;
+	
+	date_time->flg = (1 << RID_SEC)	// Real-Time Clock Seconds Register 
+			  |(1 << RID_MIN)	// Real-Time Clock Minutes Register 
+			  |(1 << RID_HRS)	// Real-Time Clock Hours Register   
+			  |(1 << RID_DOM)	// Real-Time Clock Day-of-the-Month Register
+			  |(1 << RID_MON)	// Real-Time Clock Month Register
+			  |(1 << RID_YR)	// Real-Time Clock Year Register 
+			  |(1 << RID_CEN);	// Real-Time Clock Century Register
+
+}
+
+
+time_t FreeRTOS_time( time_t *t)
+{
+	time_t res;
+	rtc_t date;
+	date.flg = (1 << RID_SEC)	// Real-Time Clock Seconds Register 
+			  |(1 << RID_MIN)	// Real-Time Clock Minutes Register 
+			  |(1 << RID_HRS)	// Real-Time Clock Hours Register   
+			  |(1 << RID_DOM)	// Real-Time Clock Day-of-the-Month Register
+			  |(1 << RID_MON)	// Real-Time Clock Month Register
+			  |(1 << RID_YR)	// Real-Time Clock Year Register 
+			  |(1 << RID_CEN);	// Real-Time Clock Century Register
+	
+	getRTC( &date);
+	
+	res = date_time_to_epoch(&date);
+	if(t)
+		*t = res;
+	return res;
+}
+
+time_t FreeRTOS_get_secs_msec( time_t *t)
+{
+	return FreeRTOS_time(t);
+}
+
+
+time_t FreeRTOS_set_secs_msec( time_t *uxCurrentSeconds, time_t *uxCurrentMS )
+{
+	rtc_t date;
+	time_t t = uxCurrentSeconds ? *uxCurrentSeconds : 0;
+	
+	if(uxCurrentMS && *uxCurrentMS >= 500)
+		t++;
+	
+	return t;
+}
+
+void FreeRTOS_gmtime_r( time_t *uxCurrentSeconds, FF_TimeStruct_t *xTimeStruct )
+{
+	rtc_t date;
+	time_t t = uxCurrentSeconds ? *uxCurrentSeconds:0;
+	
+	epoch_to_date_time( &date, t);
+	if(xTimeStruct)
+	{
+		xTimeStruct->tm_hour = date.d.buff[RID_HRS];
+		xTimeStruct->tm_mday = date.d.buff[RID_DOM];
+		xTimeStruct->tm_min  = date.d.buff[RID_MIN];
+		xTimeStruct->tm_mon  = date.d.buff[RID_MON];
+		xTimeStruct->tm_sec  = date.d.buff[RID_SEC];
+		xTimeStruct->tm_year = date.d.buff[RID_CEN] * 100 + date.d.buff[RID_YR];
+	}
+}
 
 uint16_t flash_year /*_At 0x1FFFF0 */ = 2016;
 
@@ -205,14 +330,15 @@ char *getsTime(char *s, size_t sz)
 	return s;
 }
 
-void setDate(uint8_t day, uint8_t mon, uint16_t year)
+void setDate(uint8_t dow, uint8_t day, uint8_t mon, uint16_t year)
 {
 	rtc_t p;
+	p.d.r.DOW = dow;
 	p.d.r.DOM = day;
 	p.d.r.MON = mon;
 	p.d.r.CEN = year/100;
 	p.d.r.YR  = year%100;
-	p.flg = (1 << RID_DOM) | (1 << RID_MON) | (1 << RID_CEN) | (1 << RID_YR); 
+	p.flg = (1 << RID_DOW) | (1 << RID_DOM) | (1 << RID_MON) | (1 << RID_CEN) | (1 << RID_YR); 
 	setRTC(&p);
 }
 
@@ -233,10 +359,10 @@ uint8_t initRTC()
 {
 	uint8_t res = RTC_CTRL;
 	RTC_CTRL = 0;
-	if(chkRTCPowerLost())
+	if(chkRTCPowerLost()) 
 	{
-		setDate(14, 5, 2016);
-		setTime(2, 15, 0);
+		setDate(7, 15, 5, 2016);
+		setTime(1, 55, 0);
 	}
 		
 	return res;
