@@ -364,7 +364,7 @@ static size_t		lastsize= 256;
 static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	int8_t *param;
-	uint8_t pcnt=1;
+	int8_t pcnt=1;
 	int8_t *error;
 	size_t sz;
 	char * tmp;
@@ -457,38 +457,28 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 			break;
 		}
 	}
-	
-	while(pcnt--)
+
+	*pascii = 0;
+	while(pcnt-- > 0)
 	{
 		sz = strlen(pcWriteBuffer);
 		tmp= pcWriteBuffer + sz;
 		switch(dumpfmt)
 		{
 			case DBYTE: snprintf(tmp,xWriteBufferLen-sz,"   "); 
-				*pascii++ = ' '; 
+				strcat(ascii," ");
 			break;
 			case DWORD16:snprintf(tmp,xWriteBufferLen-sz,"     ");
-				*pascii++ = ' '; 
-				*pascii++ = ' '; 
-				*pascii++ = ' ';
+				strcat(ascii,"   ");
 			break;
 			case DWORD24:snprintf(tmp,xWriteBufferLen-sz,"       "); 
-				*pascii++ = ' '; 
-				*pascii++ = ' '; 
-				*pascii++ = ' '; 
-				*pascii++ = ' ';
+				strcat(ascii,"    ");
 			break;
 		}
 	}
 	
-	sz = 7 + (dumpfmt == DBYTE)? 16*3 : ((dumpfmt == DWORD16) ? 8*5 : 5*7);
-	for(pcnt = strlen(pcWriteBuffer); pcnt < sz && pcnt < (xWriteBufferLen-1); pcnt++)
-		pcWriteBuffer[pcnt] = ' ';
-	pcWriteBuffer[pcnt] = 0;	
-		
-	tmp= &pcWriteBuffer[pcnt];
-	*pascii = 0;
-	snprintf(tmp, xWriteBufferLen-pcnt,ANSI_SATT(7,32,40)" |%s\n"ANSI_NORM,ascii);	
+	sz = strlen(pcWriteBuffer);
+	snprintf(pcWriteBuffer+sz, xWriteBufferLen-sz,ANSI_SATT(0,36,40)" |%s\n"ANSI_NORM,ascii);	
 	return counter > 0 ? pdTRUE:pdFALSE;
 }
 

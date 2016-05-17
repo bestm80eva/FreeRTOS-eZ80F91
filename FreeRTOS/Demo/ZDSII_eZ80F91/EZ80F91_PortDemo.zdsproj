@@ -295,6 +295,13 @@
 
 <!-- breakpoint information -->
 <breakpoints>
+<breakpoint temporary="false" enabled="true" >
+<line-number>461</line-number>
+<pathname>Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Demo\ZDSII_eZ80F91\monitor\monitor.c</pathname>
+<address>109598</address>
+<command></command>
+<preserve-type>0</preserve-type>
+</breakpoint>
 </breakpoints>
 
 </project>
