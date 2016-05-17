@@ -89,7 +89,7 @@ task.h is included from an application file. */
  * We do not need alignmen on eZ80 but networkbuffers have to be alligned at 23bit
  * So we do all dynamically allocated memory allign to 32bit
  */
-#ifdef _EZ80F91
+#ifdef __ACCLAIM__
  #undef portBYTE_ALIGNMENT
  #undef portBYTE_ALIGNMENT_MASK
  #define portBYTE_ALIGNMENT 4

@@ -77,7 +77,7 @@
 
 #ifndef FREERTOS_IP_CONFIG_H
 #define FREERTOS_IP_CONFIG_H
-
+#include "ez80_tty.h"
 /* Prototype for the function used to print out.  In this case it prints to the
 console before the network is connected then a UDP port after the network has
 connected. */
@@ -116,6 +116,7 @@ uint16_t portFreeRTOS_htons( uint16_t usIn );
 then set ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM to 1 to prevent the software
 stack repeating the checksum calculations. */
 #define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM   1
+#define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM   0
 
 /* Several API's will block until the result is known, or the action has been
 performed, for example FreeRTOS_send() and FreeRTOS_recv().  The timeouts can be
@@ -354,9 +355,6 @@ disconnecting stage will timeout after a period of non-activity. */
 
 #define	ipconfigSUPPORT_SIGNALS	1
 #define	ipconfigDNS_USE_CALLBACKS 1
-
-//#define ipconfigDRIVER_INCLUDED_TX_IP_CHECKSUM 1
-//#define ipconfigDRIVER_INCLUDED_RX_IP_CHECKSUM 1
 
 #endif /* FREERTOS_IP_CONFIG_H */
 

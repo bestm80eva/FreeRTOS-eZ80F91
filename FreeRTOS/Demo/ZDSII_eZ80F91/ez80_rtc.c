@@ -244,25 +244,6 @@ void setRTC( const rtc_t *data)
 		if(data->flg & bmsk)
 			RTCREG(idx) = data->d.buff[idx];
 	RTC_CTRL &= ~0x01;	 // lock RTC
-
-	if(chkRTCPowerLost() && data->flg & RID_YR && data->flg & RID_CEN)
-	{
-		#if 0
-		if(FLASH_CTL & 0x08)
-		{
-			FLASH_PAGE = ((uint24_t)&flash_year >> 15) & 0x07;
-			FLASH_ROW  = ((uint24_t)&flash_year >>  8) & 0x7F;
-			FLASH_COL  =  (uint24_t)&flash_year & 0xFF;
-			FLASH_DATA = RTC_YR;
-			FLASH_PAGE = (((uint24_t)&flash_year+1) >> 15) & 0x07;
-			FLASH_ROW  = ((uint24_t)(&flash_year+1) >>  8) & 0x7F;
-			FLASH_COL  =  ((uint24_t)&flash_year+1) & 0xFF;
-			FLASH_DATA = RTC_CEN;
-		}
-		else
-		#endif	
-			flash_year = ((uint16_t)RTC_CEN * 100) + RTC_YR;
-	}		
 }
 
 void getRTC( rtc_t *data)

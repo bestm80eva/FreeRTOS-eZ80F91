@@ -211,11 +211,11 @@ static void emacConnThd(void *argv)
 			{
 				// Read the diagnostics register to determine link settings
 				usPHY_ReadReg( PHY_DIAG_REG, &phy_data );
-	  
+				EMAC_CFG1 |= PADEN | CRCEN;
 				if( phy_data & PHY_FULL_DUPLEX )
-					EMAC_CFG1 = PADEN | CRCEN | FULLD;
+					EMAC_CFG1 |= FULLD;
 				else
-					EMAC_CFG1 = PADEN | CRCEN;
+					EMAC_CFG1 &= ~FULLD;
 				up = 1;
 			}
 		}
@@ -463,7 +463,7 @@ void RxTask(void*x)
 		
 			if(_rrp->stat & RxOK)	// Push receiped messageges to IP-Stack
 			{
-				uint16_t plen = _rrp->pktsz;
+				uint16_t plen = _rrp->pktsz - 4;
 				
 				stats.rxok++;
 				stats.rxsz += plen;

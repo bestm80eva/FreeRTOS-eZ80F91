@@ -121,7 +121,7 @@
 #define MKVERSION(x)	MKQUOTE(x)
 
 #define DEVKIT 		"EZ80F910300ZCOG"
-#define ZIDE		"ZDS II Acclaim! 5.2.1"
+#define ZIDE		"ZDS II Acclaim! 5.2.1 Build:" MKVERSION(__ZDATE__)
 #define AUTOR		"Juergen Sievers"
 #define AUTORMAIL	"JSievers@NadiSoft.de"
 #define VERSION		MKVERSION(DEMOVERSION)

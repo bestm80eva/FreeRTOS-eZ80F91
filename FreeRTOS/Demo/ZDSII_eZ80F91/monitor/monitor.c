@@ -305,13 +305,13 @@ static char *skipws(const char*s)
 	return s;
 }
 
-static uint24_t getnum(const char* s)
+static uint24_t getnum(const char* s, int8_t **error)
 {
 	uint24_t res = 0;
 	int base = 10;
 	int negativ = 0;
 	char *tmp = skipws(s);
-		
+	
 	if(*tmp == '0')
 	{
 		tmp++;
@@ -342,7 +342,9 @@ static uint24_t getnum(const char* s)
 		} 
 		break;
 	}
-
+	if(error)
+		*error = tmp;
+	
 	return res;
 }
 
@@ -356,14 +358,14 @@ typedef enum
 
 static dumptfmt_t	dumpfmt = DBYTE;
 static int8_t *    	curraddr= 0;	
-static int			counter = 0;
+static uint24_t		counter = 0;
 static size_t		lastsize= 256;
 
 static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	int8_t *param;
-	uint8_t pcnt;
-	
+	uint8_t pcnt=1;
+	int8_t *error;
 	size_t sz;
 	char * tmp;
 	uint24_t num;
@@ -375,7 +377,7 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 		BaseType_t length;
 		counter = lastsize;
 		
-		param =  FreeRTOS_CLIGetParameter(pcCommandString, 1, &length);
+		param =  FreeRTOS_CLIGetParameter(pcCommandString, pcnt, &length);
 		
 		if(param && length == 1)
 		{
@@ -383,23 +385,34 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 			if(x == DBYTE || x == DWORD16 || x == DWORD24)
 			{
 				dumpfmt = (dumptfmt_t) x;
-				lastsize = counter = 256;
-				param =  FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
+				pcnt++;
+				param =  FreeRTOS_CLIGetParameter(pcCommandString, pcnt, &length);
 			}
 		}
 		
 		// start addr
-		if(param && *param)
+		if(param && length)
 		{
-			num = getnum(param);
+			num = getnum(param, &error);
+			if(*error && *error != ' ')
+			{
+				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid address: %s", pcCommandString);
+				return pdFALSE;
+			}
 			curraddr = (int8_t*) num;
-			param =  FreeRTOS_CLIGetParameter(pcCommandString, 3, &length);
+			pcnt++;
+			param =  FreeRTOS_CLIGetParameter(pcCommandString, pcnt, &length);
 		}
 
 		// show elements
-		if(param && *param)
+		if(param && length)
 		{
-			num = getnum(param);
+			num = getnum(param, &error);
+			if(*error && *error != ' ')
+			{
+				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid count: %s", pcCommandString);
+				return pdFALSE;
+			}
 			counter = num;
 			lastsize = counter;
 		}
@@ -407,10 +420,10 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 	}		
 	
 	pascii = ascii;
-	snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,33,40)"%06X:" ANSI_SATT(0,32,40),curraddr);
+	snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(0,33,40)"%06X:" ANSI_SATT(0,32,40),curraddr);
 	pcnt = (dumpfmt == DBYTE)? 16 : ((dumpfmt == DWORD16) ? 8 : 5);
 	
-	while(pcnt-- /*&& counter > 0*/)
+	while(pcnt-- && counter > 0)
 	{
 		sz = strlen(pcWriteBuffer);
 		tmp= pcWriteBuffer + sz;
@@ -426,7 +439,10 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 				*pascii++ = isprint(*curraddr) ? *curraddr:'.'; 
 				*pascii++ = '|';
 				curraddr +=2;
-				counter -=2;
+				if(counter >= 2)
+					counter -=2;
+				else 
+					counter = 0;
 			break;
 			case DWORD24:snprintf(tmp,xWriteBufferLen-sz," %06X", *(UINT24*)curraddr); 
 				*pascii++ = isprint(*curraddr+2) ? *curraddr+2:'.'; 
@@ -434,13 +450,36 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 				*pascii++ = isprint(*curraddr) ? *curraddr:'.'; 
 				*pascii++ = '|';
 				curraddr +=3;
-				counter -=3;
+				if(counter >= 3)
+					counter -=3;
+				else 
+					counter = 0;
 			break;
 		}
 	}
 	
-	if(counter < 0)
-		counter = 0;
+	while(pcnt--)
+	{
+		sz = strlen(pcWriteBuffer);
+		tmp= pcWriteBuffer + sz;
+		switch(dumpfmt)
+		{
+			case DBYTE: snprintf(tmp,xWriteBufferLen-sz,"   "); 
+				*pascii++ = ' '; 
+			break;
+			case DWORD16:snprintf(tmp,xWriteBufferLen-sz,"     ");
+				*pascii++ = ' '; 
+				*pascii++ = ' '; 
+				*pascii++ = ' ';
+			break;
+			case DWORD24:snprintf(tmp,xWriteBufferLen-sz,"       "); 
+				*pascii++ = ' '; 
+				*pascii++ = ' '; 
+				*pascii++ = ' '; 
+				*pascii++ = ' ';
+			break;
+		}
+	}
 	
 	sz = 7 + (dumpfmt == DBYTE)? 16*3 : ((dumpfmt == DWORD16) ? 8*5 : 5*7);
 	for(pcnt = strlen(pcWriteBuffer); pcnt < sz && pcnt < (xWriteBufferLen-1); pcnt++)
@@ -453,18 +492,121 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 	return counter > 0 ? pdTRUE:pdFALSE;
 }
 
+static BaseType_t prvDateCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	BaseType_t length;
+	int8_t *param = FreeRTOS_CLIGetParameter(pcCommandString, 1, &length);
+	int8_t *error;
+	
+	if(param)
+	{
+		uint8_t dow, day, mon;
+		uint16_t year;
+		
+		dow = getnum(param,&error);
+		if(*error && *error != ' ' || dow < 1 || dow > 7 )
+		{
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid day of week (1=Mo. - 7=Su.): %s", pcCommandString);
+			return pdFALSE;
+		}
+		param = FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
+		day = getnum(param,&error);
+		if(*error && *error != ' ' || day < 1 || day > 31 )
+		{
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid day of month (1 - 31): %s", pcCommandString);
+			return pdFALSE;
+		}
+		param = FreeRTOS_CLIGetParameter(pcCommandString, 3, &length);
+		mon = getnum(param,&error);
+		if(*error && *error != ' ' || mon < 1 || mon > 12 )
+		{
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid month (1 - 12): %s", pcCommandString);
+			return pdFALSE;
+		}
+		param = FreeRTOS_CLIGetParameter(pcCommandString, 4, &length);
+		year = getnum(param,&error);
+		if(*error && *error != ' ' || year > 9999 )
+		{
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid year: %s", pcCommandString);
+			return pdFALSE;
+		}
+		
+		setDate(dow, day, mon, year);
+	}
+	
+	getsDate(pcWriteBuffer, xWriteBufferLen);
+	return pdFALSE; 
+}
+
+static BaseType_t prvTimeCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	BaseType_t length;
+	int8_t *param = FreeRTOS_CLIGetParameter(pcCommandString, 1, &length);
+	int8_t *error;
+	
+	if(param)
+	{
+		uint8_t hrs, min, sec;
+		hrs = getnum(param,&error);
+		if(*error && *error != ' ' || hrs > 23 )
+		{
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid hour ( 0 - 23): %s", pcCommandString);
+			return pdFALSE;
+		}
+		
+		param = FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
+		min = getnum(param,&error);
+		if(*error && *error != ' ' || min > 59 )
+		{
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid minute ( 0 - 59): %s", pcCommandString);
+			return pdFALSE;
+		}
+		
+		param = FreeRTOS_CLIGetParameter(pcCommandString, 3, &length);
+		sec = getnum(param,&error);
+		if(*error && *error != ' ' || sec > 59 )
+		{
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid secound ( 0 - 59): %s", pcCommandString);
+			return pdFALSE;
+		}
+		setTime(hrs, min, sec);
+	}
+	getsTime(pcWriteBuffer, xWriteBufferLen);
+	return pdFALSE;
+}
+
 static const CLI_Command_Definition_t xMemoryDump =
 	{
 		"dump", /* The command string to type. */
-		"dump [b|w|d] [start-adr] [count]\n\tDumps count items (b=byte, w=word16, l=word24) at startt-addr.",
+		"dump [b|w|d] [start-adr] [count]\n\tDumps count items (b=byte, w=word16, l=word24) at startt-addr.\n",
 		prvDumpCommand, /* The function to run. */
+		-1 /* No parameters are expected. */
+	};
+		
+static const CLI_Command_Definition_t xDate =
+	{
+		"date", /* The command string to type. */
+		"date [day-of-week day mon year]\n\tOptional set and display RTC date.\n",
+		prvDateCommand, /* The function to run. */
+		-1 /* No parameters are expected. */
+	};
+
+static const CLI_Command_Definition_t xTime =
+	{
+		"time", /* The command string to type. */
+		"time [ hour min sec]\n\tOptional set and display RTC time.\n",
+		prvTimeCommand, /* The function to run. */
 		-1 /* No parameters are expected. */
 	};
 		
 void vRegisterMonitorCLICommands( void )
 {
 	FreeRTOS_CLIRegisterCommand( &xMemoryDump );
+	FreeRTOS_CLIRegisterCommand( &xDate );
+	FreeRTOS_CLIRegisterCommand( &xTime );
 }
+
+
 
 
 /* ############################################################################# */

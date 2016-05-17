@@ -253,7 +253,7 @@ static volatile union {
 static void setDisplay(const CHAR* src)
 {
 	int i;
-	
+	portENTER_CRITICAL();
 	switch(dir)
 	{
 		case SHIFT_LEFT:
@@ -272,7 +272,7 @@ static void setDisplay(const CHAR* src)
 			}
 			break;
 	}
-	
+	portEXIT_CRITICAL();
 }
 
 /* Shift displa buffer */
@@ -281,23 +281,28 @@ static void shiftDisplay()
 	int i;
 	BYTE msk;
 	
+	
 	switch(dir)
 	{
 		case SHIFT_LEFT:
+			portENTER_CRITICAL();
 			for(i = 0; i < 7; i++)
 			{
 				dply[i].i <<= 1;
 				dply[i].c[0]  |= 0x1;
 			}
+			portEXIT_CRITICAL();
 			break;
 		case SHIFT_NONE:
 			break;
 		case SHIFT_RIGHT:
+			portENTER_CRITICAL();
 			for(i = 0; i < 7; i++)
 			{
 				dply[i].i >>= 1;
 				dply[i].c[2]  |= 0x80;
 			}
+			portEXIT_CRITICAL();
 			break;
 	}
 	
@@ -332,16 +337,21 @@ void	LEDTick(TimerHandle_t thdl)
 {
 	static uint8_t idx=0;	// current scan-line
 	static uint8_t row=1;
-
+	uint8_t tmp = CS2_LBR;
+	
 	if(idx > 6)			
 	{
 		idx = 0;			// restart map index
 		row = 1;
 	}
-
+	
+	portENTER_CRITICAL();
+	CS2_LBR = 0x80;
 	LEDMATRIX_ROW 	 = row;	// enable row
 	LEDMATRIX_COLUMN = 0x1F & dply[idx].c[1]; 	// set row image
-
+	CS2_LBR = tmp;
+	portEXIT_CRITICAL();
+	
 	idx++;
 	row <<= 1;
 }
