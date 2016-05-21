@@ -143,6 +143,9 @@
 #define LED5x7_PRIORITY (configTIMER_TASK_PRIORITY-1) 
 #endif	/* INCLUDE_LED5x7 */
 
+#if INCLUDE_BUTTONS
+#define BUTTON_PRELL 	pdMS_TO_TICKS(50)	// Entprellung
+#endif
 
 
 // Console setting

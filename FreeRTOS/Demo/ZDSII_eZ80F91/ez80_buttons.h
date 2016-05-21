@@ -91,8 +91,8 @@
 */
 #ifndef __EZ80_BUTTONS_H__
 #define __EZ80_BUTTONS_H__
-
-void initButtons(void);
+#include "timers.h"
+#include "semphr.h"
 
 typedef enum {
 	BUTTON_LEFT,
@@ -100,18 +100,25 @@ typedef enum {
 	BUTTON_RIGTH
 } BUTTONID_t;
 
-typedef struct {
-	volatile BUTTONID_t  lastisp; 
-	volatile INT8  		 laststate; 
-	volatile TickType_t  cnt[3];
-	volatile TickType_t  down[3];
-	volatile TickType_t  up[3];
-} buttons_t;
+typedef enum {
+	BUTTON_UNKNOWN = -1,
+	BUTTON_CLOSED,
+	BUTTON_OPEN
+} BUTTONSTATE_t;
 
-const buttons_t *get_buttons();
-	
-TickType_t get_buttonstime(BUTTONID_t id);
-	
-const buttons_t *	wait_buttons( TickType_t timeout);	
+typedef struct {
+	unsigned			index;
+	BUTTONSTATE_t		state;
+	TickType_t			privT;
+	TickType_t			lastT;
+	BaseType_t			changes;
+	TimerHandle_t 		tm;
+	SemaphoreHandle_t	sem;
+} button_t;
+
+void initButtons(void);
+const button_t *get_button(BUTTONID_t id);
+const button_t *wait_buttonchanged( BUTTONID_t id, TickType_t timeout);
+
 
 #endif /* __EZ80_BUTTONS_H__ */

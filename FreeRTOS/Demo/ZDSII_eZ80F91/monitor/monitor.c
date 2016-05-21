@@ -248,31 +248,26 @@ void sys_rtcinfo()
 void sys_buttoninfo()
 {
 	static const char  *const label[3] = {"Left   ","Middle ","Right  "};
-	static buttons_t old;
-	buttons_t *but = get_buttons();
+	static const char  *const state[3] = {"?????","Open ","Close"};
+	static TickType_t cnt[3];
 	const char* att;
 	int i;
 	
 	lockcons();
 	printf( ANSI_SCUR ANSI_COFF);
 	printf( ANSI_SATT(0,34,43) ANSI_GXY(55,10) " Platform buttons                               ");
-	
-	att = old.lastisp != but->lastisp ? ANSI_SATT(1,31,40):ANSI_SATT(0,32,40);
-	old.lastisp = but->lastisp;
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(55,11) "LastISP: %s%s", att, label[old.lastisp]);
-
-	att = old.laststate != but->laststate ? ANSI_SATT(1,31,40):ANSI_SATT(0,32,40);
-	old.laststate = but->laststate;
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(55,12) "State  : %s%u", att, (unsigned)but->laststate);
-	
+	printf( ANSI_SATT(0,36,40) ANSI_GXY(62,11) "   n  ,  T-1   ,   T    , State ");
 	
 	for( i=BUTTON_LEFT; i<=BUTTON_RIGTH; i++)
 	{
 		char b[80];
+		button_t *but = get_button(i);
+		const char *s = state[but->state +1];
+		
 		snprintf(b,sizeof(b)
-		, ANSI_SATT(0,36,40) "\x1b[%i;55f%s: n, t-down, t-up: %s%4u,%8u,%8u",13+i, label[i]
-		,(char*) ((old.cnt[i] != but->cnt[i])||(old.down[i] != but->down[i])||(old.up[i] != but->up[i])? ANSI_SATT(1,31,40):ANSI_SATT(0,32,40))
-		,old.cnt[i] = but->cnt[i],old.down[i] = but->down[i],old.up[i] = but->up[i]);
+		, ANSI_SATT(0,36,40) "\x1b[%i;55f%s: %s%4u,%8u,%8u %s",12+i, label[i]
+		,(char*) ((cnt[i] != but->changes)? ANSI_SATT(1,31,40):ANSI_SATT(0,32,40))
+		,(cnt[i] = but->changes), but->privT, but->lastT, s);
 		printf(b);
 		
 	}

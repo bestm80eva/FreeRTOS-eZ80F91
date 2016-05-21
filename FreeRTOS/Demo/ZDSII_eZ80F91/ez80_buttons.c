@@ -95,9 +95,8 @@
  ****************************************************************************/
 #include "FreeRTOS.h"
 #ifdef INCLUDE_BUTTONS 
-#include "ez80_buttons.h"
 #include "task.h"
-#include "semphr.h"
+#include "ez80_buttons.h"
 #include <gpio.h>
 #include <String.h>
 
@@ -108,33 +107,26 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-static volatile buttons_t buttons;
-static SemaphoreHandle_t  bx_Semaphore;
-
+static volatile button_t button[3];
+static const char * const tname[3] = {"BLTimer","BMTimer","BRTimer"};
+static unsigned bstate;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_PB/1/2interrupt
+ * Name: buttonx
  *
  * Description:
- *   These could be exteneded to provide interrupt driven button input
+ *   Button Edge-Triggered Interrupt.
  *
  ****************************************************************************/
 
 static void buttonx(BUTTONID_t id)
 {
-	buttons.lastisp  = id; 
-	buttons.laststate= PB_DR & 7;
-	buttons.cnt[id]++;
-	if(buttons.laststate & ( 1 << id))
-		buttons.up[id] = xTaskGetTickCountFromISR();
-	else
-		buttons.down[id] = xTaskGetTickCountFromISR();
-	
-	PB_ALT0 |= (1<<id);/* Clear interrupt flag for eZ80F91 date codes 0611 and after */
-	xSemaphoreGiveFromISR(bx_Semaphore,0);
+	button[id].state = BUTTON_UNKNOWN;
+	xTimerStart	( button[id].tm, 0);
+	PB_ALT0 |= (1 << id);/* Clear interrupt flag for eZ80F91 date codes 0611 and after */
 }
 
 void nested_interrupt button0_isp(void)
@@ -152,25 +144,48 @@ void nested_interrupt button2_isp(void)
 	buttonx(BUTTON_RIGTH);
 }
 
+static void ButTimer( TimerHandle_t tm)
+{
+	button_t *b =  (button_t*) pvTimerGetTimerID( tm);
+	portENTER_CRITICAL();
+	b->state = ( PB_DR >> b->index) & 1;
+	b->changes++;
+	b->privT = b->lastT;
+	b->lastT = xTaskGetTickCount();
+	if(b->sem)
+		xSemaphoreGive(b->sem);
+	portEXIT_CRITICAL();
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_button_initialize
+ * Name: initButtons
  ****************************************************************************/
 
 void initButtons(void)
 {
-	memset(&buttons,0,sizeof(buttons));
-	
-	bx_Semaphore = xSemaphoreCreateBinary();
-	
+	int i;
+	for(i=BUTTON_LEFT; i <= BUTTON_RIGTH; i++)
+	{
+		button[i].index = i; 
+		button[i].sem   = 0;
+		button[i].state = BUTTON_UNKNOWN;
+		button[i].privT = 
+		button[i].lastT = xTaskGetTickCount();
+		button[i].changes= -1;
+		button[i].tm	= xTimerCreate(tname[i], BUTTON_PRELL, pdFALSE, &button[i], ButTimer);
+		
+		xTimerStart	( button[i].tm, 0);
+	}
+
 	/* Attach GIO interrupts */
 	set_vector(PB0_IVECT, button0_isp);
 	set_vector(PB1_IVECT, button1_isp);
 	set_vector(PB2_IVECT, button2_isp);
-
+	
 	/* Configure PB0,1,2 as interrupt, dual edge */
 	PB_DR 	|= 7;
 	PB_ALT2	|= 7;
@@ -178,26 +193,17 @@ void initButtons(void)
 	PB_DDR	&= ~7;
 }
 
-/****************************************************************************
- * Name: board_buttons
- ****************************************************************************/
 
-const buttons_t *get_buttons(void)
+
+const button_t *get_button(BUTTONID_t id)
 {
-  return &buttons;
+  return &button[id];
 }
 
-TickType_t get_buttonstime(BUTTONID_t id)
+const button_t *wait_buttonchanged( BUTTONID_t id, TickType_t timeout)
 {
-	return buttons.up[id] - buttons.down[id];
+	return (!button[id].sem && !(button[id].sem = xSemaphoreCreateBinary()) ||
+		xSemaphoreTake(button[id].sem, timeout) == pdFALSE) ? 0 : &button[id];
 }
 
-const buttons_t*	wait_buttons( TickType_t timeout)
-{
-	if(xSemaphoreTake(bx_Semaphore, timeout) == pdTRUE)
-	{
-		return &buttons;
-	}
-	return 0;
-}
 #endif /* INCLUDE_BUTTONS */
