@@ -90,7 +90,7 @@
 	JSIE	 Juergen Sievers <JSievers@NadiSoft.de>
 	
 	Leagend:
-	150804:	JSIE Start this port by founding on Richard Barry's Port March 11, 2010
+	150804:	SIE Start this port by founding on Richard Barry's Port March 11, 2010
 			http://interactive.freertos.org/entries/126322-eZ80-using-ZDSII-4-11
 	
 */
@@ -116,7 +116,7 @@
 #define INCLUDE_MONITOR	1		// Include Demo-Monitor
 #define INCLUDE_RTC		1		// Include Realtime Clock
 #define INCLUDE_SNTP	0		// NTP Client
-
+#define INCLUDE_TRACE	0		// Include Trace output 
 #define MKQUOTE(x)	#x
 #define MKVERSION(x)	MKQUOTE(x)
 
@@ -153,7 +153,7 @@
 #define CLOCK_DIVISOR_16	16				// baudrate generator setting
 
 #if INCLUDE_CONSOLE	== 1
-#define CONOUTWAIT			0					// max wait for console output queue
+#define CONOUTWAIT			pdMS_TO_TICKS(50)	// max wait for console output queue
 #define CONINWAIT			pdMS_TO_TICKS(50)	// max wait for console input queue
 #define CONBAUDRATE			BAUD_115200			// console baud rate
 #define CONFIFO_TRGLVL		FIFO_TRGLVL_8		// 16byte fifo trigger level	
@@ -165,9 +165,10 @@
 
 // Modem setting
 #if INCLUDE_MODEM	== 1
-#define MODWAIT				pdMS_TO_TICKS(200)	// max wait for console output queue
-#define MODBAUDRATE			BAUD_115200		// console baud rate
-#define MODFIFO_TRGLVL		FIFO_TRGLVL_8	// 16byte fifo trigger level	
+#define MODOUTWAIT			pdMS_TO_TICKS(50)	// max wait for uart output queue
+#define MODINWAIT			pdMS_TO_TICKS(50)	// max wait for console input queue
+#define MODBAUDRATE			BAUD_115200			// uart baud rate
+#define MODFIFO_TRGLVL		FIFO_TRGLVL_8		// 16byte fifo trigger level	
 #define MODDATABITS			DATABITS_8		
 #define MODSTOPBITS			STOPBITS_1
 #define MODPARITY			PAR_NOPARITY
@@ -182,22 +183,15 @@ extern uint8_t _heapbot;
 
 /* MPU IDE II specifics		*/
 void * set_vector(unsigned int vector, void(*isp)(void));
+/* Missing stdc functions	*/
 int strcasecmp(const char *s1, const char *s2);
 
-/*
-void mytraceMALLOC( const char *pvAddress, size_t uiSize );
-void mytraceFREE( const char *pvAddress, size_t uiSize );
-void myAssert(int x);
 
-#define traceMALLOC( pvAddress, uiSize ) mytraceMALLOC( pvAddress, uiSize )
-#define traceFREE( pvAddress, uiSize )   mytraceFREE( pvAddress, uiSize )
-*/
-
+/* CLI configuration								*/
 #define configINCLUDE_TRACE_RELATED_CLI_COMMANDS 0
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE		256
 #define configINCLUDE_QUERY_HEAP_COMMAND 		1
 #define configINCLUDE_DEMO_DEBUG_STATS 			0
-#define ipconfigSUPPORT_OUTGOING_PINGS			1
 
 /*
  * Start of FreeRTOS configuration stuff
@@ -291,5 +285,7 @@ void vAssertCalled( const char* file, int line );
 #define INCLUDE_xTimerPendFunctionCall          1
 
 /* A header file that defines trace macro can be included here. */
+#define configINCLUDE_TRACE_FACILITY            0
+#include "trcKernelPort.h"
 
 #endif /* FREERTOS_CONFIG_H */

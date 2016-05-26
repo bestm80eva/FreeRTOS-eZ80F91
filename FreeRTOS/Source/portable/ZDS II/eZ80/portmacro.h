@@ -145,6 +145,21 @@ typedef portTickType		TickType_t;
                                  asm("jp   po,  $+5");   \
                                  asm("ei")
 
+
+//#define HWTC_COUNT_DIRECTION                DIRECTION_DECREMENTING
+//#define HWTC_TYPE                           HWTC_TYPE_SYSTICK
+//#define HWTC_COUNT                          
+//#define HWTC_PERIOD                         
+
+//NOTE: The private timer ticks with a very high frequency (half the core-clock usually),
+//but offers the possibility to apply a prescaler. Depending on the prescaler you set the
+//HWTC_DIVISOR may need to be raised. Refer to the notes at the beginning of this file
+//for more information.
+// #define HWTC_DIVISOR 1
+
+//#define IRQ_PRIORITY_ORDER 0  		// lower IRQ priority values are more significant
+
+
 #define portDISABLE_INTERRUPTS() DI()
 #define portENABLE_INTERRUPTS()  EI()
 #define portNOP()                asm("nop")

@@ -87,7 +87,7 @@ connected. */
 /* Set to 1 to print out debug messages.  If ipconfigHAS_DEBUG_PRINTF is set to
 1 then FreeRTOS_debug_printf should be defined to the function used to print
 out the debugging messages. */
-#define ipconfigHAS_DEBUG_PRINTF	1
+#define ipconfigHAS_DEBUG_PRINTF	0
 #if( ipconfigHAS_DEBUG_PRINTF == 1 )
 	#define FreeRTOS_debug_printf(X)	printf X
 #endif
@@ -96,7 +96,7 @@ out the debugging messages. */
 FreeRTOS_netstat() command, and ping replies.  If ipconfigHAS_PRINTF is set to 1
 then FreeRTOS_printf should be set to the function used to print out the
 messages. */
-#define ipconfigHAS_PRINTF			1
+#define ipconfigHAS_PRINTF			0
 #if( ipconfigHAS_PRINTF == 1 )
 	#define FreeRTOS_printf(X)			printf X
 #endif
@@ -258,7 +258,7 @@ be queued for processing at any one time.  The event queue must be a minimum of
 /* The address of a socket is the combination of its IP address and its port
 number.  FreeRTOS_bind() is used to manually allocate a port number to a socket
 (to 'bind' the socket to a port), but manual binding is not normally necessary
-for client sockets (those sockets that initiate outgoing connections rather than
+for client sockets (those sockets that initiate connections rather than
 wait for incoming connections on a known port number).  If
 ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND is set to 1 then calling
 FreeRTOS_sendto() on a socket that has not yet been bound will result in the IP

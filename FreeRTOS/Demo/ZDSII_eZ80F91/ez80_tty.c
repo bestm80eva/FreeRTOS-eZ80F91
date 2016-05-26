@@ -85,9 +85,9 @@
 
 
 	Developer:
-	JSIE	 Juergen Sievers <JSievers@NadiSoft.de>
+	SIE	 Juergen Sievers <JSievers@NadiSoft.de>
 
-	150804:	JSIE Start this port.
+	150804:	SIE Start this port.
 	
 */
 

@@ -150,11 +150,18 @@ int main( void )
 	BaseType_t	res = pdPASS;
 	rtc_t	rtc;
 	TickType_t xTimeNow;
+
+#if USE_TRACEALYZER_RECORDER == 1	
+	vTraceInitTraceData();
+	uiTraceStart(); // vTraceStop()
+#endif
 	
 	/* Seed the random number generator. */
 	xTimeNow = xTaskGetTickCount();
 	prvSRand( ( uint32_t ) xTimeNow );
 
+	
+	
 #if INCLUDE_CONSOLE == 1 || INCLUDE_MODEM == 1  		// Include serial port 0 or serial port 1
 	initSerial();
 #endif

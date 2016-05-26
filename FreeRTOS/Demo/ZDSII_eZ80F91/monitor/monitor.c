@@ -293,14 +293,14 @@ void sysinfo(void* param)
 	}
 }
 
-static char *skipws(const char*s)
+static char *skipws(const int8_t *s)
 {
 	while(*s && isspace(*s))
 		s++;
 	return s;
 }
 
-static uint24_t getnum(const char* s, int8_t **error)
+static uint24_t getnum(const int8_t *s, int8_t **error)
 {
 	uint24_t res = 0;
 	int base = 10;
@@ -362,10 +362,10 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 	int8_t pcnt=1;
 	int8_t *error;
 	size_t sz;
-	char * tmp;
+	int8_t *tmp;
 	uint24_t num;
-	char ascii[25];
-	char *pascii;
+	int8_t ascii[25];
+	int8_t *pascii;
 		
 	if(!(counter > 0))
 	{
@@ -374,7 +374,7 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 		
 		param =  FreeRTOS_CLIGetParameter(pcCommandString, pcnt, &length);
 		
-		if(param && length == 1)
+		if(param && length)
 		{
 			int8_t x = toupper(*param);
 			if(x == DBYTE || x == DWORD16 || x == DWORD24)
@@ -475,6 +475,139 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 	sz = strlen(pcWriteBuffer);
 	snprintf(pcWriteBuffer+sz, xWriteBufferLen-sz,ANSI_SATT(0,36,40)" |%s\n"ANSI_NORM,ascii);	
 	return counter > 0 ? pdTRUE:pdFALSE;
+}
+
+static uint8_t hexbyte(uint8_t x)
+{
+	uint8_t n = x - '0';
+	if(n > 9)
+		n -= 7;
+	return n;
+}
+
+static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	static int8_t *start=0;
+	static int8_t *endad=0;
+	static int8_t *lasta=0;
+	UBaseType_t len = endad - start;
+	BaseType_t  ret,i;
+	uint8_t     chks = 0;
+
+	if(!len)
+	{
+		
+		BaseType_t length;
+		int8_t *error;
+		int8_t *param =  FreeRTOS_CLIGetParameter(pcCommandString, 1, &length);
+		UBaseType_t tmp;
+	
+		lasta=0;
+		
+		if(param)
+		{
+			tmp = getnum(param, &error);
+			
+			if(*error != ' ')
+			{
+
+#if USE_TRACEALYZER_RECORDER == 1					
+				if(!strcasecmp(param,"trace"))
+				{
+					extern RecorderDataType RecorderData;
+					start = (int8_t*)&RecorderData;
+					endad = start + sizeof(RecorderData);
+					snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,32,40)"# Tracebuffer %p-%p\n",start,endad);
+					return pdTRUE;
+				}
+#endif				
+				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid start address: %s", pcCommandString);
+				return pdFALSE;
+			}
+			start = endad = (int8_t*)tmp;
+
+			param =  FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
+			if(param)
+			{
+				tmp = getnum(param, &error);
+				
+				if(*error != ' ')
+				{
+					snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid end address: %s", pcCommandString);
+					return pdFALSE;
+				}
+				
+				endad = (int8_t*)tmp;
+				if(start > endad)
+				{
+					tmp = (UBaseType_t) start;
+					start = endad;
+					endad = (int8_t*) tmp;
+				}
+				
+				snprintf(pcWriteBuffer,xWriteBufferLen,"# Intel hex from @%p to @%p",start,endad);
+				if(start != endad)
+				{
+					vTraceStop();	
+					return pdTRUE;
+				}
+				return pdFALSE;
+				
+			}
+			else
+			{
+				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Missing end-address: %s", pcCommandString);
+				return pdFALSE;
+			}
+		} 
+		else
+		{
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Missing start- and end-address: %s", pcCommandString);
+			return pdFALSE;
+		}	
+		
+	} 
+	else
+	{
+		
+		if(((UBaseType_t)start & 0xFF0000) != ((UBaseType_t)lasta & 0xFF0000))
+		{
+			snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),":02000004%02X%02X",((UBaseType_t)start >> 24)&0xFF,((UBaseType_t)start >> 16)&0xFF);
+			lasta = start;
+		}
+		else
+		{
+			
+			if(len > 16)
+				len = 16;
+			
+			if((((UBaseType_t)start + len) & 0xFF0000U) != ((UBaseType_t)start & 0xFF0000))
+				len = 16 - ((UBaseType_t)start & 0xF);
+			
+			snprintf(pcWriteBuffer,xWriteBufferLen,":%02X%02X%02X00",len,((UBaseType_t)start >> 8) & 0xFF,(UBaseType_t)start & 0xFF);
+
+			while( len--)
+			{
+				snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),"%02X",(UBaseType_t)*start++ & 0xFF);
+			} 
+		}		
+	}
+	
+	len = strlen(pcWriteBuffer);
+	for(i=1; i < len; i+=2)
+		chks += (hexbyte(pcWriteBuffer[i]) << 4) + hexbyte(pcWriteBuffer[i+1]);
+	
+	snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),"%02X\n",(UBaseType_t)(~chks +1) & 0xFF);
+	if(start < endad)
+		ret = pdTRUE;
+	else
+	{
+		snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),":00000001FF\n");
+		vTraceStart();	
+		ret = pdFALSE;
+	}
+
+	return ret;
 }
 
 static BaseType_t prvDateCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
@@ -583,10 +716,23 @@ static const CLI_Command_Definition_t xTime =
 		prvTimeCommand, /* The function to run. */
 		-1 /* No parameters are expected. */
 	};
-		
+	
+static const CLI_Command_Definition_t xIHex16 =
+	{
+		"ihex", /* The command string to type. */
+		"ihex start-addr end-addr"
+#if USE_TRACEALYZER_RECORDER == 1	
+		"| trace "
+#endif
+		"Dump content in intel hex16 format.\n",
+		pvrIHex16Command, /* The function to run. */
+		-1 /* No parameters are expected. */
+	};		
+	
 void vRegisterMonitorCLICommands( void )
 {
 	FreeRTOS_CLIRegisterCommand( &xMemoryDump );
+	FreeRTOS_CLIRegisterCommand( &xIHex16);
 	FreeRTOS_CLIRegisterCommand( &xDate );
 	FreeRTOS_CLIRegisterCommand( &xTime );
 }

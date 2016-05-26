@@ -224,13 +224,26 @@ void FreeRTOS_gmtime_r( time_t *uxCurrentSeconds, FF_TimeStruct_t *xTimeStruct )
 	}
 }
 
-uint16_t flash_year /*_At 0x1FFFF0 */ = 2016;
-
-
+/*
+ * The ez80ef91 rtc isn't able to detect a power-lost condition.
+ * To get able to handle power-lost we make a small value-check 
+ * about the rtc's time-registers. For security reasons you shoud 
+ * flash the last  year, month or day (depending on how long the 
+ * device stays powered off) and check the last flashed values 
+ * with the RTC registers.
+ * For example (unsigned) rtc-year - flash-yaer <= 1 ...
+ */
 BaseType_t chkRTCPowerLost()
 {
-	uint16_t now = (uint16_t)RTC_CEN * 100 + RTC_YR;
-	return  (now != flash_year) ? pdTRUE : pdFALSE;
+	return 
+		RTCREG(RID_SEC) <  60 &&
+		RTCREG(RID_MIN) <  60 &&
+		RTCREG(RID_HRS) <  24 &&
+		RTCREG(RID_DOW) >   0 && RTCREG(RID_DOW) <  8 &&
+		RTCREG(RID_DOM) >   0 && RTCREG(RID_DOM) < 32 &&
+		RTCREG(RID_MON) >   0 && RTCREG(RID_MON) < 13 &&
+		RTCREG(RID_CEN) < 100 &&
+		RTCREG(RID_YR)  < 100  ? pdFALSE : pdTRUE;
 }
 
 void setRTC( const rtc_t *data)

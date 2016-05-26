@@ -87,6 +87,7 @@
 	JSIE	 Juergen Sievers <JSievers@NadiSoft.de>
 
 	150804:	JSIE Start this port.
+	160523. JSIE Add entprellung by using timer
 	
 */
 

@@ -70,7 +70,7 @@
 /* FreeRTOS includes. */
 #include "FreeRTOS.h"
 #include "task.h"
-#include "ez80_tty.h"	// SIE 06/10/16 snprintf
+#include "ez80_tty.h"	// snprintf
 /* Standard includes. */
 #include <stdint.h>
 #include <stdio.h>
