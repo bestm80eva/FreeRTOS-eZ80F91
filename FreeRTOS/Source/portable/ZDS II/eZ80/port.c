@@ -193,7 +193,6 @@ void prvSRand( UBaseType_t ulSeed )
 	uxRand();
 }
 
-
 int strcasecmp(const char *s1, const char *s2)
 {
 	char c1=*s1,c2=*s2;
@@ -207,4 +206,3 @@ int strcasecmp(const char *s1, const char *s2)
 	}
 	return c1-c2;
 }
-

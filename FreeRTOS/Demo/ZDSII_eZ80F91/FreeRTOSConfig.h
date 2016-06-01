@@ -111,12 +111,11 @@
 #define INCLUDE_LED5x7	1 		// Include LED 5x7 Driver
 #define INCLUDE_BUTTONS	1		// Include plattform buttons
 #define INCLUDE_CONSOLE 1 		// Include serial port 0
-#define INCLUDE_MODEM 	1 		// Include serial port 1
+#define INCLUDE_MODEM 	0 		// Include serial port 1
 #define INCLUDE_EMAC	1		// Include Ethernet Driver
 #define INCLUDE_MONITOR	1		// Include Demo-Monitor
 #define INCLUDE_RTC		1		// Include Realtime Clock
 #define INCLUDE_SNTP	0		// NTP Client
-#define INCLUDE_TRACE	0		// Include Trace output 
 #define MKQUOTE(x)	#x
 #define MKVERSION(x)	MKQUOTE(x)
 
@@ -153,8 +152,8 @@
 #define CLOCK_DIVISOR_16	16				// baudrate generator setting
 
 #if INCLUDE_CONSOLE	== 1
-#define CONOUTWAIT			pdMS_TO_TICKS(50)	// max wait for console output queue
-#define CONINWAIT			pdMS_TO_TICKS(50)	// max wait for console input queue
+#define CONOUTWAIT			pdMS_TO_TICKS(0)	// max wait for console output queue
+#define CONINWAIT			pdMS_TO_TICKS(0)	// max wait for console input queue
 #define CONBAUDRATE			BAUD_115200			// console baud rate
 #define CONFIFO_TRGLVL		FIFO_TRGLVL_8		// 16byte fifo trigger level	
 #define CONDATABITS			DATABITS_8		
@@ -165,8 +164,8 @@
 
 // Modem setting
 #if INCLUDE_MODEM	== 1
-#define MODOUTWAIT			pdMS_TO_TICKS(50)	// max wait for uart output queue
-#define MODINWAIT			pdMS_TO_TICKS(50)	// max wait for console input queue
+#define MODOUTWAIT			pdMS_TO_TICKS(10)	// max wait for uart output queue
+#define MODINWAIT			pdMS_TO_TICKS(10)	// max wait for console input queue
 #define MODBAUDRATE			BAUD_115200			// uart baud rate
 #define MODFIFO_TRGLVL		FIFO_TRGLVL_8		// 16byte fifo trigger level	
 #define MODDATABITS			DATABITS_8		
@@ -237,8 +236,8 @@ int strcasecmp(const char *s1, const char *s2);
 #define configUSE_MALLOC_FAILED_HOOK            0
 
 /* Run time and task stats gathering related definitions. */
-#define configGENERATE_RUN_TIME_STATS           1
-#define configUSE_TRACE_FACILITY                1
+#define configGENERATE_RUN_TIME_STATS           0
+#define configUSE_TRACE_FACILITY                0
 #define configUSE_STATS_FORMATTING_FUNCTIONS    1
 
 /* Co-routine related definitions. */

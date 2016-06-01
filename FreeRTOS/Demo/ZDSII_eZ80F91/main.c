@@ -178,7 +178,7 @@ int main( void )
     are created in the vApplicationIPNetworkEventHook() hook function
     below.  The hook function is called when the network connects. */
 	res = FreeRTOS_IPInit( ucIPAddress, ucNetMask, ucGatewayAddress, ucDNSServerAddress, ucMACAddress );
-    vRegisterSampleCLICommands();
+    //vRegisterSampleCLICommands();
 	vRegisterTCPCLICommands();
 	vRegisterMonitorCLICommands();
 	
@@ -221,7 +221,7 @@ void TaskLED( void *pvParameters )
 		strcat(line5x7," - ");
 		getsTime(line5x7+strlen(line5x7),sizeof(line5x7) - strlen(line5x7));
 		idx = 0;
-		uart_printf(UART_1,"line5x7");
+		
 		while(idx < strlen(line5x7))
 		{
 			idx += LED5x7_puts(line5x7+idx,ticks);

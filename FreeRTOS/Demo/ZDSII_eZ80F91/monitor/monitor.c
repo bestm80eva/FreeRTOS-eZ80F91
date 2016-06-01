@@ -489,7 +489,9 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 {
 	static int8_t *start=0;
 	static int8_t *endad=0;
-	static int8_t *lasta=0;
+	static int8_t  lasta=0;
+	static int8_t tractiv = 0;
+	
 	UBaseType_t len = endad - start;
 	BaseType_t  ret,i;
 	uint8_t     chks = 0;
@@ -511,12 +513,15 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 			if(*error != ' ')
 			{
 
-#if USE_TRACEALYZER_RECORDER == 1					
+#if configUSE_TRACE_FACILITY == 1					
 				if(!strcasecmp(param,"trace"))
 				{
-					extern RecorderDataType RecorderData;
-					start = (int8_t*)&RecorderData;
-					endad = start + sizeof(RecorderData);
+					
+					void* vTraceGetTraceBuffer(void);
+					uint32_t uiTraceGetTraceBufferSize(void);
+					start = (int8_t*)vTraceGetTraceBuffer();
+					endad = start + uiTraceGetTraceBufferSize();
+					
 					snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,32,40)"# Tracebuffer %p-%p\n",start,endad);
 					return pdTRUE;
 				}
@@ -531,7 +536,7 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 			{
 				tmp = getnum(param, &error);
 				
-				if(*error != ' ')
+				if(*error)
 				{
 					snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid end address: %s", pcCommandString);
 					return pdFALSE;
@@ -548,7 +553,9 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 				snprintf(pcWriteBuffer,xWriteBufferLen,"# Intel hex from @%p to @%p",start,endad);
 				if(start != endad)
 				{
+#if configUSE_TRACE_FACILITY == 1					
 					vTraceStop();	
+#endif					
 					return pdTRUE;
 				}
 				return pdFALSE;
@@ -569,41 +576,46 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 	} 
 	else
 	{
+		UBaseType_t a = ((UBaseType_t)start >> 16) & 0xFF; 
 		
-		if(((UBaseType_t)start & 0xFF0000) != ((UBaseType_t)lasta & 0xFF0000))
+		if(a != lasta)
 		{
-			snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),":02000004%02X%02X",((UBaseType_t)start >> 24)&0xFF,((UBaseType_t)start >> 16)&0xFF);
-			lasta = start;
+			snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),":0200000400%02X", a);
+			chks  = 0x02 + 0x00 + 0x00 + 0x04 + 0x00 + a;
+			lasta = a;
 		}
 		else
 		{
-			
+			UBaseType_t b = (UBaseType_t)start & 0xFFFF;
+	
 			if(len > 16)
 				len = 16;
 			
-			if((((UBaseType_t)start + len) & 0xFF0000U) != ((UBaseType_t)start & 0xFF0000))
-				len = 16 - ((UBaseType_t)start & 0xF);
+			if((b+len) > 0xFFFF)
+				len = 16 - ( b & 0xF);
 			
 			snprintf(pcWriteBuffer,xWriteBufferLen,":%02X%02X%02X00",len,((UBaseType_t)start >> 8) & 0xFF,(UBaseType_t)start & 0xFF);
-
+			chks = 0x02 + (b >> 8) + b + 0x00;
+			
 			while( len--)
 			{
-				snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),"%02X",(UBaseType_t)*start++ & 0xFF);
+				unsigned s = (UBaseType_t)*start++ & 0xFF;
+				snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),"%02X", s);
+				chks += s;
 			} 
 		}		
 	}
 	
-	len = strlen(pcWriteBuffer);
-	for(i=1; i < len; i+=2)
-		chks += (hexbyte(pcWriteBuffer[i]) << 4) + hexbyte(pcWriteBuffer[i+1]);
-	
 	snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),"%02X\n",(UBaseType_t)(~chks +1) & 0xFF);
+	
 	if(start < endad)
 		ret = pdTRUE;
 	else
 	{
 		snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),":00000001FF\n");
+#if configUSE_TRACE_FACILITY == 1
 		vTraceStart();	
+#endif		
 		ret = pdFALSE;
 	}
 

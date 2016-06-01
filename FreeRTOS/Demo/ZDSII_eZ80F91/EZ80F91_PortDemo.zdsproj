@@ -31,8 +31,6 @@
 <file filter-key="flash">debug-flash\f91_demo.hex</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCPCommandConsole.c</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCP-related-CLI-commands.c</file>
-<file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\Sample-CLI-commands.c</file>
-<file filter-key="">.\CLI-commands.c</file>
 <file filter-key="">..\..\Source\portable\ZDS II\eZ80\switcher.asm</file>
 <file filter-key="">.\ez80_leds.c</file>
 <file filter-key="">..\..\Source\include\portable.h</file>
@@ -291,14 +289,15 @@
 <watch-elements>
 <watch-element expression="pxCurrentTCB" />
 <watch-element expression="RecorderData" />
+<watch-element expression="uart" />
 </watch-elements>
 
 <!-- breakpoint information -->
 <breakpoints>
 <breakpoint temporary="false" enabled="true" >
-<line-number>51</line-number>
-<pathname>C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\src\boot\common\vectors24.asm</pathname>
-<address>3</address>
+<line-number>504</line-number>
+<pathname>Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Demo\ZDSII_eZ80F91\monitor\monitor.c</pathname>
+<address>100566</address>
 <command></command>
 <preserve-type>0</preserve-type>
 </breakpoint>
