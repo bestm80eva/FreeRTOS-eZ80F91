@@ -50,11 +50,11 @@ Additional ZiLOG's ZDSII Acclaim 5.2.1 Developer Environment. Free download from
 
 Now lets go:
 
-This Demo is based on FreeRTOS V9.0.0rc2. Some files were modified, because ZiLOG's Dev-Environment isn't able to compile FreeRTOS as it is.
+This Demo is based on FreeRTOS V9.0.0. Some files were modified, because ZiLOG's Dev-Environment isn't able to compile FreeRTOS as it is.
 
-The Project are located at “Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2” if you install the project on different location you must change the ZDS II Project file too. 
+The Project are located at “Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS” if you install the project on different location you must change the ZDS II Project file too. 
 
-Start the ZDSII eZ80Acclaim! IDE an load the project file at Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Demo\ZDSII_eZ80F91\EZ80F91_PortDemo.zdsproj
+Start the ZDSII eZ80Acclaim! IDE an load the project file at Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91\EZ80F91_PortDemo.zdsproj
 
 There are two configuration included. Debug-Ram and Debug-Flash. Select Debug-Ram to let the IDE map System-Ram to the start area downloading and running the code on Ram (Debugger only). For stand alone system use Debug-Flash.
 
@@ -156,3 +156,8 @@ Have fun. Hints are welcome, join the project - if you like.
 
 Regrads
 Jürgen
+
+History:
+06/02/16 SIE:	update to FreeRTOS 9.0.0
+		  	Fix CLI ihex address input.
+			

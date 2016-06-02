@@ -443,7 +443,7 @@ void vTraceChannelUserEvent(UserEventChannel channel);
 #define uiTraceGetTraceBufferSize() 0
 #define xTraceOpenLabel(label) 0
 #define vTraceUserEvent(eventLabel)
-#define vTracePrintF(eventLabel,formatStr,...)
+//#define vTracePrintF(eventLabel,formatStr,...)
 #define vTraceExcludeTaskFromSchedulingTrace(name)
 
 #define vTraceSetISRProperties(handle, name, priority)
