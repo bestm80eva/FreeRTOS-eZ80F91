@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V9.0.0rc2 - Copyright (C) 2016 Real Time Engineers Ltd.
+    FreeRTOS - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
@@ -425,6 +425,7 @@ BaseType_t xIsEthernetConnected( void )
 void nested_interrupt EMAC_EthTxIsr(void)
 {
 	uint8_t istat;
+	vTraceStoreISRBegin( TIID_EthTx );
 	EMAC_ISTAT  = (istat = EMAC_ISTAT) & (TXPCF|TXDONE); // Read and Clear the interrupt
 	
 	if(istat & TXPCF)
@@ -432,6 +433,7 @@ void nested_interrupt EMAC_EthTxIsr(void)
 	
 	if(istat & TXDONE)
 		stats.txdone++;
+	vTraceStoreISREnd(0);
 }
 
 /*******************************************************************************
@@ -528,6 +530,7 @@ void RxTask(void*x)
 void nested_interrupt EMAC_EthRxIsr(void)
 {
 	uint8_t istat;
+	vTraceStoreISRBegin( TIID_EthRx);
 	EMAC_ISTAT  = (istat = EMAC_ISTAT) & (RXCF|RXPCF|RXDONE); // Get and clear the interrupt
 	
 	if(istat & RXCF)
@@ -540,6 +543,7 @@ void nested_interrupt EMAC_EthRxIsr(void)
 		stats.rxdone++;
 	
 	xTaskResumeFromISR(xRxTask);	// wakeup the rx worker thread
+	vTraceStoreISREnd(0);
 }
 
 /*******************************************************************************
@@ -552,6 +556,7 @@ void nested_interrupt EMAC_EthRxIsr(void)
 void nested_interrupt EMAC_EthSysIsr(void)
 {
 	uint8_t istat;
+	vTraceStoreISRBegin( TIID_EthSys);
 	EMAC_ISTAT  = (istat = EMAC_ISTAT) & (RXOVRRUN|TXFSMERR|MGTDONE); // Get and clear the interrupt ;
 	
 	if( istat & RXOVRRUN) 
@@ -565,6 +570,7 @@ void nested_interrupt EMAC_EthSysIsr(void)
 		xSemaphoreGiveFromISR(phySemSync,0);
 		stats.mgdone++;
 	}	
+	vTraceStoreISREnd(0);
 }
 
 /*******************************************************************************

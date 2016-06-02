@@ -160,4 +160,6 @@ Jürgen
 History:
 06/02/16 SIE:	update to FreeRTOS 9.0.0
 		  	Fix CLI ihex address input.
+06/03/16 SIE:	Label Demo Version 1.0.0
+			Added trace facility.
 			

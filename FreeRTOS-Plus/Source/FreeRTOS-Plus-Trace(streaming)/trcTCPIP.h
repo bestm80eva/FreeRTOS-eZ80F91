@@ -43,7 +43,7 @@
 #define TRC_TCPIP_H
 
 #ifdef __cplusplus
-extern “C” {
+extern "C" {
 #endif
 
 int32_t trcTcpWrite(void* data, uint32_t size, int32_t *ptrBytesWritten);

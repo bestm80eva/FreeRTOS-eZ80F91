@@ -44,7 +44,7 @@
 #define _TRC_STREAM_PORT_H
 
 #ifdef __cplusplus
-extern “C” {
+extern "C" {
 #endif
 
 #if (USE_TRACEALYZER_RECORDER == 1)

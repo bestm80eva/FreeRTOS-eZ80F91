@@ -71,6 +71,7 @@
  * PORT_MICROCHIP_PIC32MZ				14		Yes			Any			
  * PORT_ARM_CORTEX_A9					15		No			Any
  * PORT_ARM_CORTEX_M0					16		Yes			Any
+ * PORT_EZ80F91  						17		No			FreeRTOS
  *****************************************************************************/
 
 // Set the port setting here!

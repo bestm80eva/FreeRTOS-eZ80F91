@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V9.0.0rc2 - Copyright (C) 2016 Real Time Engineers Ltd.
+    FreeRTOS - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
@@ -117,6 +117,7 @@ static int alarms = 0;
 void nested_interrupt rtc_alarm(void)
 {
 	char dummy = RTC_CTRL;
+	vTraceStoreISRBegin(TIID_rtc);
 	alarmflg = 5;
 
 	lockcons();
@@ -124,6 +125,7 @@ void nested_interrupt rtc_alarm(void)
 	printf( ANSI_SCUR ANSI_SATT(7,31,40) ANSI_GXY(62,8) ">>> ALARM %6u <<<"ANSI_RCUR, ++alarms);
 	printf( ANSI_RCUR ANSI_CON) ;
 	unlockcons();
+	vTraceStoreISREnd(0);
 }
 
 void sys_heapinfo()
@@ -489,8 +491,7 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 {
 	static int8_t *start=0;
 	static int8_t *endad=0;
-	static int8_t  lasta=0;
-	static int8_t tractiv = 0;
+	static uint8_t lasta=0;
 	
 	UBaseType_t len = endad - start;
 	BaseType_t  ret,i;
@@ -516,9 +517,10 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 #if configUSE_TRACE_FACILITY == 1					
 				if(!strcasecmp(param,"trace"))
 				{
-					
 					void* vTraceGetTraceBuffer(void);
 					uint32_t uiTraceGetTraceBufferSize(void);
+					vTraceStop();	
+
 					start = (int8_t*)vTraceGetTraceBuffer();
 					endad = start + uiTraceGetTraceBufferSize();
 					
@@ -551,14 +553,8 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 				}
 				
 				snprintf(pcWriteBuffer,xWriteBufferLen,"# Intel hex from @%p to @%p",start,endad);
-				if(start != endad)
-				{
-#if configUSE_TRACE_FACILITY == 1					
-					vTraceStop();	
-#endif					
-					return pdTRUE;
-				}
-				return pdFALSE;
+				
+				return (start != endad) ?pdTRUE : pdFALSE;
 				
 			}
 			else
@@ -581,7 +577,7 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 		if(a != lasta)
 		{
 			snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),":0200000400%02X", a);
-			chks  = 0x02 + 0x00 + 0x00 + 0x04 + 0x00 + a;
+			chks  = 0x02 + 0x04 + a;
 			lasta = a;
 		}
 		else
@@ -594,8 +590,8 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 			if((b+len) > 0xFFFF)
 				len = 16 - ( b & 0xF);
 			
-			snprintf(pcWriteBuffer,xWriteBufferLen,":%02X%02X%02X00",len,((UBaseType_t)start >> 8) & 0xFF,(UBaseType_t)start & 0xFF);
-			chks = 0x02 + (b >> 8) + b + 0x00;
+			snprintf(pcWriteBuffer,xWriteBufferLen,":%02X%02X%02X00",len,(b >> 8) & 0xFF,b & 0xFF);
+			chks = len + (b >> 8) + b;
 			
 			while( len--)
 			{
@@ -613,9 +609,6 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 	else
 	{
 		snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),":00000001FF\n");
-#if configUSE_TRACE_FACILITY == 1
-		vTraceStart();	
-#endif		
 		ret = pdFALSE;
 	}
 

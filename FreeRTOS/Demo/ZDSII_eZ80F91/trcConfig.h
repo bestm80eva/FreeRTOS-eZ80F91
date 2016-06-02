@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Tracealyzer v3.0.5 Recorder Library
+ * Tracealyzer v3.0.2 Recorder Library
  * Percepio AB, www.percepio.com
  *
  * trcConfig.h
@@ -38,7 +38,7 @@
  *
  * Tabs are used for indent in this file (1 tab = 4 spaces)
  *
- * Copyright Percepio AB, 2016.
+ * Copyright Percepio AB, 2014.
  * www.percepio.com
  ******************************************************************************/
 
@@ -71,10 +71,11 @@
  * PORT_MICROCHIP_PIC32MZ				14		Yes			Any			
  * PORT_ARM_CORTEX_A9					15		No			Any
  * PORT_ARM_CORTEX_M0					16		Yes			Any
+ * PORT_EZ80F91  						17		No			FreeRTOS
  *****************************************************************************/
 
 // Set the port setting here!
-#define SELECTED_PORT PORT_HWIndependent
+#define SELECTED_PORT PORT_EZ80F91
 
 #if (SELECTED_PORT == PORT_ARM_CortexM)
 	/* For ARM Cortex-M: make sure ARM's CMSIS library is included here, which
@@ -132,7 +133,7 @@
  * Default value is 0 (store all enabled events).
  *
  ******************************************************************************/
-#define TRACE_SCHEDULING_ONLY 0
+#define TRACE_SCHEDULING_ONLY 1
 
 /*******************************************************************************
  * EVENT_BUFFER_SIZE
@@ -171,7 +172,7 @@
  * Resource Usage -> Object Table. 
  ******************************************************************************/
 #define NTask			15
-#define NISR			5
+#define NISR			16
 #define NQueue			10
 #define NSemaphore		10
 #define NMutex			10

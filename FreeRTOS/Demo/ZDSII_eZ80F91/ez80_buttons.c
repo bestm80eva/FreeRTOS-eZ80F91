@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V9.0.0rc2 - Copyright (C) 2016 Real Time Engineers Ltd.
+    FreeRTOS - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
@@ -132,17 +132,23 @@ static void buttonx(BUTTONID_t id)
 
 void nested_interrupt button0_isp(void)
 {
+	vTraceStoreISRBegin( TIID_button0);
 	buttonx(BUTTON_LEFT);
+	vTraceStoreISREnd(0);
 }
 
 void nested_interrupt button1_isp(void)
 {
+	vTraceStoreISRBegin( TIID_button1);
 	buttonx(BUTTON_MIDLE);
+	vTraceStoreISREnd(0);
 }
 
 void nested_interrupt button2_isp(void)
 {
+	vTraceStoreISRBegin( TIID_button2);
 	buttonx(BUTTON_RIGTH);
+	vTraceStoreISREnd(0);
 }
 
 static void ButTimer( TimerHandle_t tm)

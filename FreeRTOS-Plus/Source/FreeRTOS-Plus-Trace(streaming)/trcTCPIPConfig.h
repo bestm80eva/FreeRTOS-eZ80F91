@@ -44,7 +44,7 @@
 #define TRC_TCPIP_CONFIG_H
 
 #ifdef __cplusplus
-extern “C” {
+extern "C" {
 #endif
 
 /* TCP/IP includes*/

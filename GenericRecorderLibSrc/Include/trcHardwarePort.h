@@ -116,6 +116,7 @@
 #define PORT_MICROCHIP_PIC32MZ				14	/*	Yes			Any					*/
 #define PORT_ARM_CORTEX_A9					15	/*	Yes			Any					*/
 #define PORT_ARM_CORTEX_M0					16	/*	Yes			Any					*/
+#define PORT_EZ80F91  						17	/*	No			FreeRTOS			*/
 
 #include "trcConfig.h"
 
@@ -434,6 +435,55 @@ extern const unsigned ticks;
 	#if !( defined (HWTC_COUNT_DIRECTION) && defined (HWTC_TYPE) && defined (HWTC_COUNT) && defined (HWTC_PERIOD) && defined (HWTC_DIVISOR) && defined (IRQ_PRIORITY_ORDER) )
 		#error SELECTED_PORT is PORT_APPLICATION_DEFINED but not all of the necessary constants have been defined.
 	#endif
+
+#elif (SELECTED_PORT == PORT_EZ80F91)
+	extern const unsigned ticks;
+	// OS Tick only (typically 1 ms resolution)
+	#define HWTC_COUNT_DIRECTION DIRECTION_DECREMENTING
+	#define HWTC_TYPE HWTC_TYPE_SYSTICK
+	#define HWTC_COUNT (TMR0_DR_L + (TMR0_DR_H << 8))
+	#define HWTC_PERIOD (ticks +1)
+	#define HWTC_DIVISOR 1
+
+	// Please update according to your system...
+	#define IRQ_PRIORITY_ORDER 0
+
+	#define	TRACE_ENTER_CRITICAL_SECTION() portENTER_CRITICAL()
+	#define TRACE_EXIT_CRITICAL_SECTION() portEXIT_CRITICAL()
+
+	// Interrupt handler ID
+	typedef enum {
+	TIID_EthRx  =1,	//	void nested_interrupt EMAC_EthRxIsr(void)
+	TIID_EthTx,		//	void nested_interrupt EMAC_EthTxIsr(void)
+	TIID_EthSys,	//	void nested_interrupt EMAC_EthSysIsr(void)
+	ID_Tmr0,		//  Timer 0 scheduler
+	ID_Tmr1,		//  Timer 1 unused
+	ID_Tmr2,		//  Timer 2 unused
+	ID_Tmr3,		//  Timer 3 unused
+	TIID_rtc,		//	void nested_interrupt rtc_alarm(void)
+	TIID_uart0,		//	void nested_interrupt isr_uart0( void) 
+	ID_uart1,		//	void nested_interrupt isr_uart1( void) 
+	TIID_button0,	//	void nested_interrupt button0_isp(void)
+	TIID_button1,	//	void nested_interrupt button1_isp(void)
+	TIID_button2	//	void nested_interrupt button2_isp(void)
+	} traceISP_ID_t;
+	
+	// Interrupt Priority
+	typedef enum {
+	IPRI_EthRx,		//	void nested_interrupt EMAC_EthRxIsr(void)
+	IPRI_EthTx,		//	void nested_interrupt EMAC_EthTxIsr(void)
+	IPRI_EthSys,	//	void nested_interrupt EMAC_EthSysIsr(void)
+	RI_Tmr0,		//  Timer 0 scheduler
+	IPRI_Tmr1,		//  Timer 1 unused
+	IPRI_Tmr2,		//  Timer 2 unused
+	IPRI_Tmr3,		//  Timer 3 unused
+	IPRI_rtc,		//	void nested_interrupt rtc_alarm(void)
+	IPRI_uart0,		//	void nested_interrupt isr_uart0( void) 
+	PRI_uart1,		//	void nested_interrupt isr_uart1( void) 
+	IPRI_button0	,//	void nested_interrupt button0_isp(void)
+	IPRI_button1,	//	void nested_interrupt button1_isp(void)
+	IPRI_button2	//	void nested_interrupt button2_isp(void)
+	} traceISP_PRIO_t;
 
 #elif (SELECTED_PORT != PORT_NOT_SET)
 

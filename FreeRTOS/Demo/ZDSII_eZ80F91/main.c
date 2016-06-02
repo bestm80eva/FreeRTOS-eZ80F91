@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V9.0.0rc2 - Copyright (C) 2016 Real Time Engineers Ltd.
+    FreeRTOS - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
@@ -110,6 +110,7 @@
 #include "ez80_buttons.h"
 #include "monitor\monitor.h"
 
+
 void prvSRand( uint32_t );
 
 void vStartTCPCommandInterpreterTask( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPriority );
@@ -151,8 +152,20 @@ int main( void )
 	rtc_t	rtc;
 	TickType_t xTimeNow;
 
-#if USE_TRACE_FACILITY == 1
+#if configUSE_TRACE_FACILITY == 1
 	vTraceInitTraceData();
+	vTraceSetISRProperties(TIID_EthRx, "i_EthRx", IPRI_EthRx);
+	vTraceSetISRProperties(TIID_EthTx, "i_EthTx", IPRI_EthTx);
+	vTraceSetISRProperties(TIID_EthSys, "i_EthSys", IPRI_EthSys);
+	//raceSetISRProperties(TIID_Tmr0, "i_Tmr0", IPRI_Tmr0);
+	//raceSetISRProperties(TIID_Tmr1, "i_Tmr1", IPRI_Tmr1);
+	//raceSetISRProperties(TIID_Tmr2, "i_Tmr2", IPRI_Tmr2);
+	vTraceSetISRProperties(TIID_rtc, "i_rtc", IPRI_rtc);
+	vTraceSetISRProperties(TIID_uart0, "i_uart0", IPRI_uart0);
+	//raceSetISRProperties(TIID_uart1, "i_uart1", IPRI_uart1);
+	//vTraceSetISRProperties(TIID_button0, "i_swb0", IPRI_button0);
+	//vTraceSetISRProperties(TIID_button1, "i_swb1", IPRI_button1);
+	//vTraceSetISRProperties(TIID_button2, "i_swb2", IPRI_button2);
 	uiTraceStart(); 
 	// vTraceStop()
 #endif
@@ -236,16 +249,7 @@ void TaskLED( void *pvParameters )
 #if configUSE_IDLE_HOOK == 1
 void vApplicationIdleHook( void )
 {
-	static char stb[512];
-	
-	snprintf(stb,sizeof(stb),"tx n %6u b %6u ab %6z ov %6u, rx n %6u b %6u nt %6z ov %6u, ps %4u, cf %4u\n",
-		stats.txdone, stats.txsz, stats.txabort, stats.txover,
-		stats.rxdone, stats.rxsz, stats.rxnotok, stats.rxover,
-		stats.rxpcf, stats.rxcf 
-	);
-	puts(stb);
-	
-	vTaskDelay(1000);
+
 }	
 #endif
 

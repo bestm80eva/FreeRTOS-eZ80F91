@@ -28,7 +28,6 @@
 <file filter-key="">monitor\monitor.c</file>
 <file filter-key="">.\ez80_tty.c</file>
 <file filter-key="">.\ez80_rtc.c</file>
-<file filter-key="flash">debug-flash\f91_demo.hex</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCPCommandConsole.c</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCP-related-CLI-commands.c</file>
 <file filter-key="">..\..\Source\portable\ZDS II\eZ80\switcher.asm</file>
@@ -41,6 +40,7 @@
 <file filter-key="">..\..\..\GenericRecorderLibSrc\trcHardwarePort.c</file>
 <file filter-key="">..\..\..\GenericRecorderLibSrc\trcKernel.c</file>
 <file filter-key="">..\..\..\GenericRecorderLibSrc\trcKernelPortFreeRTOS.c</file>
+<file filter-key="flash">debug-flash\f91_demo.hex</file>
 </files>
 
 <!-- configuration information -->
@@ -63,7 +63,7 @@
 <tool name="Compiler">
 <options>
 <option name="padbranch" type="string" change-action="compile">CCODE</option>
-<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=0.0.1b,_MULTI_THREAD</option>
+<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=1.0.0,_MULTI_THREAD</option>
 <option name="genprintf" type="boolean" change-action="compile">false</option>
 <option name="keepasm" type="boolean" change-action="none">true</option>
 <option name="keeplst" type="boolean" change-action="none">true</option>
@@ -182,7 +182,7 @@
 <tool name="Compiler">
 <options>
 <option name="padbranch" type="string" change-action="compile">CCODE</option>
-<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=0.0.1b,_MULTI_THREAD</option>
+<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=1.0.0,_MULTI_THREAD</option>
 <option name="genprintf" type="boolean" change-action="compile">false</option>
 <option name="keepasm" type="boolean" change-action="none">true</option>
 <option name="keeplst" type="boolean" change-action="none">true</option>
@@ -294,6 +294,13 @@
 
 <!-- breakpoint information -->
 <breakpoints>
+<breakpoint temporary="false" enabled="true" >
+<line-number>460</line-number>
+<pathname>Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\GenericRecorderLibSrc\trcBase.c</pathname>
+<address>133223</address>
+<command></command>
+<preserve-type>0</preserve-type>
+</breakpoint>
 </breakpoints>
 
 </project>

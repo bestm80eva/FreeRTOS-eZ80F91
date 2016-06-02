@@ -409,6 +409,17 @@
 		#error SELECTED_PORT is PORT_APPLICATION_DEFINED but not all of the necessary constants have been defined.
 	#endif
 
+#elif (SELECTED_PORT == PORT_EZ80F91)
+	
+	#define HWTC_COUNT_DIRECTION DIRECTION_INCREMENTING
+	#define HWTC_COUNT 0
+	#define HWTC_PERIOD 1
+	#define HWTC_DIVISOR 1
+
+	// Please update according to your system...
+	#define IRQ_PRIORITY_ORDER NOT_SET
+
+
 #elif (SELECTED_PORT != PORT_NOT_SET)
 
 	#error "SELECTED_PORT had unsupported value!"

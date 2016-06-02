@@ -42,7 +42,7 @@
 #define _TRC_RECORDER_H
 
 #ifdef __cplusplus
-extern “C” {
+extern "C" {
 #endif
 
 #include "trcConfig.h"

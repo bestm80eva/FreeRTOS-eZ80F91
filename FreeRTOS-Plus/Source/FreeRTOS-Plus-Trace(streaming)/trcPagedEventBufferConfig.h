@@ -43,7 +43,7 @@
 #define TRC_PAGED_EVENT_BUFFER_CONFIG_H
 
 #ifdef __cplusplus
-extern “C” {
+extern "C" {
 #endif
 
 #define TRC_PAGED_EVENT_BUFFER_PAGE_COUNT 5
