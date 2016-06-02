@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V9.0.0rc2 - Copyright (C) 2016 Real Time Engineers Ltd.
+    FreeRTOS V9.0.0 - Copyright (C) 2016 Real Time Engineers Ltd.
     All rights reserved
 
     VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
@@ -152,8 +152,8 @@ itself. */
 
 /* The following endian values are used by FreeRTOS+ components, not FreeRTOS
 itself. */
-#define pdFREERTOS_LITTLE_ENDIAN	1
-#define pdFREERTOS_BIG_ENDIAN		0
+#define pdFREERTOS_LITTLE_ENDIAN	0
+#define pdFREERTOS_BIG_ENDIAN		1
 
 #endif /* PROJDEFS_H */
 

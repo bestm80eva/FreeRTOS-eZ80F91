@@ -31,8 +31,6 @@
 <file filter-key="flash">debug-flash\f91_demo.hex</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCPCommandConsole.c</file>
 <file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCP-related-CLI-commands.c</file>
-<file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\Sample-CLI-commands.c</file>
-<file filter-key="">.\CLI-commands.c</file>
 <file filter-key="">..\..\Source\portable\ZDS II\eZ80\switcher.asm</file>
 <file filter-key="">.\ez80_leds.c</file>
 <file filter-key="">..\..\Source\include\portable.h</file>
@@ -75,8 +73,8 @@
 <option name="optspeed" type="boolean" change-action="compile">false</option>
 <option name="promote" type="boolean" change-action="compile">true</option>
 <option name="reduceopt" type="boolean" change-action="compile">true</option>
-<option name="stdinc" type="string" change-action="compile">C:\Programme\Zilog\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\ZTP\Inc;;C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\RZK\Inc;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Source\portable/ZDS II\eZ80</option>
-<option name="usrinc" type="string" change-action="compile">Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Demo\ZDSII_eZ80F91;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Demo\ZDSII_eZ80F91\monitor;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Source\portable\ZDS II\eZ80;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Source\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\NetworkInterface;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\Compiler\ZDSII_eZ80Acclaim!_5.2.1;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\protocols\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\GenericRecorderLibSrc\Include</option>
+<option name="stdinc" type="string" change-action="compile">C:\Programme\Zilog\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\ZTP\Inc;;C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\RZK\Inc;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable/ZDS II\eZ80</option>
+<option name="usrinc" type="string" change-action="compile">Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91\monitor;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable\ZDS II\eZ80;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\NetworkInterface;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\Compiler\ZDSII_eZ80Acclaim!_5.2.1;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\protocols\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\GenericRecorderLibSrc\Include</option>
 <option name="watch" type="boolean" change-action="none">false</option>
 <option name="multithread" type="boolean" change-action="compile">true</option>
 </options>
@@ -194,8 +192,8 @@
 <option name="optspeed" type="boolean" change-action="compile">false</option>
 <option name="promote" type="boolean" change-action="compile">true</option>
 <option name="reduceopt" type="boolean" change-action="compile">true</option>
-<option name="stdinc" type="string" change-action="compile">C:\Programme\Zilog\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\ZTP\Inc;;C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\RZK\Inc;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Source\portable/ZDS II\eZ80</option>
-<option name="usrinc" type="string" change-action="compile">Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Demo\ZDSII_eZ80F91;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Demo\ZDSII_eZ80F91\monitor;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Source\portable\ZDS II\eZ80;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS\Source\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\NetworkInterface;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\Compiler\ZDSII_eZ80Acclaim!_5.2.1;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS_V9.0.0rc2\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\protocols\include</option>
+<option name="stdinc" type="string" change-action="compile">C:\Programme\Zilog\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\ZTP\Inc;;C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\RZK\Inc;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable/ZDS II\eZ80</option>
+<option name="usrinc" type="string" change-action="compile">Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91\monitor;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable\ZDS II\eZ80;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\NetworkInterface;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\Compiler\ZDSII_eZ80Acclaim!_5.2.1;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\protocols\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\GenericRecorderLibSrc\Include</option>
 <option name="watch" type="boolean" change-action="none">false</option>
 <option name="multithread" type="boolean" change-action="compile">true</option>
 </options>
@@ -291,17 +289,11 @@
 <watch-elements>
 <watch-element expression="pxCurrentTCB" />
 <watch-element expression="RecorderData" />
+<watch-element expression="uart" />
 </watch-elements>
 
 <!-- breakpoint information -->
 <breakpoints>
-<breakpoint temporary="false" enabled="true" >
-<line-number>51</line-number>
-<pathname>C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\src\boot\common\vectors24.asm</pathname>
-<address>3</address>
-<command></command>
-<preserve-type>0</preserve-type>
-</breakpoint>
 </breakpoints>
 
 </project>

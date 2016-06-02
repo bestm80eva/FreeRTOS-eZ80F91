@@ -151,9 +151,10 @@ int main( void )
 	rtc_t	rtc;
 	TickType_t xTimeNow;
 
-#if USE_TRACEALYZER_RECORDER == 1	
+#if USE_TRACE_FACILITY == 1
 	vTraceInitTraceData();
-	uiTraceStart(); // vTraceStop()
+	uiTraceStart(); 
+	// vTraceStop()
 #endif
 	
 	/* Seed the random number generator. */
@@ -178,7 +179,7 @@ int main( void )
     are created in the vApplicationIPNetworkEventHook() hook function
     below.  The hook function is called when the network connects. */
 	res = FreeRTOS_IPInit( ucIPAddress, ucNetMask, ucGatewayAddress, ucDNSServerAddress, ucMACAddress );
-    vRegisterSampleCLICommands();
+    //vRegisterSampleCLICommands();
 	vRegisterTCPCLICommands();
 	vRegisterMonitorCLICommands();
 	
@@ -221,7 +222,7 @@ void TaskLED( void *pvParameters )
 		strcat(line5x7," - ");
 		getsTime(line5x7+strlen(line5x7),sizeof(line5x7) - strlen(line5x7));
 		idx = 0;
-		uart_printf(UART_1,"line5x7");
+		
 		while(idx < strlen(line5x7))
 		{
 			idx += LED5x7_puts(line5x7+idx,ticks);
@@ -275,7 +276,7 @@ implementation of vApplicationGetIdleTaskMemory() to provide the memory that is
 used by the Idle task. */
 void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
                                     StackType_t **ppxIdleTaskStackBuffer,
-                                    uint16_t *pusIdleTaskStackSize )
+                                    uint32_t *pusIdleTaskStackSize )
 {
 /* If the buffers to be provided to the Idle task are declared inside this
 function then they must be declared static - otherwise they will be allocated on
@@ -302,7 +303,7 @@ application must provide an implementation of vApplicationGetTimerTaskMemory()
 to provide the memory that is used by the Timer service task. */
 void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer,
                                      StackType_t **ppxTimerTaskStackBuffer,
-                                     uint16_t *pusTimerTaskStackSize )
+                                     uint32_t *pusTimerTaskStackSize )
 {
 /* If the buffers to be provided to the Timer task are declared inside this
 function then they must be declared static - otherwise they will be allocated on
