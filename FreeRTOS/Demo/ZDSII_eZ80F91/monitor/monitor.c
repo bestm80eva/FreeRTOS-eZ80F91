@@ -302,12 +302,18 @@ static char *skipws(const int8_t *s)
 	return s;
 }
 
-static uint24_t getnum(const int8_t *s, int8_t **error)
+static int32_t getnum(const int8_t **s)
 {
-	uint24_t res = 0;
+	int32_t res = 0;
 	int base = 10;
-	int negativ = 0;
-	char *tmp = skipws(s);
+	int negative = 0;
+	char *tmp = skipws(*s);
+	
+	if(*tmp == '-' || *tmp == '+')
+	{
+		negative = *tmp== '-';
+		tmp = skipws(tmp+1);
+	}
 	
 	if(*tmp == '0')
 	{
@@ -339,12 +345,32 @@ static uint24_t getnum(const int8_t *s, int8_t **error)
 		} 
 		break;
 	}
-	if(error)
-		*error = tmp;
 	
-	return res;
+	*s = tmp;
+	
+	return negative ? -res:res;
 }
 
+int8_t* getaddrrange(const int8_t *s, int8_t**addr, int32_t *len)
+{
+	int8_t* tmp = s;
+	int32_t n = getnum(&tmp);
+
+	if(n >= 0 && n < 0x1000000)
+	{
+		*addr = (int8_t*) n;
+		if(*tmp)
+		{
+			*len = getnum(&tmp);
+			if(*len < 0)
+				*len = -*len - n;
+			else 
+				len++;
+		}
+	
+	}
+	return tmp;
+}
 
 typedef enum 
 	{
@@ -355,16 +381,17 @@ typedef enum
 
 static dumptfmt_t	dumpfmt = DBYTE;
 static int8_t *    	curraddr= 0;	
-static uint24_t		counter = 0;
-static size_t		lastsize= 256;
+static uint32_t		counter = 0;
+static uint32_t		lastsize= 256;
 
 static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
 	int8_t *param;
 	int8_t pcnt=1;
-	int8_t *error;
-	size_t sz;
-	int8_t *tmp;
+	
+	int32_t sz = lastsize;
+	int8_t *tmp= curraddr;
+	
 	uint24_t num;
 	int8_t ascii[25];
 	int8_t *pascii;
@@ -374,7 +401,7 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 		BaseType_t length;
 		counter = lastsize;
 		
-		param =  FreeRTOS_CLIGetParameter(pcCommandString, pcnt, &length);
+		param =  FreeRTOS_CLIGetParameter(pcCommandString, 1, &length);
 		
 		if(param && length)
 		{
@@ -382,38 +409,20 @@ static BaseType_t prvDumpCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 			if(x == DBYTE || x == DWORD16 || x == DWORD24)
 			{
 				dumpfmt = (dumptfmt_t) x;
-				pcnt++;
-				param =  FreeRTOS_CLIGetParameter(pcCommandString, pcnt, &length);
+				param =  FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
 			}
 		}
-		
-		// start addr
-		if(param && length)
+		if(param)
 		{
-			num = getnum(param, &error);
-			if(*error && *error != ' ')
+			param = skipws(getaddrrange(param, &tmp, &sz));
+			if(*param)
 			{
-				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid address: %s", pcCommandString);
+				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(0,31,40)"wrong addres range. Use start ([+]count|-end).");
 				return pdFALSE;
 			}
-			curraddr = (int8_t*) num;
-			pcnt++;
-			param =  FreeRTOS_CLIGetParameter(pcCommandString, pcnt, &length);
 		}
-
-		// show elements
-		if(param && length)
-		{
-			num = getnum(param, &error);
-			if(*error && *error != ' ')
-			{
-				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid count: %s", pcCommandString);
-				return pdFALSE;
-			}
-			counter = num;
-			lastsize = counter;
-		}
-		
+		curraddr = tmp;
+		counter = lastsize = sz;
 	}		
 	
 	pascii = ascii;
@@ -489,90 +498,72 @@ static uint8_t hexbyte(uint8_t x)
 
 static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-	static int8_t *start=0;
-	static int8_t *endad=0;
 	static uint8_t lasta=0;
+
+	int8_t *addr;
 	
-	UBaseType_t len = endad - start;
+	
 	BaseType_t  ret,i;
 	uint8_t     chks = 0;
 
-	if(!len)
+	if(!counter)
 	{
 		
-		BaseType_t length;
-		int8_t *error;
-		int8_t *param =  FreeRTOS_CLIGetParameter(pcCommandString, 1, &length);
-		UBaseType_t tmp;
-	
-		lasta=0;
+		int8_t *param =  FreeRTOS_CLIGetParameter(pcCommandString, 1, &i);
 		
 		if(param)
 		{
-			tmp = getnum(param, &error);
-			
-			if(*error != ' ')
-			{
-
+			int32_t len;
 #if configUSE_TRACE_FACILITY == 1					
-				if(!strcasecmp(param,"trace"))
-				{
-					void* vTraceGetTraceBuffer(void);
-					uint32_t uiTraceGetTraceBufferSize(void);
-					vTraceStop();	
+			if(!strcasecmp(param,"trace"))
+			{
+				void* vTraceGetTraceBuffer(void);
+				uint32_t uiTraceGetTraceBufferSize(void);
+				vTraceStop();	
 
-					start = (int8_t*)vTraceGetTraceBuffer();
-					endad = start + uiTraceGetTraceBufferSize();
-					
-					snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,32,40)"# Tracebuffer %p-%p\n",start,endad);
-					return pdTRUE;
-				}
+				curraddr = (int8_t*)vTraceGetTraceBuffer();
+				counter  = uiTraceGetTraceBufferSize();
+				lastsize = 0;
+				
+				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,32,40)"# Tracebuffer at %p, %lu bytes.\n",curraddr,counter);
+				return pdTRUE;
+			}
 #endif				
-				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid start address: %s", pcCommandString);
+			param = skipws(getaddrrange(param, &addr, &len));
+			
+			if(*param)
+			{
+#if USE_TRACEALYZER_RECORDER == 1
+				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(0,31,40)"Wrong addres range. Use start_addr (\'trace\'|([+]count|-end_addr)).");
+#else
+				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(0,31,40)"Wrong addres range. Use start_addr ([+]count|-end_addr).");
+#endif				
 				return pdFALSE;
 			}
-			start = endad = (int8_t*)tmp;
-
-			param =  FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
-			if(param)
-			{
-				tmp = getnum(param, &error);
-				
-				if(*error)
-				{
-					snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid end address: %s", pcCommandString);
-					return pdFALSE;
-				}
-				
-				endad = (int8_t*)tmp;
-				if(start > endad)
-				{
-					tmp = (UBaseType_t) start;
-					start = endad;
-					endad = (int8_t*) tmp;
-				}
-				
-				snprintf(pcWriteBuffer,xWriteBufferLen,"# Intel hex from @%p to @%p",start,endad);
-				
-				return (start != endad) ?pdTRUE : pdFALSE;
-				
-			}
-			else
-			{
-				snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Missing end-address: %s", pcCommandString);
-				return pdFALSE;
-			}
+			
+			curraddr = addr;
+			counter = lastsize = len;
+			snprintf(pcWriteBuffer,xWriteBufferLen,"# Intel hex from %p, %lu bytes.\n", curraddr, counter);
+			
+			lasta = (UBaseType_t)curraddr >> 16;
+			
+			return counter ?pdTRUE : pdFALSE;
 		} 
 		else
 		{
-			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Missing start- and end-address: %s", pcCommandString);
+#if USE_TRACEALYZER_RECORDER == 1
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(0,31,40)"Missing addres range. Use (\'trace\'|start_addr ([+]count|-end_addr)).");
+#else
+			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(0,31,40)"Missing addres range. Use start_addr ([+]count|-end_addr).");
+#endif				
 			return pdFALSE;
 		}	
-		
 	} 
 	else
 	{
-		UBaseType_t a = ((UBaseType_t)start >> 16) & 0xFF; 
+		UBaseType_t a = (UBaseType_t)curraddr >> 16; 
+		UBaseType_t b = (UBaseType_t)curraddr & 0xFFFF;
+		
 		
 		if(a != lasta)
 		{
@@ -582,29 +573,27 @@ static BaseType_t pvrIHex16Command( char *pcWriteBuffer, size_t xWriteBufferLen,
 		}
 		else
 		{
-			UBaseType_t b = (UBaseType_t)start & 0xFFFF;
-	
-			if(len > 16)
-				len = 16;
+			UBaseType_t l = (counter > 16) ? 16 : counter;
 			
-			if((b+len) > 0xFFFF)
-				len = 16 - ( b & 0xF);
+			if((b + l) > 0xFFFF)
+				l = 16 - ( b & 0xF);
 			
-			snprintf(pcWriteBuffer,xWriteBufferLen,":%02X%02X%02X00",len,(b >> 8) & 0xFF,b & 0xFF);
-			chks = len + (b >> 8) + b;
+			snprintf(pcWriteBuffer,xWriteBufferLen,":%02X%04X00", l, b);
+			chks = l + (b >> 8) + b;
 			
-			while( len--)
+			while( counter && l--)
 			{
-				unsigned s = (UBaseType_t)*start++ & 0xFF;
+				unsigned s = (UBaseType_t)*curraddr++ & 0xFF;
 				snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),"%02X", s);
 				chks += s;
+				counter--;
 			} 
 		}		
 	}
 	
 	snprintf(pcWriteBuffer+strlen(pcWriteBuffer),xWriteBufferLen-strlen(pcWriteBuffer),"%02X\n",(UBaseType_t)(~chks +1) & 0xFF);
 	
-	if(start < endad)
+	if(counter)
 		ret = pdTRUE;
 	else
 	{
@@ -626,29 +615,29 @@ static BaseType_t prvDateCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 		uint8_t dow, day, mon;
 		uint16_t year;
 		
-		dow = getnum(param,&error);
-		if(*error && *error != ' ' || dow < 1 || dow > 7 )
+		dow = getnum(&param);
+		if(*param != ' ' || dow < 1 || dow > 7 )
 		{
 			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid day of week (1=Mo. - 7=Su.): %s", pcCommandString);
 			return pdFALSE;
 		}
-		param = FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
-		day = getnum(param,&error);
-		if(*error && *error != ' ' || day < 1 || day > 31 )
+		
+		day = getnum(&param);
+		if(*param != ' ' || day < 1 || day > 31 )
 		{
 			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid day of month (1 - 31): %s", pcCommandString);
 			return pdFALSE;
 		}
-		param = FreeRTOS_CLIGetParameter(pcCommandString, 3, &length);
-		mon = getnum(param,&error);
-		if(*error && *error != ' ' || mon < 1 || mon > 12 )
+		
+		mon = getnum(&param);
+		if(*param != ' ' || mon < 1 || mon > 12 )
 		{
 			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid month (1 - 12): %s", pcCommandString);
 			return pdFALSE;
 		}
-		param = FreeRTOS_CLIGetParameter(pcCommandString, 4, &length);
-		year = getnum(param,&error);
-		if(*error && *error != ' ' || year > 9999 )
+		
+		year = getnum(&param);
+		if(*param || year > 9999 )
 		{
 			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid year: %s", pcCommandString);
 			return pdFALSE;
@@ -670,24 +659,22 @@ static BaseType_t prvTimeCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 	if(param)
 	{
 		uint8_t hrs, min, sec;
-		hrs = getnum(param,&error);
-		if(*error && *error != ' ' || hrs > 23 )
+		hrs = getnum(&param);
+		if(*param != ' ' || hrs > 23 )
 		{
 			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid hour ( 0 - 23): %s", pcCommandString);
 			return pdFALSE;
 		}
 		
-		param = FreeRTOS_CLIGetParameter(pcCommandString, 2, &length);
-		min = getnum(param,&error);
-		if(*error && *error != ' ' || min > 59 )
+		min = getnum(&param);
+		if(*param != ' ' || min > 59 )
 		{
 			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid minute ( 0 - 59): %s", pcCommandString);
 			return pdFALSE;
 		}
 		
-		param = FreeRTOS_CLIGetParameter(pcCommandString, 3, &length);
-		sec = getnum(param,&error);
-		if(*error && *error != ' ' || sec > 59 )
+		sec = getnum(&param);
+		if(*param || sec > 59 )
 		{
 			snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,31,40)"Invalid secound ( 0 - 59): %s", pcCommandString);
 			return pdFALSE;
@@ -697,6 +684,31 @@ static BaseType_t prvTimeCommand( char *pcWriteBuffer, size_t xWriteBufferLen, c
 	getsTime(pcWriteBuffer, xWriteBufferLen);
 	return pdFALSE;
 }
+
+static BaseType_t prvTraceCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
+{
+	BaseType_t length;
+	int8_t *param = FreeRTOS_CLIGetParameter(pcCommandString, 1, &length);
+	if(param)
+	{
+		if(!strcasecmp(param,"on"))
+			vTraceStart();
+		else if(!strcasecmp(param,"off"))
+			vTraceStop();
+		else if(!strcasecmp(param,"clear"))
+			vTraceClear();
+	}
+	snprintf(pcWriteBuffer,xWriteBufferLen,ANSI_SATT(1,32,40)"Trace is %s", (char*)(iTraceAktiv() ? "on":"off"));
+	return pdFALSE;
+}
+
+static const CLI_Command_Definition_t xTrace =
+	{
+		"trace", /* The command string to type. */
+		"trace [on|off|clear] \n\tSet trace to on/off or clear buffer and display trace state.\n",
+		prvTraceCommand, /* The function to run. */
+		-1 /* No parameters are expected. */
+	};
 
 static const CLI_Command_Definition_t xMemoryDump =
 	{
@@ -740,6 +752,9 @@ void vRegisterMonitorCLICommands( void )
 	FreeRTOS_CLIRegisterCommand( &xIHex16);
 	FreeRTOS_CLIRegisterCommand( &xDate );
 	FreeRTOS_CLIRegisterCommand( &xTime );
+#if USE_TRACEALYZER_RECORDER == 1	
+	FreeRTOS_CLIRegisterCommand( &xTrace);
+#endif
 }
 
 

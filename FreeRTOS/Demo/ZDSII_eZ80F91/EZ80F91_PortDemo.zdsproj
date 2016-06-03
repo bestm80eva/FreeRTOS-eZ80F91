@@ -297,7 +297,7 @@
 <breakpoint temporary="false" enabled="true" >
 <line-number>460</line-number>
 <pathname>Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\GenericRecorderLibSrc\trcBase.c</pathname>
-<address>133223</address>
+<address>0</address>
 <command></command>
 <preserve-type>0</preserve-type>
 </breakpoint>

@@ -456,13 +456,13 @@ extern const unsigned ticks;
 	TIID_EthRx  =1,	//	void nested_interrupt EMAC_EthRxIsr(void)
 	TIID_EthTx,		//	void nested_interrupt EMAC_EthTxIsr(void)
 	TIID_EthSys,	//	void nested_interrupt EMAC_EthSysIsr(void)
-	ID_Tmr0,		//  Timer 0 scheduler
-	ID_Tmr1,		//  Timer 1 unused
-	ID_Tmr2,		//  Timer 2 unused
-	ID_Tmr3,		//  Timer 3 unused
+	TIID_Tmr0,		//  Timer 0 scheduler
+	TIID_Tmr1,		//  Timer 1 unused
+	TIID_Tmr2,		//  Timer 2 unused
+	TIID_Tmr3,		//  Timer 3 unused
 	TIID_rtc,		//	void nested_interrupt rtc_alarm(void)
 	TIID_uart0,		//	void nested_interrupt isr_uart0( void) 
-	ID_uart1,		//	void nested_interrupt isr_uart1( void) 
+	TIID_uart1,		//	void nested_interrupt isr_uart1( void) 
 	TIID_button0,	//	void nested_interrupt button0_isp(void)
 	TIID_button1,	//	void nested_interrupt button1_isp(void)
 	TIID_button2	//	void nested_interrupt button2_isp(void)
@@ -473,13 +473,13 @@ extern const unsigned ticks;
 	IPRI_EthRx,		//	void nested_interrupt EMAC_EthRxIsr(void)
 	IPRI_EthTx,		//	void nested_interrupt EMAC_EthTxIsr(void)
 	IPRI_EthSys,	//	void nested_interrupt EMAC_EthSysIsr(void)
-	RI_Tmr0,		//  Timer 0 scheduler
+	IPRI_Tmr0,		//  Timer 0 scheduler
 	IPRI_Tmr1,		//  Timer 1 unused
 	IPRI_Tmr2,		//  Timer 2 unused
 	IPRI_Tmr3,		//  Timer 3 unused
 	IPRI_rtc,		//	void nested_interrupt rtc_alarm(void)
 	IPRI_uart0,		//	void nested_interrupt isr_uart0( void) 
-	PRI_uart1,		//	void nested_interrupt isr_uart1( void) 
+	IPRI_uart1,		//	void nested_interrupt isr_uart1( void) 
 	IPRI_button0	,//	void nested_interrupt button0_isp(void)
 	IPRI_button1,	//	void nested_interrupt button1_isp(void)
 	IPRI_button2	//	void nested_interrupt button2_isp(void)

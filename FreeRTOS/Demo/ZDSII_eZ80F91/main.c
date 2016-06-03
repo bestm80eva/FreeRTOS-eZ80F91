@@ -157,16 +157,16 @@ int main( void )
 	vTraceSetISRProperties(TIID_EthRx, "i_EthRx", IPRI_EthRx);
 	vTraceSetISRProperties(TIID_EthTx, "i_EthTx", IPRI_EthTx);
 	vTraceSetISRProperties(TIID_EthSys, "i_EthSys", IPRI_EthSys);
-	//raceSetISRProperties(TIID_Tmr0, "i_Tmr0", IPRI_Tmr0);
-	//raceSetISRProperties(TIID_Tmr1, "i_Tmr1", IPRI_Tmr1);
-	//raceSetISRProperties(TIID_Tmr2, "i_Tmr2", IPRI_Tmr2);
+	vTraceSetISRProperties(TIID_Tmr0, "i_Tmr0", IPRI_Tmr0);
+	vTraceSetISRProperties(TIID_Tmr1, "i_Tmr1", IPRI_Tmr1);
+	vTraceSetISRProperties(TIID_Tmr2, "i_Tmr2", IPRI_Tmr2);
 	vTraceSetISRProperties(TIID_rtc, "i_rtc", IPRI_rtc);
 	vTraceSetISRProperties(TIID_uart0, "i_uart0", IPRI_uart0);
-	//raceSetISRProperties(TIID_uart1, "i_uart1", IPRI_uart1);
-	//vTraceSetISRProperties(TIID_button0, "i_swb0", IPRI_button0);
-	//vTraceSetISRProperties(TIID_button1, "i_swb1", IPRI_button1);
-	//vTraceSetISRProperties(TIID_button2, "i_swb2", IPRI_button2);
-	uiTraceStart(); 
+	vTraceSetISRProperties(TIID_uart1, "i_uart1", IPRI_uart1);
+	vTraceSetISRProperties(TIID_button0, "i_swb0", IPRI_button0);
+	vTraceSetISRProperties(TIID_button1, "i_swb1", IPRI_button1);
+	vTraceSetISRProperties(TIID_button2, "i_swb2", IPRI_button2);
+	// uiTraceStart(); 
 	// vTraceStop()
 #endif
 	

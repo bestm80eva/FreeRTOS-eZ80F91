@@ -130,6 +130,11 @@ void vTraceClear(void)
 
 }
 
+int iTraceAktiv()
+{
+	return RecorderDataPtr? RecorderDataPtr->recorderActive : 0;
+}
+
 /*******************************************************************************
  * uiTraceStart
  *

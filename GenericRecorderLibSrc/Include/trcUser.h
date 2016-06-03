@@ -91,6 +91,8 @@ void vTraceSetRecorderData(void* pRecorderData);
  ******************************************************************************/
 void vTraceSetStopHook(TRACE_STOP_HOOK stopHookFunction);
 
+int iTraceAktiv();
+
 /*******************************************************************************
  * uiTraceStart
  *
