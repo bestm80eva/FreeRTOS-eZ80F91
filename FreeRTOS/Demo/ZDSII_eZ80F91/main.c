@@ -227,6 +227,7 @@ int main( void )
 // Show a banner on the 5x7 LED Display
 void TaskLED( void *pvParameters )
 {
+#if configMIXEDMODE != 1
     TickType_t ticks = (int)pvParameters;
 	CHAR line5x7[80];
 	
@@ -246,6 +247,14 @@ void TaskLED( void *pvParameters )
 			vTaskDelay(300);
 		}
     }
+#else	
+	asm("\
+		xref __z80_start	\n\
+		ld	a,LOW(HIGH16(__z80_start)) \n\
+		ld	mb,a			\n\
+		jp.sis	0			\n\
+	");
+#endif
 }
 #endif
 
