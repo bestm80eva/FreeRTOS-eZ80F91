@@ -91,107 +91,89 @@ COMMENT #
 	
 */
 #
+
 	include	ez80f91.inc
 
-	.assume	ADL=1
-	xref   	_pxCurrentTCB		;current task control block
-    xref	_vTaskSwitchContext
-	xref	_xTaskIncrementTick
-	xref	_prvSetupTimerInterrupt
-	xref	_set_vector
-	xref	_ticks
-	
-	xdef	_vPortYield
-	;xdef	_vPortYieldFromTick
-	xdef 	_xPortStartScheduler
-
-TIMER0_IVECT	equ		54h
-
-; Save processor context on current TCB
-PUSHALL MACRO
-	PUSH	AF
-	PUSH	BC
-	PUSH	DE
-	PUSH	HL
-	PUSH	IX
-	PUSH	IY
-	EX		AF,	AF'
-	EXX
-	PUSH	AF
-	PUSH	BC
-	PUSH	DE
-	PUSH	HL
-	LD		IX,	0
-	ADD		IX,	SP
+SWENTER	macro
+	push	af		
+	push	bc		
+	push	de		
+	push	hl		
+	push	ix		
+	push	iy		
+	exx				
+	ex	af,af'		
+	push	af		
+	push	bc		
+	push	de		
+	push	hl		
+	LD		IX,	0	
+	ADD		IX,	SP	
 	LD		HL,	(_pxCurrentTCB)	
-	LD		(HL),	IX
-	MACEND
+	LD		(HL),IX	
+endmac SWENTER
 
-; Restor processor context from current TCB
-POPALL	MACRO
+SWLEAVE macro
 	LD		HL,	(_pxCurrentTCB)	
 	LD		HL,	(HL)
-	LD		SP,	HL
-	POP		HL
-	POP		DE
-	POP		BC
-	POP		AF
-	EXX
-	EX		AF,	AF'
-	POP		IY
-	POP		IX
-	POP		HL
-	POP		DE
-	POP		BC
-	POP		AF
-	MACEND
+	LD		SP,	HL	
+	pop		hl		
+	pop		de		
+	pop		bc		
+	pop		af		
+	ex		af,af'	
+	exx				
+	pop		iy		
+	pop		ix		
+	pop		hl		
+	pop		de		
+	pop		bc		
+	pop		af		
+	ei	
+	
 
-	SEGMENT CODE
+endmac SWLEAVE
 
-; Setup scheduler timer and restor processor to current PCB	
-_xPortStartScheduler:
-	DI
-	LD		A,	0
-	OUT0	(TMR0_IER),A
+	.assume	ADL=1
+	segment CODE	
 
-	LD		BC,	_vPortYieldFromTick
-	PUSH	BC
-	LD		BC,	TIMER0_IVECT
-	PUSH	BC
-	CALL	_set_vector
-	POP		BC
-	POP		BC
-
-	LD		HL,	(_ticks)
-	LD		A,	H
-	OUT0	(TMR0_DR_H),	A
-	LD		A,	L
-	OUT0	(TMR0_DR_L),	A
-	IN0		A,	(TMR0_IIR)
-	LD		A,	15
-	OUT0	(TMR0_CTL),	A
-	LD		A,	1
-	OUT0	(TMR0_IER),A
-	JR		xr
-
-; Manual triggert switch context
+	xref _vTaskSwitchContext 
+	xref _pxCurrentTCB	
+	xdef _vPortYield
+	xdef _gotask
 _vPortYield:
-	DI
-	PUSHALL
-	call	_vTaskSwitchContext
-xr:	POPALL
-	EI
-	RET
+	di	
+ifdef MIXEDMODE	
+	dec	sp
+endif	
+	SWENTER
+ifdef MIXEDMODE		
+	ld	a,3
+	ld	(ix+30),a
+endif	
+	call	_vTaskSwitchContext	
+_gotask:				
+	SWLEAVE
+ifdef MIXEDMODE		
+	ret.l
+else
+	ret
+endif
 
 ; Scheduler timer interrupt triggert context switch
+	xref _xTaskIncrementTick 
+	xdef _vPortYieldFromTick
 _vPortYieldFromTick:
-	PUSHALL
-	IN0		A,	(TMR0_IIR)	; ack timer interrupt
-	call	_xTaskIncrementTick
-	call	_vTaskSwitchContext
-	POPALL
-	EI
-	RETI
+	SWENTER
+	in0		a,(TMR0_IIR)
+	call	_xTaskIncrementTick 
+	call	_vTaskSwitchContext	
+	SWLEAVE
+ifdef MIXEDMODE		
+	reti.l
+else
+	reti
+endif
 
 
 	END

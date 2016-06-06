@@ -135,6 +135,7 @@ void nested_interrupt button0_isp(void)
 	vTraceStoreISRBegin( TIID_button0);
 	buttonx(BUTTON_LEFT);
 	vTraceStoreISREnd(0);
+	RETISP();
 }
 
 void nested_interrupt button1_isp(void)
@@ -142,6 +143,7 @@ void nested_interrupt button1_isp(void)
 	vTraceStoreISRBegin( TIID_button1);
 	buttonx(BUTTON_MIDLE);
 	vTraceStoreISREnd(0);
+	RETISP();
 }
 
 void nested_interrupt button2_isp(void)
@@ -149,6 +151,7 @@ void nested_interrupt button2_isp(void)
 	vTraceStoreISRBegin( TIID_button2);
 	buttonx(BUTTON_RIGTH);
 	vTraceStoreISREnd(0);
+	RETISP();
 }
 
 static void ButTimer( TimerHandle_t tm)

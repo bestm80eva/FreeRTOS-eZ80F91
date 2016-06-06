@@ -152,6 +152,10 @@ int main( void )
 	rtc_t	rtc;
 	TickType_t xTimeNow;
 
+#if configMIXEDMODE	== 1
+	asm("stmix");
+#endif
+
 #if configUSE_TRACE_FACILITY == 1
 	vTraceInitTraceData();
 	vTraceSetISRProperties(TIID_EthRx, "i_EthRx", IPRI_EthRx);

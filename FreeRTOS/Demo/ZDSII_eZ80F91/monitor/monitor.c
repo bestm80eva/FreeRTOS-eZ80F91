@@ -126,6 +126,7 @@ void nested_interrupt rtc_alarm(void)
 	printf( ANSI_RCUR ANSI_CON) ;
 	unlockcons();
 	vTraceStoreISREnd(0);
+	RETISP();
 }
 
 void sys_heapinfo()
@@ -364,8 +365,7 @@ int8_t* getaddrrange(const int8_t *s, int8_t**addr, int32_t *len)
 			*len = getnum(&tmp);
 			if(*len < 0)
 				*len = -*len - n;
-			else 
-				len++;
+			len++;
 		}
 	
 	}

@@ -434,6 +434,7 @@ void nested_interrupt EMAC_EthTxIsr(void)
 	if(istat & TXDONE)
 		stats.txdone++;
 	vTraceStoreISREnd(0);
+	RETISP();
 }
 
 /*******************************************************************************
@@ -544,6 +545,7 @@ void nested_interrupt EMAC_EthRxIsr(void)
 	
 	xTaskResumeFromISR(xRxTask);	// wakeup the rx worker thread
 	vTraceStoreISREnd(0);
+	RETISP();
 }
 
 /*******************************************************************************
@@ -571,6 +573,7 @@ void nested_interrupt EMAC_EthSysIsr(void)
 		stats.mgdone++;
 	}	
 	vTraceStoreISREnd(0);
+	RETISP();
 }
 
 /*******************************************************************************

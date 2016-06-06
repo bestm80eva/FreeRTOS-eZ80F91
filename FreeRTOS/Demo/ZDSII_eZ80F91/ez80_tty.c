@@ -260,6 +260,7 @@ void nested_interrupt isr_uart0( void)
 	vTraceStoreISRBegin(TIID_uart0);
 	isr_uartx(UART_0);
 	vTraceStoreISREnd(0);
+	RETISP();
 }
 
 void nested_interrupt isr_uart1( void) 
@@ -267,6 +268,7 @@ void nested_interrupt isr_uart1( void)
 	//raceStoreISRBegin( TIID_uart1);
 	isr_uartx(UART_1);
 	//raceStoreISREnd(0);
+	RETISP();
 }
 
 void init_uart( UARTID_t port, BaseType_t baudrate, uint8_t databits, uint8_t stopbits, uint8_t parity, uint8_t fifolevel, uint8_t flowctrl)

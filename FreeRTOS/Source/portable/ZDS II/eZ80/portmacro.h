@@ -135,6 +135,28 @@ typedef UINT24	UBaseType_t;
 typedef portTickType		TickType_t;
 
 /*-----------------------------------------------------------*/
+/*
+ * Wraps all interrupt handler to meet the mixed mode behavior. 
+ * The compiler does not support nacked function therefore we 
+ * have to pay the commented assembler statements behind the RETI.L
+*/
+#if configMIXEDMODE == 1
+#define RETISP()		\
+	asm( 				"\
+	LD	SP,IX			\n\
+	POP	IX				\n\
+	POP	HL				\n\
+	POP	DE				\n\
+	POP	BC				\n\
+	POP	IY				\n\
+	POP	AF				\n\
+	EI					\n\
+	RETI.L				\n\
+	")
+#else
+#define RETISP()
+#endif
+
 
 /* Critical section management. */
 #define portENTER_CRITICAL()     asm("ld   a,  i");      \
@@ -149,6 +171,9 @@ typedef portTickType		TickType_t;
 #define portDISABLE_INTERRUPTS() DI()
 #define portENABLE_INTERRUPTS()  EI()
 #define portNOP()                asm("nop")
+
+#define	SETISPHANDLE(ispf)
+
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */

@@ -107,7 +107,8 @@
 /*
  * Enable and configure Demo-Application PSP Modules
  */
- 
+#define configMIXEDMODE MIXEDMODE
+
 #define INCLUDE_LED5x7	1 		// Include LED 5x7 Driver
 #define INCLUDE_BUTTONS	1		// Include plattform buttons
 #define INCLUDE_CONSOLE 1 		// Include serial port 0

@@ -90,11 +90,12 @@
 */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "ez80_tty.h"
 
 /*-----------------------------------------------------------*/
-void	vPortYield();
-void	vPortYieldFromTick();
-	
+extern void	vPortYield();
+extern void	vPortYieldFromTick();
+
 /* The address of the pxCurrentTCB variable, */
 typedef void tskTCB;
 extern volatile tskTCB * volatile pxCurrentTCB;
@@ -120,10 +121,23 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
 
     /* Place the task return address on stack. Not used*/
     *--pxTopOfStack = ( StackType_t ) 0;
-
+	/* if you're wanting to return from tasks
+	   enable the following lines AND
+	   fix pcParameters access on each task funtion!!
+	*/
+#if 0 && configMIXEDMODE	== 1
+	pxTopOfStack = (StackType_t*)((char*)pxTopOfStack -1);
+	*(char*)pxTopOfStack = 3; // ADL=1
+#endif
+	
     /* The start of the task code will be popped off the stack last, so place
     it on first. */
     *--pxTopOfStack = ( StackType_t ) pxCode;
+
+#if configMIXEDMODE	== 1
+	pxTopOfStack = (StackType_t*)((char*)pxTopOfStack -1);
+	*(char*)pxTopOfStack = 3; // ADL=1
+#endif
 
     /* Now the registers. */
     *--pxTopOfStack = ( StackType_t ) 0xAFAFAF;  /* AF  */
@@ -131,7 +145,7 @@ StackType_t *pxPortInitialiseStack( StackType_t *pxTopOfStack, TaskFunction_t px
     *--pxTopOfStack = ( StackType_t ) 0xDEDEDE;  /* DE  */
     *--pxTopOfStack = ( StackType_t ) 0xEFEFEF;  /* HL  */
 	*--pxTopOfStack = ( StackType_t ) 0x111111;  /* IX  */
-    *--pxTopOfStack = ( StackType_t ) 0x222222;  /* IY  */
+	*--pxTopOfStack = ( StackType_t ) 0x222222;  /* IY  */
     *--pxTopOfStack = ( StackType_t ) 0xFAFAFA;  /* AF' */
     *--pxTopOfStack = ( StackType_t ) 0xCBCBCB;  /* BC' */
     *--pxTopOfStack = ( StackType_t ) 0xEDEDED;  /* DE' */
@@ -183,6 +197,29 @@ UINT32 uxRand( void )
 	/* Utility function to generate a pseudo random number. */
 	ulNextRand = ulMultiplier * ulNextRand + ulIncrement;
 	return ulNextRand;
+}
+
+void z80trap(unsigned short z80sp, unsigned short z80pc, unsigned char z80page)
+{
+	printf("Z80 Trap PC %02X.%04X, SP %02X.%04X\n", z80page,z80pc,z80page,z80sp);
+	configASSERT(0);
+}
+
+/*
+ * Setup scheduler timer and restor processor to current PCB	
+ */
+BaseType_t xPortStartScheduler()
+{
+	DI();
+	TMR0_IER = 0;
+	set_vector(TIMER0_IVECT, vPortYieldFromTick);
+	TMR0_DR_H= ticks >> 8;
+	TMR0_DR_L= ticks;
+	TMR0_CTL = 15;
+	TMR0_IER = 1;
+	//asm("xref _gotask\n jp.l _gotask");
+	asm("xref _gotask\n jp _gotask");
+	return 0;
 }
 
 

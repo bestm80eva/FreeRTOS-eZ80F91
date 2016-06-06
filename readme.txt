@@ -160,6 +160,7 @@ Jürgen
 History:
 06/02/16 SIE:	update to FreeRTOS 9.0.0
 		  	Fix CLI ihex address input.
-06/03/16 SIE:	Label Demo Version 1.0.0
+04/06/16 SIE:	Label Demo Version 1.0.0
 			Added trace facility.
 			
+06/06/16 SIE: Add Mixed-Mode to run FreeRTOS on mixed mode. Also gets able to run Z80 tasks each on its own secure 64K-Page.
