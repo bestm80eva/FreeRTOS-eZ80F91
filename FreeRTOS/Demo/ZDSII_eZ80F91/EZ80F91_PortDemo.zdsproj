@@ -1,4 +1,4 @@
-<project type="Executable" project-type="Standard" configuration="Debug-Flash" created-by="05031803" modified-by="d:5.2.0:11111601" ZDSII="ZDS - eZ80Acclaim! 5.2.1 (Build 12102401)">
+<project type="Executable" project-type="Standard" configuration="Debug-Ram-Mixedmode" created-by="05031803" modified-by="d:5.2.0:11111601" ZDSII="ZDS - eZ80Acclaim! 5.2.1 (Build 12102401)">
 <cpu>EZ80F91</cpu>
 
 <!-- file information -->
@@ -203,7 +203,7 @@
 <tool name="Debugger">
 <options>
 <option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_Flash</option>
-<option name="debugtool" type="string" change-action="none">EthernetSmartCable</option>
+<option name="debugtool" type="string" change-action="none">USBSmartCable</option>
 <option name="usepageerase" type="boolean" change-action="none">true</option>
 </options>
 </tool>
@@ -322,7 +322,7 @@
 <tool name="Debugger">
 <options>
 <option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_RAM</option>
-<option name="debugtool" type="string" change-action="none">EthernetSmartCable</option>
+<option name="debugtool" type="string" change-action="none">USBSmartCable</option>
 <option name="usepageerase" type="boolean" change-action="none">true</option>
 </options>
 </tool>
@@ -415,13 +415,6 @@
 
 <!-- breakpoint information -->
 <breakpoints>
-<breakpoint temporary="false" enabled="true" >
-<line-number>51</line-number>
-<pathname>Z:\ZDSII_eZ80Acclaim!_5.2.1\src\boot\common\vectors24.asm</pathname>
-<address>3</address>
-<command></command>
-<preserve-type>0</preserve-type>
-</breakpoint>
 </breakpoints>
 
 </project>
