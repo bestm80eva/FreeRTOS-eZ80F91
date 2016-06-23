@@ -1,0 +1,427 @@
+<project type="Executable" project-type="Standard" configuration="Debug-Flash" created-by="05031803" modified-by="d:5.2.0:11111601" ZDSII="ZDS - eZ80Acclaim! 5.2.1 (Build 12102401)">
+<cpu>EZ80F91</cpu>
+
+<!-- file information -->
+<files>
+<file filter-key="">..\..\Source\list.c</file>
+<file filter-key="">..\..\Source\queue.c</file>
+<file filter-key="">..\..\Source\tasks.c</file>
+<file filter-key="">..\..\Source\portable\ZDS II\eZ80\port.c</file>
+<file filter-key="">.\FreeRTOSConfig.h</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_UDP_IP.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_ARP.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_DHCP.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_DNS.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_IP.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_Sockets.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_Stream_Buffer.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_TCP_IP.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\FreeRTOS_TCP_WIN.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\BufferManagement\BufferAllocation_2.c</file>
+<file filter-key="">..\..\Source\event_groups.c</file>
+<file filter-key="">..\..\Source\timers.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\NetworkInterface\eZ80F91\NetworkInterface.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI\FreeRTOS_CLI.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI\FreeRTOS_CLI.h</file>
+<file filter-key="">.\ez80_buttons.c</file>
+<file filter-key="">..\..\Source\portable\MemMang\heap_4.c</file>
+<file filter-key="">monitor\monitor.c</file>
+<file filter-key="">.\ez80_tty.c</file>
+<file filter-key="">.\ez80_rtc.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCPCommandConsole.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\TCP-related-CLI-commands.c</file>
+<file filter-key="">..\..\Source\portable\ZDS II\eZ80\switcher.asm</file>
+<file filter-key="">.\ez80_leds.c</file>
+<file filter-key="">..\..\Source\include\portable.h</file>
+<file filter-key="">.\main.c</file>
+<file filter-key="">..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\protocols\NTP\NTPDemo.c</file>
+<file filter-key="">..\..\..\GenericRecorderLibSrc\trcUser.c</file>
+<file filter-key="">..\..\..\GenericRecorderLibSrc\trcBase.c</file>
+<file filter-key="">..\..\..\GenericRecorderLibSrc\trcHardwarePort.c</file>
+<file filter-key="">..\..\..\GenericRecorderLibSrc\trcKernel.c</file>
+<file filter-key="">..\..\..\GenericRecorderLibSrc\trcKernelPortFreeRTOS.c</file>
+<file filter-key="flash">debug-flash\f91_demo.hex</file>
+<file filter-key="">..\..\Source\portable\ZDS II\eZ80\portmacro.h</file>
+<file filter-key="">.\Z80Task.asm</file>
+</files>
+
+<!-- configuration information -->
+<configurations>
+<configuration name="Debug-Ram" >
+<tools>
+<tool name="Assembler">
+<options>
+<option name="define" type="string" change-action="assemble">_EZ80ACCLAIM!=1,FREERTOS=1,_DEBUG,_EZ80F91</option>
+<option name="include" type="string" change-action="assemble">Z:\ZDSII_eZ80Acclaim!_5.2.1\src\rtl\common</option>
+<option name="list" type="boolean" change-action="none">true</option>
+<option name="listmac" type="boolean" change-action="none">false</option>
+<option name="name" type="boolean" change-action="none">true</option>
+<option name="pagelen" type="integer" change-action="none">56</option>
+<option name="pagewidth" type="integer" change-action="none">80</option>
+<option name="quiet" type="boolean" change-action="none">true</option>
+<option name="sdiopt" type="boolean" change-action="compile">true</option>
+</options>
+</tool>
+<tool name="Compiler">
+<options>
+<option name="padbranch" type="string" change-action="compile">CCODE</option>
+<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=1.0.0,_MULTI_THREAD,MIXEDMODE=0</option>
+<option name="genprintf" type="boolean" change-action="compile">false</option>
+<option name="keepasm" type="boolean" change-action="none">true</option>
+<option name="keeplst" type="boolean" change-action="none">true</option>
+<option name="list" type="boolean" change-action="none">false</option>
+<option name="listinc" type="boolean" change-action="none">false</option>
+<option name="modsect" type="boolean" change-action="compile">false</option>
+<option name="optspeed" type="boolean" change-action="compile">false</option>
+<option name="promote" type="boolean" change-action="compile">true</option>
+<option name="reduceopt" type="boolean" change-action="compile">true</option>
+<option name="stdinc" type="string" change-action="compile">C:\Programme\Zilog\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\ZTP\Inc;;C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\RZK\Inc;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable/ZDS II\eZ80</option>
+<option name="usrinc" type="string" change-action="compile">Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91\monitor;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable\ZDS II\eZ80;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\NetworkInterface;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\Compiler\ZDSII_eZ80Acclaim!_5.2.1;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\protocols\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\GenericRecorderLibSrc\Include</option>
+<option name="watch" type="boolean" change-action="none">false</option>
+<option name="multithread" type="boolean" change-action="compile">true</option>
+</options>
+</tool>
+<tool name="Debugger">
+<options>
+<option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_RAM</option>
+<option name="debugtool" type="string" change-action="none">USBSmartCable</option>
+<option name="usepageerase" type="boolean" change-action="none">true</option>
+</options>
+</tool>
+<tool name="FlashProgrammer">
+<options>
+<option name="erasebeforeburn" type="boolean" change-action="none">false</option>
+<option name="eraseinfopage" type="boolean" change-action="none">false</option>
+<option name="enableinfopage" type="boolean" change-action="none">false</option>
+<option name="includeserial" type="boolean" change-action="none">false</option>
+<option name="offset" type="integer" change-action="none">0</option>
+<option name="snenable" type="boolean" change-action="none">false</option>
+<option name="sn" type="string" change-action="none">000000000000000000000000</option>
+<option name="snsize" type="integer" change-action="none">1</option>
+<option name="snstep" type="integer" change-action="none">000000000000000000000000</option>
+<option name="snstepformat" type="integer" change-action="none">0</option>
+<option name="snaddress" type="string" change-action="none">0</option>
+<option name="snformat" type="integer" change-action="none">0</option>
+<option name="snbigendian" type="boolean" change-action="none">true</option>
+<option name="singleval" type="string" change-action="none">0</option>
+<option name="singlevalformat" type="integer" change-action="none">0</option>
+<option name="usepageerase" type="boolean" change-action="none">false</option>
+</options>
+</tool>
+<tool name="General">
+<options>
+<option name="warn" type="boolean" change-action="none">true</option>
+<option name="debug" type="boolean" change-action="assemble">true</option>
+<option name="debugcache" type="boolean" change-action="none">true</option>
+<option name="igcase" type="boolean" change-action="assemble">false</option>
+<option name="outputdir" type="string" change-action="compile">Debug-Ram\</option>
+</options>
+</tool>
+<tool name="Librarian">
+<options>
+<option name="outfile" type="string" change-action="build">.\Debug-Ram\F91_Demo.lib</option>
+</options>
+</tool>
+<tool name="Linker">
+<options>
+<option name="directives" type="string" change-action="build"></option>
+<option name="createnew" type="boolean" change-action="build">true</option>
+<option name="exeform" type="string" change-action="build">OMF695,INTEL32</option>
+<option name="linkctlfile" type="string" change-action="build">.\F91_Demo_Debug.linkcmd</option>
+<option name="map" type="boolean" change-action="none">true</option>
+<option name="maxhexlen" type="integer" change-action="build">64</option>
+<option name="objlibmods" type="string" change-action="build"></option>
+<option name="of" type="string" change-action="build">Debug-Ram\EZ80F91_PortDemo</option>
+<option name="quiet" type="boolean" change-action="none">false</option>
+<option name="relist" type="boolean" change-action="build">false</option>
+<option name="startuptype" type="string" change-action="build">Standard</option>
+<option name="startuplnkcmds" type="boolean" change-action="build">true</option>
+<option name="usecrun" type="boolean" change-action="build">true</option>
+<option name="warnoverlap" type="boolean" change-action="none">true</option>
+<option name="xref" type="boolean" change-action="none">false</option>
+<option name="undefisfatal" type="boolean" change-action="none">true</option>
+<option name="warnisfatal" type="boolean" change-action="none">false</option>
+<option name="sort" type="string" change-action="none">ADDRESS</option>
+<option name="padhex" type="boolean" change-action="build">false</option>
+<option name="fplib" type="string" change-action="build">Dummy</option>
+<option name="useadddirectives" type="boolean" change-action="build">false</option>
+<option name="linkconfig" type="string" change-action="build">Standard</option>
+<option name="flashinfo" type="string" change-action="build">0-1FF</option>
+<option name="ram" type="string" change-action="build">B7E000-BFFFFF</option>
+<option name="rom" type="string" change-action="build">0-07FFFF</option>
+<option name="extio" type="string" change-action="build">0-FFFF</option>
+<option name="intio" type="string" change-action="build">0-FF</option>
+</options>
+</tool>
+<tool name="Middleware">
+<options>
+<option name="usezsl" type="boolean" change-action="rebuild">false</option>
+<option name="zslports" type="string" change-action="rebuild"></option>
+<option name="zsluarts" type="string" change-action="rebuild"></option>
+<option name="userzk" type="boolean" change-action="rebuild">false</option>
+<option name="rzkconfigpi" type="boolean" change-action="rebuild">true</option>
+<option name="rzkconfigmini" type="boolean" change-action="rebuild">false</option>
+<option name="rzkcomps" type="string" change-action="rebuild"></option>
+</options>
+</tool>
+</tools>
+</configuration>
+<configuration name="Debug-Flash" >
+<tools>
+<tool name="Assembler">
+<options>
+<option name="define" type="string" change-action="assemble">_EZ80ACCLAIM!=1,FREERTOS=1,_DEBUG,_EZ80F91</option>
+<option name="include" type="string" change-action="assemble">Z:\ZDSII_eZ80Acclaim!_5.2.1\src\rtl\common</option>
+<option name="list" type="boolean" change-action="none">true</option>
+<option name="listmac" type="boolean" change-action="none">false</option>
+<option name="name" type="boolean" change-action="none">true</option>
+<option name="pagelen" type="integer" change-action="none">56</option>
+<option name="pagewidth" type="integer" change-action="none">80</option>
+<option name="quiet" type="boolean" change-action="none">true</option>
+<option name="sdiopt" type="boolean" change-action="compile">true</option>
+</options>
+</tool>
+<tool name="Compiler">
+<options>
+<option name="padbranch" type="string" change-action="compile">CCODE</option>
+<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=1.0.0,_MULTI_THREAD</option>
+<option name="genprintf" type="boolean" change-action="compile">false</option>
+<option name="keepasm" type="boolean" change-action="none">true</option>
+<option name="keeplst" type="boolean" change-action="none">true</option>
+<option name="list" type="boolean" change-action="none">false</option>
+<option name="listinc" type="boolean" change-action="none">false</option>
+<option name="modsect" type="boolean" change-action="compile">false</option>
+<option name="optspeed" type="boolean" change-action="compile">false</option>
+<option name="promote" type="boolean" change-action="compile">true</option>
+<option name="reduceopt" type="boolean" change-action="compile">true</option>
+<option name="stdinc" type="string" change-action="compile">C:\Programme\Zilog\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\ZTP\Inc;;C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\RZK\Inc;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable/ZDS II\eZ80</option>
+<option name="usrinc" type="string" change-action="compile">Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91\monitor;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable\ZDS II\eZ80;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\NetworkInterface;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\Compiler\ZDSII_eZ80Acclaim!_5.2.1;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\protocols\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\GenericRecorderLibSrc\Include</option>
+<option name="watch" type="boolean" change-action="none">false</option>
+<option name="multithread" type="boolean" change-action="compile">true</option>
+</options>
+</tool>
+<tool name="Debugger">
+<options>
+<option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_Flash</option>
+<option name="debugtool" type="string" change-action="none">EthernetSmartCable</option>
+<option name="usepageerase" type="boolean" change-action="none">true</option>
+</options>
+</tool>
+<tool name="FlashProgrammer">
+<options>
+<option name="erasebeforeburn" type="boolean" change-action="none">false</option>
+<option name="eraseinfopage" type="boolean" change-action="none">false</option>
+<option name="enableinfopage" type="boolean" change-action="none">false</option>
+<option name="includeserial" type="boolean" change-action="none">false</option>
+<option name="offset" type="integer" change-action="none">0</option>
+<option name="snenable" type="boolean" change-action="none">false</option>
+<option name="sn" type="string" change-action="none">000000000000000000000000</option>
+<option name="snsize" type="integer" change-action="none">1</option>
+<option name="snstep" type="integer" change-action="none">000000000000000000000000</option>
+<option name="snstepformat" type="integer" change-action="none">0</option>
+<option name="snaddress" type="string" change-action="none">0</option>
+<option name="snformat" type="integer" change-action="none">0</option>
+<option name="snbigendian" type="boolean" change-action="none">true</option>
+<option name="singleval" type="string" change-action="none">0</option>
+<option name="singlevalformat" type="integer" change-action="none">0</option>
+<option name="usepageerase" type="boolean" change-action="none">false</option>
+</options>
+</tool>
+<tool name="General">
+<options>
+<option name="warn" type="boolean" change-action="none">true</option>
+<option name="debug" type="boolean" change-action="assemble">true</option>
+<option name="debugcache" type="boolean" change-action="none">true</option>
+<option name="igcase" type="boolean" change-action="assemble">false</option>
+<option name="outputdir" type="string" change-action="compile">Debug-Flash\</option>
+</options>
+</tool>
+<tool name="Librarian">
+<options>
+<option name="outfile" type="string" change-action="build">.\Debug-Flash\EZ80F91_PortDemo.lib</option>
+</options>
+</tool>
+<tool name="Linker">
+<options>
+<option name="directives" type="string" change-action="build"></option>
+<option name="createnew" type="boolean" change-action="build">true</option>
+<option name="exeform" type="string" change-action="build">OMF695,INTEL32</option>
+<option name="linkctlfile" type="string" change-action="build">.\F91_Demo_Debug.linkcmd</option>
+<option name="map" type="boolean" change-action="none">true</option>
+<option name="maxhexlen" type="integer" change-action="build">64</option>
+<option name="objlibmods" type="string" change-action="build"></option>
+<option name="of" type="string" change-action="build">Debug-Flash\EZ80F91_PortDemo</option>
+<option name="quiet" type="boolean" change-action="none">false</option>
+<option name="relist" type="boolean" change-action="build">false</option>
+<option name="startuptype" type="string" change-action="build">Standard</option>
+<option name="startuplnkcmds" type="boolean" change-action="build">true</option>
+<option name="usecrun" type="boolean" change-action="build">true</option>
+<option name="warnoverlap" type="boolean" change-action="none">true</option>
+<option name="xref" type="boolean" change-action="none">false</option>
+<option name="undefisfatal" type="boolean" change-action="none">true</option>
+<option name="warnisfatal" type="boolean" change-action="none">false</option>
+<option name="sort" type="string" change-action="none">ADDRESS</option>
+<option name="padhex" type="boolean" change-action="build">false</option>
+<option name="fplib" type="string" change-action="build">Dummy</option>
+<option name="useadddirectives" type="boolean" change-action="build">false</option>
+<option name="linkconfig" type="string" change-action="build">Standard</option>
+<option name="flashinfo" type="string" change-action="build">0-1FF</option>
+<option name="ram" type="string" change-action="build">B7E000-C7ffff</option>
+<option name="rom" type="string" change-action="build">0-03FFFF,100000-1FFFFF</option>
+<option name="extio" type="string" change-action="build">0-FFFF</option>
+<option name="intio" type="string" change-action="build">0-FF</option>
+</options>
+</tool>
+<tool name="Middleware">
+<options>
+<option name="usezsl" type="boolean" change-action="rebuild">false</option>
+<option name="zslports" type="string" change-action="rebuild"></option>
+<option name="zsluarts" type="string" change-action="rebuild"></option>
+<option name="userzk" type="boolean" change-action="rebuild">false</option>
+<option name="rzkconfigpi" type="boolean" change-action="rebuild">true</option>
+<option name="rzkconfigmini" type="boolean" change-action="rebuild">false</option>
+<option name="rzkcomps" type="string" change-action="rebuild"></option>
+</options>
+</tool>
+</tools>
+</configuration>
+<configuration name="Debug-Ram-Mixedmode" >
+<tools>
+<tool name="Assembler">
+<options>
+<option name="define" type="string" change-action="assemble">_EZ80ACCLAIM!=1,FREERTOS=1,_DEBUG,_EZ80F91,MIXEDMODE=1</option>
+<option name="include" type="string" change-action="assemble">Z:\ZDSII_eZ80Acclaim!_5.2.1\src\rtl\common</option>
+<option name="list" type="boolean" change-action="none">true</option>
+<option name="listmac" type="boolean" change-action="none">false</option>
+<option name="name" type="boolean" change-action="none">true</option>
+<option name="pagelen" type="integer" change-action="none">56</option>
+<option name="pagewidth" type="integer" change-action="none">80</option>
+<option name="quiet" type="boolean" change-action="none">true</option>
+<option name="sdiopt" type="boolean" change-action="compile">true</option>
+</options>
+</tool>
+<tool name="Compiler">
+<options>
+<option name="padbranch" type="string" change-action="compile">CCODE</option>
+<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=1.0.0,_MULTI_THREAD,MIXEDMODE=1</option>
+<option name="genprintf" type="boolean" change-action="compile">false</option>
+<option name="keepasm" type="boolean" change-action="none">true</option>
+<option name="keeplst" type="boolean" change-action="none">true</option>
+<option name="list" type="boolean" change-action="none">false</option>
+<option name="listinc" type="boolean" change-action="none">false</option>
+<option name="modsect" type="boolean" change-action="compile">false</option>
+<option name="optspeed" type="boolean" change-action="compile">false</option>
+<option name="promote" type="boolean" change-action="compile">true</option>
+<option name="reduceopt" type="boolean" change-action="compile">true</option>
+<option name="stdinc" type="string" change-action="compile">C:\Programme\Zilog\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\ZTP\Inc;;C:\Programme\ZiLOG\ZDSII_eZ80Acclaim!_5.2.1\ZTP\ZTP2.4.1_Lib\RZK\Inc;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable/ZDS II\eZ80</option>
+<option name="usrinc" type="string" change-action="compile">Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Demo\ZDSII_eZ80F91\monitor;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\portable\ZDS II\eZ80;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS\Source\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\NetworkInterface;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\portable\Compiler\ZDSII_eZ80Acclaim!_5.2.1;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-CLI;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Demo\Common\FreeRTOS_Plus_CLI_Demos\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\FreeRTOS-Plus\Source\FreeRTOS-Plus-TCP\protocols\include;Z:\ZDSII_eZ80Acclaim!_5.2.1\FreeRTOS\GenericRecorderLibSrc\Include</option>
+<option name="watch" type="boolean" change-action="none">false</option>
+<option name="multithread" type="boolean" change-action="compile">true</option>
+</options>
+</tool>
+<tool name="Debugger">
+<options>
+<option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_RAM</option>
+<option name="debugtool" type="string" change-action="none">EthernetSmartCable</option>
+<option name="usepageerase" type="boolean" change-action="none">true</option>
+</options>
+</tool>
+<tool name="FlashProgrammer">
+<options>
+<option name="erasebeforeburn" type="boolean" change-action="none">false</option>
+<option name="eraseinfopage" type="boolean" change-action="none">false</option>
+<option name="enableinfopage" type="boolean" change-action="none">false</option>
+<option name="includeserial" type="boolean" change-action="none">false</option>
+<option name="offset" type="integer" change-action="none">0</option>
+<option name="snenable" type="boolean" change-action="none">false</option>
+<option name="sn" type="string" change-action="none">000000000000000000000000</option>
+<option name="snsize" type="integer" change-action="none">1</option>
+<option name="snstep" type="integer" change-action="none">000000000000000000000000</option>
+<option name="snstepformat" type="integer" change-action="none">0</option>
+<option name="snaddress" type="string" change-action="none">0</option>
+<option name="snformat" type="integer" change-action="none">0</option>
+<option name="snbigendian" type="boolean" change-action="none">true</option>
+<option name="singleval" type="string" change-action="none">0</option>
+<option name="singlevalformat" type="integer" change-action="none">0</option>
+<option name="usepageerase" type="boolean" change-action="none">false</option>
+</options>
+</tool>
+<tool name="General">
+<options>
+<option name="warn" type="boolean" change-action="none">true</option>
+<option name="debug" type="boolean" change-action="assemble">true</option>
+<option name="debugcache" type="boolean" change-action="none">true</option>
+<option name="igcase" type="boolean" change-action="assemble">false</option>
+<option name="outputdir" type="string" change-action="compile">Debug-Ram-Mixedmode\</option>
+</options>
+</tool>
+<tool name="Librarian">
+<options>
+<option name="outfile" type="string" change-action="build">.\Debug-Ram-Mixedmode\EZ80F91_PortDemo.lib</option>
+</options>
+</tool>
+<tool name="Linker">
+<options>
+<option name="directives" type="string" change-action="build">DEFINE __z80_start = base of Z80PAGE</option>
+<option name="createnew" type="boolean" change-action="build">true</option>
+<option name="exeform" type="string" change-action="build">OMF695,INTEL32</option>
+<option name="linkctlfile" type="string" change-action="build">.\F91_Demo_Debug.linkcmd</option>
+<option name="map" type="boolean" change-action="none">true</option>
+<option name="maxhexlen" type="integer" change-action="build">64</option>
+<option name="objlibmods" type="string" change-action="build"></option>
+<option name="of" type="string" change-action="build">Debug-Ram-Mixedmode\EZ80F91_PortDemo</option>
+<option name="quiet" type="boolean" change-action="none">false</option>
+<option name="relist" type="boolean" change-action="build">false</option>
+<option name="startuptype" type="string" change-action="build">Standard</option>
+<option name="startuplnkcmds" type="boolean" change-action="build">true</option>
+<option name="usecrun" type="boolean" change-action="build">true</option>
+<option name="warnoverlap" type="boolean" change-action="none">true</option>
+<option name="xref" type="boolean" change-action="none">false</option>
+<option name="undefisfatal" type="boolean" change-action="none">true</option>
+<option name="warnisfatal" type="boolean" change-action="none">false</option>
+<option name="sort" type="string" change-action="none">ADDRESS</option>
+<option name="padhex" type="boolean" change-action="build">false</option>
+<option name="fplib" type="string" change-action="build">Dummy</option>
+<option name="useadddirectives" type="boolean" change-action="build">true</option>
+<option name="linkconfig" type="string" change-action="build">Standard</option>
+<option name="flashinfo" type="string" change-action="build">0-1FF</option>
+<option name="ram" type="string" change-action="build">B7E000-BFFFFF</option>
+<option name="rom" type="string" change-action="build">0-07FFFF</option>
+<option name="extio" type="string" change-action="build">0-FFFF</option>
+<option name="intio" type="string" change-action="build">0-FF</option>
+</options>
+</tool>
+<tool name="Middleware">
+<options>
+<option name="usezsl" type="boolean" change-action="rebuild">false</option>
+<option name="zslports" type="string" change-action="rebuild"></option>
+<option name="zsluarts" type="string" change-action="rebuild"></option>
+<option name="userzk" type="boolean" change-action="rebuild">false</option>
+<option name="rzkconfigpi" type="boolean" change-action="rebuild">true</option>
+<option name="rzkconfigmini" type="boolean" change-action="rebuild">false</option>
+<option name="rzkcomps" type="string" change-action="rebuild"></option>
+</options>
+</tool>
+</tools>
+</configuration>
+</configurations>
+
+<!-- watch information -->
+<watch-elements>
+<watch-element expression="pxCurrentTCB" />
+<watch-element expression="RecorderData" />
+<watch-element expression="uart" />
+</watch-elements>
+
+<!-- breakpoint information -->
+<breakpoints>
+<breakpoint temporary="false" enabled="true" >
+<line-number>51</line-number>
+<pathname>Z:\ZDSII_eZ80Acclaim!_5.2.1\src\boot\common\vectors24.asm</pathname>
+<address>3</address>
+<command></command>
+<preserve-type>0</preserve-type>
+</breakpoint>
+</breakpoints>
+
+</project>
