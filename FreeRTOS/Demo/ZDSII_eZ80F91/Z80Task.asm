@@ -29,7 +29,7 @@ loop:
 		jr		loop
 		
 message:		
-		ascii 'Hallo Z80\n',0
+		ascii 'Hallo Niclason\n',0
 		ds	0FFFFh - $
 		ds  1
 		

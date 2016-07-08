@@ -40,9 +40,9 @@
 <file filter-key="">..\..\..\GenericRecorderLibSrc\trcHardwarePort.c</file>
 <file filter-key="">..\..\..\GenericRecorderLibSrc\trcKernel.c</file>
 <file filter-key="">..\..\..\GenericRecorderLibSrc\trcKernelPortFreeRTOS.c</file>
-<file filter-key="flash">debug-flash\f91_demo.hex</file>
 <file filter-key="">..\..\Source\portable\ZDS II\eZ80\portmacro.h</file>
 <file filter-key="">.\Z80Task.asm</file>
+<file filter-key="flash">Debug-Flash\EZ80F91_PortDemo.hex</file>
 </files>
 
 <!-- configuration information -->
@@ -203,7 +203,7 @@
 <tool name="Debugger">
 <options>
 <option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_Flash</option>
-<option name="debugtool" type="string" change-action="none">USBSmartCable</option>
+<option name="debugtool" type="string" change-action="none">EthernetSmartCable</option>
 <option name="usepageerase" type="boolean" change-action="none">true</option>
 </options>
 </tool>
@@ -322,7 +322,7 @@
 <tool name="Debugger">
 <options>
 <option name="target" type="string" change-action="rebuild">eZ80DevPlatform_F91_RAM</option>
-<option name="debugtool" type="string" change-action="none">USBSmartCable</option>
+<option name="debugtool" type="string" change-action="none">EthernetSmartCable</option>
 <option name="usepageerase" type="boolean" change-action="none">true</option>
 </options>
 </tool>
