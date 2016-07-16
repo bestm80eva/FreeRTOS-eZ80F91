@@ -60,7 +60,7 @@ size_t NexusMessage::read(int fd)
 			clr();
 		}
 
-		cout << " readTCP:" << *this << endl;
+//		cout << " readTCP:" << *this << endl;
 	}
 	else
 		perror("recv");
@@ -89,14 +89,14 @@ size_t NexusMessage::read(libusb_device_handle* handle, uint8_t endpoint)
 	}
 	else
 		_msg->resize(*this);
-	cout << " readUSB:" << *this << endl;
+//	cout << " readUSB:" << *this << endl;
 	return (size_t) *this;
 }
 
 size_t NexusMessage::write(int fd) const
 {
 	size_t len = *this;
-	cout << "writeTCP:" << *this << endl;
+//	cout << "writeTCP:" << *this << endl;
 	if(len)
 	{
 		len = ::write( fd, _msg->data(), len);
@@ -112,7 +112,7 @@ size_t NexusMessage::write(libusb_device_handle* handle, uint8_t endpoint)
 {
 	int s,len = 0;
 
-	cout << "writeUSB:" << *this << endl;
+//	cout << "writeUSB:" << *this << endl;
 	s = libusb_bulk_transfer(handle, endpoint, _msg->data(), *this, &len, 0);
 
 	if( s || (size_t) len != *this)

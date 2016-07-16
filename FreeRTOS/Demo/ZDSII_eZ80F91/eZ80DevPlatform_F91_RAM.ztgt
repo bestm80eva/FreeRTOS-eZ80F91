@@ -12,9 +12,9 @@
    </Clock>
    <ControlReg>
       <pc>0</pc>
-      <splStackPtr>C00000</splStackPtr>
-      <spsStackPtr>ffff</spsStackPtr>
-      <useAdlMode>true</useAdlMode>
+      <splStackPtr>0</splStackPtr>
+      <spsStackPtr>0</spsStackPtr>
+      <useAdlMode>false</useAdlMode>
    </ControlReg>
    <ExtFlash>
       <device />

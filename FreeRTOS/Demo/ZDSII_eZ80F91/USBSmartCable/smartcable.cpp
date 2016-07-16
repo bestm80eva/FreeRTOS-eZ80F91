@@ -67,19 +67,7 @@ int initUSB()
 					cerr << "failed to get device descriptor " << (const char*) libusb_strerror((enum libusb_error) r) << endl;
 					break;
 				}
-				cout << hex << setw(4) << setfill('0') << desc.idVendor << ':'
-					 << hex << setw(4) << setfill('0') << desc.idProduct
-					 << "(bus " << (unsigned) libusb_get_bus_number(tmp) << ", device " << (unsigned) libusb_get_device_address(tmp) << ')' << endl;
-
 				r = libusb_get_port_numbers(tmp, path, sizeof(path));
-
-				if (r > 0)
-				{
-					cout << " path: ";
-					for (j = 0; j < r; j++)
-						cout << dec << (unsigned) path[j] << ' ';
-				}
-				cout << endl;
 				if(desc.idVendor == vendor_id && desc.idProduct == product_id)
 				{
 

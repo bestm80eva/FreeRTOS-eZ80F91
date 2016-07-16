@@ -170,7 +170,7 @@ void vPortEndScheduler( void )
 /*-----------------------------------------------------------*/
 
 
-static UINT32 ulNextRand = 0x12345678;
+static long ulNextRand = 0x12345678;
 
 /* You are right its a little engine MPU but the compiler 
    does not be able to handle the existing FreeRTOS macro
@@ -188,22 +188,67 @@ UINT16 portFreeRTOS_htons( UINT16 usIn )
 {
 	return (usIn >> 8U) | (usIn << 8U);
 }
-	
-UINT32 uxRand( void )
+
+long uxRand( void )
 {
-	static const UINT32 ulMultiplier = 0x375a4e35UL; 
-	static const UINT32 ulIncrement  = 7UL;
+	static const long ulMultiplier = 0x375a4e35L; 
+	static const long ulIncrement  = 7L;
 
 	/* Utility function to generate a pseudo random number. */
 	ulNextRand = ulMultiplier * ulNextRand + ulIncrement;
 	return ulNextRand;
 }
 
-void z80trap(unsigned short z80sp, unsigned short z80pc, unsigned char z80page)
+
+
+#if defined(MIXEDMODE) 
+#include "CPM2.2/exbios.h"
+
+//void netdump(const char *msg);
+	
+void dumptrap(const trapargs_t *ta)
 {
-	printf("Z80 Trap PC %02X.%04X, SP %02X.%04X\n", z80page,z80pc,z80page,z80sp);
-	configASSERT(0);
+	static char trapbuffer[1024];
+	
+	snprintf(trapbuffer,1024,
+	    "\nTRAP:     AF,     BC,     DE,     HL,     IX,     IY,mbase,flag,ret\n"
+	    "      %6X, %6X, %6X, %6X, %6X, %6X,   %2X,  %2X,%6X\n"
+		"      %6X, %6X, %6X, %6X\n",
+		ta->af,
+		ta->bc, 
+		ta->de, 
+		ta->hl, 
+		ta->ix, 
+		ta->iy,
+		
+		ta->mbase, 
+		ta->trapflg, 
+		ta->trapret,
+		ta->af_,
+		ta->bc_, 
+		ta->de_, 
+		ta->hl_
+		);	
+	//netdump(trapbuffer);
 }
+
+void z80trap(trapargs_t* arg)
+{
+#ifdef CPM22
+	void exbioscall(trapargs_t* arg);
+	exbioscall(arg);
+#else
+	dumptrap(arg);
+	*(uint16_t*)&arg->trapret += 1;
+#endif
+}
+
+void e80trap(trapargs_t *arg)
+{
+	dumptrap(arg);
+	arg->trapret++;
+}
+#endif // MIXEDMODE
 
 /*
  * Setup scheduler timer and restor processor to current PCB	

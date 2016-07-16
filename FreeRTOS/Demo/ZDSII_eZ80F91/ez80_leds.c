@@ -427,7 +427,7 @@ void initLED5x7()
 	memset(dply,0xFF,sizeof(dply));
 	
 	xLED5x7Queue= xQueueCreate( LED5x7_QUEUES, sizeof( CHAR));
-	xTaskCreate( LED5x7Task, "LED5x7", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, &ledtimer);
+	xTaskCreate( LED5x7Task, "LED5x7", configMINIMAL_STACK_SIZE, NULL,PRIO_LED, &ledtimer);
 	ledtimer = xTimerCreate("LED5x7Timer", LED5x7_FRAMES, pdTRUE, &tid, LEDTick);
 	xTimerStart(ledtimer,0);
 }

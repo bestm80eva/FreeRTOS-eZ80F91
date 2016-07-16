@@ -43,7 +43,7 @@ unsigned CUsbSmartCableDevice::open()
 		r = libusb_open(_dev, &_handle);
 		if(r)
 		{
-			cerr << "libusb_open" << (const char*) libusb_strerror((enum libusb_error) r) << endl;
+			cerr << "libusb_open " << (const char*) libusb_strerror((enum libusb_error) r) << endl;
 			throw;
 		}
 
@@ -57,13 +57,13 @@ unsigned CUsbSmartCableDevice::open()
 		r = libusb_claim_interface (_handle,0);
 		if(r)
 		{
-			cerr << "libusb_claim_interface" << (const char*) libusb_strerror((enum libusb_error) r) << endl;
+			cerr << "libusb_claim_interface " << (const char*) libusb_strerror((enum libusb_error) r) << endl;
 			throw;
 		}
 
 		r = libusb_reset_device (_handle);
 		if(r)
-			cerr << "libusb_reset_device" << (const char*) libusb_strerror((enum libusb_error) r) << endl;
+			cerr << "libusb_reset_device " << (const char*) libusb_strerror((enum libusb_error) r) << endl;
 	}
 	return _ocrefcnt;
 }

@@ -134,6 +134,11 @@ static const uint8_t ucDNSServerAddress[ 4 ] = { 192, 168, 1, 1 };
 	void TaskLED( void *pvParameters );
 #endif
 
+#ifdef CPM22
+char cpmmem[0x10000] _Align 0x10000;
+void prvTCPCpmIOTask( void *ram );
+#endif
+
 void StatsTimerInit()
 {
 	
@@ -151,11 +156,6 @@ int main( void )
 	BaseType_t	res = pdPASS;
 	rtc_t	rtc;
 	TickType_t xTimeNow;
-
-#if configMIXEDMODE	== 1
-	asm("stmix");
-#endif
-
 #if configUSE_TRACE_FACILITY == 1
 	vTraceInitTraceData();
 	vTraceSetISRProperties(TIID_EthRx, "i_EthRx", IPRI_EthRx);
@@ -205,16 +205,16 @@ int main( void )
 	
 	// Demo Sysinfo 
 	// Connect putty 115200,8,1,n (ansi terminal) to get the status informations
-	res = xTaskCreate( sysinfo, "SysInfo", configMINIMAL_STACK_SIZE*2, (void *)portMAX_DELAY,  tskIDLE_PRIORITY + 1, NULL);
+	res = xTaskCreate( sysinfo, "SysInfo", configMINIMAL_STACK_SIZE*2, (void *)portMAX_DELAY, PRIO_SYSINFO, NULL);
 
 
 #if INCLUDE_LED5x7	== 1
 	initLED5x7();
-	res = xTaskCreate( TaskLED, "TaskLED", configMINIMAL_STACK_SIZE, (void *)portMAX_DELAY,  LED5x7_PRIORITY, NULL);
+	res = xTaskCreate( TaskLED, "TaskLED", configMINIMAL_STACK_SIZE, (void *)portMAX_DELAY, PRIO_LED5x7, NULL);
 #endif
 
-#if INCLUDE_SNTP == 1
-	vStartNTPTask(configMINIMAL_STACK_SIZE, tskIDLE_PRIORITY + 2 );
+#ifdef CPM22 
+	res = xTaskCreate( prvTCPCpmIOTask, "CPMIO", configMINIMAL_STACK_SIZE*2, (void*)cpmmem, PRIO_CPMIO, NULL);
 #endif
 
 	vTaskStartScheduler();
@@ -227,7 +227,6 @@ int main( void )
 // Show a banner on the 5x7 LED Display
 void TaskLED( void *pvParameters )
 {
-#if configMIXEDMODE != 1
     TickType_t ticks = (int)pvParameters;
 	CHAR line5x7[80];
 	
@@ -247,14 +246,6 @@ void TaskLED( void *pvParameters )
 			vTaskDelay(300);
 		}
     }
-#else	
-	asm("\
-		xref __z80_start	\n\
-		ld	a,LOW(HIGH16(__z80_start)) \n\
-		ld	mb,a			\n\
-		jp.sis	0			\n\
-	");
-#endif
 }
 #endif
 

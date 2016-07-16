@@ -135,12 +135,18 @@ typedef int F91_EMAC_CONF_t;
  * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE. 
  *----------------------------------------------------------*/
 
+
+#define PRIO_LED 		tskIDLE_PRIORITY + 4
+#define PRIO_SYSINFO   	tskIDLE_PRIORITY + 1
+#define PRIO_LED5x7	  	tskIDLE_PRIORITY + 2
+#define PRIO_CPMIO 	  	tskIDLE_PRIORITY + 3
+#define PRIO_CPM22		tskIDLE_PRIORITY + 3
+
 #if INCLUDE_LED5x7 == 1 
 #define LED5x7_FRAMES	pdMS_TO_TICKS(  5)	// display refresch delay 
 #define LED5x7_SHIFTT	pdMS_TO_TICKS( 60)	// LED5x7_FRAMES delays between shifts
 #define LED5x7_CDELAY	pdMS_TO_TICKS(300)	// LED5x7_FRAMES deleys between letters
 #define LED5x7_QUEUES	80					// chars on queue
-#define LED5x7_PRIORITY (configTIMER_TASK_PRIORITY-1) 
 #endif	/* INCLUDE_LED5x7 */
 
 #if INCLUDE_BUTTONS
