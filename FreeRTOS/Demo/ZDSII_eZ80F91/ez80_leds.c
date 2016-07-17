@@ -107,8 +107,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* LED anode and cathode external I/O pointers */
-#define LEDMATRIX_ROW      (*(volatile unsigned char*)0x800000)  //Anode
-#define LEDMATRIX_COLUMN   (*(volatile unsigned char*)0x800001)  //Cathode
+#define LEDMATRIX_ANODE   (*(volatile unsigned char*)0x800000)  //Anode
+#define LEDMATRIX_CATHODE (*(volatile unsigned char*)0x800001)  //Cathode
 
 
 /****************************************************************************
@@ -335,25 +335,21 @@ static void nextDisplay(void)
  ****************************************************************************/
 void	LEDTick(TimerHandle_t thdl)
 {
-	static uint8_t idx=0;	// current scan-line
-	static uint8_t row=1;
+	static uint8_t row=7;
 	uint8_t tmp = CS2_LBR;
 	
-	if(idx > 6)			
-	{
-		idx = 0;			// restart map index
-		row = 1;
-	}
+	row--;
 	
 	portENTER_CRITICAL();
 	CS2_LBR = 0x80;
-	LEDMATRIX_ROW 	 = row;	// enable row
-	LEDMATRIX_COLUMN = 0x1F & dply[idx].c[1]; 	// set row image
+	LEDMATRIX_ANODE   = (1 << row);	// enable row
+	LEDMATRIX_CATHODE = 0x1F & dply[row].c[1]; 	// set row image
 	CS2_LBR = tmp;
 	portEXIT_CRITICAL();
 	
-	idx++;
-	row <<= 1;
+	if(!row)
+		row = 7;
+	
 }
 
 /****************************************************************************
@@ -416,9 +412,7 @@ BaseType_t LED5x7_putchar(CHAR c, TickType_t tout)
 static int tid;
 void initLED5x7()
 {
-	LEDMATRIX_ROW 	 = 0;		// light off
-	LEDMATRIX_COLUMN = 0xFF; 
-	
+
 	currglyph  	= cmatrix[95];
 	frames		= LED5x7_FRAMES;	// display refresch delay 
 	shift		= LED5x7_SHIFTT;	// LED5x7_FRAMES delays between shifts

@@ -53,7 +53,7 @@ ifdef MIXEDMODE
 else	
 	di
     rsmix
-,   jp.lil __init
+    jp.lil __init
 endif
 _rst8:
     di

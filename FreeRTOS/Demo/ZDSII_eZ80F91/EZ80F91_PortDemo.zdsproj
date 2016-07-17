@@ -1,4 +1,4 @@
-<project type="Executable" project-type="Standard" configuration="Debug-Ram-Mixedmode" created-by="05031803" modified-by="d:5.2.0:11111601" ZDSII="ZDS - eZ80Acclaim! 5.2.1 (Build 12102401)">
+<project type="Executable" project-type="Standard" configuration="Debug-Flash" created-by="05031803" modified-by="d:5.2.0:11111601" ZDSII="ZDS - eZ80Acclaim! 5.2.1 (Build 12102401)">
 <cpu>EZ80F91</cpu>
 
 <!-- file information -->
@@ -52,6 +52,7 @@
 <file filter-key="">CPM2.2\cpm.inc</file>
 <file filter-key="">CPMRDisk\src\Interface.h</file>
 <file filter-key="">CPM2.2\bios.asm</file>
+<file filter-key="">CPM2.2\boot.asm</file>
 </files>
 
 <!-- configuration information -->
@@ -179,7 +180,7 @@
 <tools>
 <tool name="Assembler">
 <options>
-<option name="define" type="string" change-action="assemble">_EZ80ACCLAIM!=1,FREERTOS=1,_DEBUG,_EZ80F91</option>
+<option name="define" type="string" change-action="assemble">_EZ80ACCLAIM!=1,FREERTOS=1,_DEBUG,_EZ80F91,MIXEDMODE=1,CPM22=1</option>
 <option name="include" type="string" change-action="assemble">Z:\ZDSII_eZ80Acclaim!_5.2.1\src\rtl\common</option>
 <option name="list" type="boolean" change-action="none">true</option>
 <option name="listmac" type="boolean" change-action="none">false</option>
@@ -193,7 +194,7 @@
 <tool name="Compiler">
 <options>
 <option name="padbranch" type="string" change-action="compile">CCODE</option>
-<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=1.0.0,_MULTI_THREAD</option>
+<option name="define" type="string" change-action="compile">_DEBUG,_EZ80F91,_EZ80ACCLAIM!,ZDSII_EZ80_PORT,DEMOVERSION=1.0.0,_MULTI_THREAD,MIXEDMODE=1,CPM22=1</option>
 <option name="genprintf" type="boolean" change-action="compile">false</option>
 <option name="keepasm" type="boolean" change-action="none">true</option>
 <option name="keeplst" type="boolean" change-action="none">true</option>
@@ -252,7 +253,17 @@
 </tool>
 <tool name="Linker">
 <options>
-<option name="directives" type="string" change-action="build"></option>
+<option name="directives" type="string" change-action="build">ORDER Z80BOOT, Z80CPM, Z80BIOS
+DEFINE __z80_boot= copy base of Z80BOOT
+DEFINE __z80_boot_len = length of Z80BOOT
+COPY Z80BOOT ROM
+DEFINE __z80_cpm = copy base of Z80CPM
+DEFINE __z80_cpm_len = length of Z80CPM
+COPY Z80CPM ROM
+DEFINE __z80_bios = copy base of Z80BIOS
+DEFINE __z80_bios_len = length of Z80BIOS
+COPY Z80BIOS ROM
+,</option>
 <option name="createnew" type="boolean" change-action="build">true</option>
 <option name="exeform" type="string" change-action="build">OMF695,INTEL32</option>
 <option name="linkctlfile" type="string" change-action="build">.\F91_Demo_Debug.linkcmd</option>
@@ -262,7 +273,7 @@
 <option name="of" type="string" change-action="build">Debug-Flash\EZ80F91_PortDemo</option>
 <option name="quiet" type="boolean" change-action="none">false</option>
 <option name="relist" type="boolean" change-action="build">false</option>
-<option name="startuptype" type="string" change-action="build">Standard</option>
+<option name="startuptype" type="string" change-action="build">Included</option>
 <option name="startuplnkcmds" type="boolean" change-action="build">true</option>
 <option name="usecrun" type="boolean" change-action="build">true</option>
 <option name="warnoverlap" type="boolean" change-action="none">true</option>
@@ -272,7 +283,7 @@
 <option name="sort" type="string" change-action="none">ADDRESS</option>
 <option name="padhex" type="boolean" change-action="build">false</option>
 <option name="fplib" type="string" change-action="build">Dummy</option>
-<option name="useadddirectives" type="boolean" change-action="build">false</option>
+<option name="useadddirectives" type="boolean" change-action="build">true</option>
 <option name="linkconfig" type="string" change-action="build">Standard</option>
 <option name="flashinfo" type="string" change-action="build">0-1FF</option>
 <option name="ram" type="string" change-action="build">B7E000-C7ffff</option>
@@ -371,15 +382,17 @@
 </tool>
 <tool name="Linker">
 <options>
-<option name="directives" type="string" change-action="build">ORDER Z80CPM, Z80BIOS
+<option name="directives" type="string" change-action="build">ORDER Z80BOOT, Z80CPM, Z80BIOS
+DEFINE __z80_boot= copy base of Z80BOOT
+DEFINE __z80_boot_len = length of Z80BOOT
+COPY Z80BOOT ROM
 DEFINE __z80_cpm = copy base of Z80CPM
 DEFINE __z80_cpm_len = length of Z80CPM
 COPY Z80CPM ROM
 DEFINE __z80_bios = copy base of Z80BIOS
 DEFINE __z80_bios_len = length of Z80BIOS
 COPY Z80BIOS ROM
-
-</option>
+,</option>
 <option name="createnew" type="boolean" change-action="build">true</option>
 <option name="exeform" type="string" change-action="build">OMF695,INTEL32</option>
 <option name="linkctlfile" type="string" change-action="build">.\EZ80F91_PortDemo_Debug-Ram-Mixedmode.linkcmd</option>

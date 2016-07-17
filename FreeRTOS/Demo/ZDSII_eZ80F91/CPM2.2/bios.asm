@@ -3,34 +3,6 @@ ifdef CPM22
 include cpm.inc
 
 ;
-;	I/O ports
-;
-MONITOR EQU 30h
-
-CONIO	EQU 31h
-CONSTA	EQU	01h		;console status port
-CONDAT	EQU	02h		;console data port
-PRTSTA	EQU	03h		;printer status port
-PRTDAT	EQU	04h		;printer data port
-AUXDAT	EQU	05h		;auxiliary data port
-
-FDIO	EQU 32h
-FDCD	EQU	01h		;fdc-port: # of drive
-FDCT	EQU	02h		;fdc-port: # of track
-FDCS	EQU	03h		;fdc-port: # of sector
-FDCOP	EQU	04h		;fdc-port: command
-FDCST	EQU	05h		;fdc-port: status
-
-DMAIO	EQU 33h
-DMABC	EQU	01h		;dma-port: dma address BC
-
-ROMBOOT	EQU	34h		; boot buildin CP/M 2.2
-
-EXBIOS: MACRO device, direction, port
-	db	0cbh, device, direction, port
-MACEND
-
-;
 ;**************************************************************
 ;*
 ;*        B I O S   J U M P   T A B L E
@@ -451,8 +423,6 @@ CHKHD8:	DS	1		;check vector harddisk 8 I
 CHKHD9:	DS	1		;check vector harddisk 9 J
 ;
 EDAT	EQU	$		;end of data area
-		DS 0ffffh - $
-		DS  1
 endif ;CPM22	
 	
 	END	;of BIOS

@@ -138,9 +138,9 @@ typedef int F91_EMAC_CONF_t;
 
 #define PRIO_LED 		tskIDLE_PRIORITY + 4
 #define PRIO_SYSINFO   	tskIDLE_PRIORITY + 1
-#define PRIO_LED5x7	  	tskIDLE_PRIORITY + 2
+#define PRIO_LED5x7	  	tskIDLE_PRIORITY + 4
 #define PRIO_CPMIO 	  	tskIDLE_PRIORITY + 3
-#define PRIO_CPM22		tskIDLE_PRIORITY + 3
+#define PRIO_CPM22		tskIDLE_PRIORITY + 2
 
 #if INCLUDE_LED5x7 == 1 
 #define LED5x7_FRAMES	pdMS_TO_TICKS(  5)	// display refresch delay 

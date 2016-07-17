@@ -21,6 +21,8 @@
 
 extern char _z80_cpm;
 extern char _z80_cpm_len;
+extern char _z80_bios;
+extern char _z80_bios_len;
 
 static QueueHandle_t cpminq;
 static Socket_t xConnectedSocket = (Socket_t)-1;
@@ -60,8 +62,11 @@ void z80Monitor(trapargs_t *reg)
 void Romboot(trapargs_t *reg)
 {
 	char *cpmram = (char*)(0xE400 | (reg->mbase << 16));
+	char *biosram = (char*)(0xFA00 | (reg->mbase << 16));
 	const char *cpmrom = &_z80_cpm;
-	memcpy(cpmram, cpmrom, (unsigned)&_z80_cpm_len);	
+	const char *biosrom= &_z80_bios;
+	memcpy(cpmram, cpmrom, (unsigned)&_z80_cpm_len);
+	memcpy(biosram, biosrom, (unsigned)&_z80_bios_len);
 	reg->trapret = 0xFA00;	// cold start
 }
 
