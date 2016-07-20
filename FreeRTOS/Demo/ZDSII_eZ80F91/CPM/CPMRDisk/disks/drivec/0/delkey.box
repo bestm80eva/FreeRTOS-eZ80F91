@@ -1,0 +1,226 @@
+(***********************************************************) 
+(*                                                         *) 
+(*                 TURBO-access version 1.00               *) 
+(*                                                         *) 
+(*                       DELKEY module                     *) 
+(*                                                         *) 
+(*                   Copyright (C) 1984 by                 *) 
+(*                        BORLAND Int.                     *) 
+(*                                                         *) 
+(***********************************************************)
+ 
+(*$A+,R-*)
+
+procedure DeleteKey(var IdxF       : IndexFile;
+                    var ProcDatRef : Integer;
+                    var ProcKey              );
+var
+  PKey         : TaKeyStr absolute ProcKey;
+  PageTooSmall : Boolean;
+  PagPtr       : TaPagePtr;
+ 
+(*$A-*)
+
+procedure DelB(PrPgRef : Integer);
+var
+  C,I,K,L,R,
+  XPageRef  : Integer;
+  PagPtr    : TaPagePtr;
+ 
+(*$A+*)
+
+procedure UnderFlow(PrPgRef,
+                    PrPgRef2,
+                    R        : Integer);
+var
+  I,K,
+  LItem,
+  LPageRef : Integer;
+  PagPtr,
+  PagePtr2,
+  L        : TaPagePtr;
+begin
+  TaGetPage(IdxF,PrPgRef,PagPtr); 
+  TaGetPage(IdxF,PrPgRef2,PagePtr2);
+  if R < PagPtr^.ItemsOnPage then
+  begin
+    R := R + 1; 
+    LPageRef := PagPtr^.ItemArray[R].PageRef; 
+    TaGetPage(IdxF,LPageRef,L);
+    K := (L^.ItemsOnPage - Order + 1) div 2;
+    PagePtr2^.ItemArray[Order] := PagPtr^.ItemArray[R]; 
+    PagePtr2^.ItemArray[Order].PageRef := L^.BckwPageRef;
+    if K > 0 then
+    begin
+      for I := 1 to K - 1 do 
+        PagePtr2^.ItemArray[I + Order] := L^.ItemArray[I];
+      PagPtr^.ItemArray[R] := L^.ItemArray[K]; 
+      PagPtr^.ItemArray[R].PageRef := LPageRef;
+      L^.BckwPageRef := L^.ItemArray[K].PageRef; 
+      L^.ItemsOnPage := L^.ItemsOnPage - K;
+      for I := 1 to L^.ItemsOnPage do 
+        L^.ItemArray[I] := L^.ItemArray[I + K];
+      PagePtr2^.ItemsOnPage := Order - 1 + K; 
+      PageTooSmall := false; 
+      TaUpdatePage(L);
+    end
+    else
+    begin
+      for I := 1 to Order do 
+        PagePtr2^.ItemArray[I + Order] := L^.ItemArray[I];
+      for I := R to PagPtr^.ItemsOnPage - 1 do 
+        PagPtr^.ItemArray[I] := PagPtr^.ItemArray[I + 1];
+      PagePtr2^.ItemsOnPage := PageSize; 
+      PagPtr^.ItemsOnPage := PagPtr^.ItemsOnPage - 1; 
+      TaReturnPage(L);
+      PageTooSmall := PagPtr^.ItemsOnPage < Order;
+    end;
+    TaUpdatePage(PagePtr2);
+  end
+  else
+  begin
+    if R = 1 then 
+      LPageRef := PagPtr^.BckwPageRef
+    else LPageRef := PagPtr^.ItemArray[R - 1].PageRef; 
+    TaGetPage(IdxF,LPageRef,L);
+    LItem := L^.ItemsOnPage + 1; 
+    K := (LItem - Order) div 2;
+    if K > 0 then
+    begin
+      for I := Order - 1 downto 1 do 
+        PagePtr2^.ItemArray[I + K] := PagePtr2^.ItemArray[I];
+      PagePtr2^.ItemArray[K] := PagPtr^.ItemArray[R]; 
+      PagePtr2^.ItemArray[K].PageRef := PagePtr2^.BckwPageRef; 
+      LItem := LItem - K;
+      for I := K - 1 downto 1 do 
+        PagePtr2^.ItemArray[I] := L^.ItemArray[I + LItem];
+      PagePtr2^.BckwPageRef := L^.ItemArray[LItem].PageRef; 
+      PagPtr^.ItemArray[R] := L^.ItemArray[LItem]; 
+      PagPtr^.ItemArray[R].PageRef := PrPgRef2;
+      L^.ItemsOnPage := LItem - 1; 
+      PagePtr2^.ItemsOnPage := Order - 1 + K; 
+      PageTooSmall := false; 
+      TaUpdatePage(PagePtr2);
+    end
+    else
+    begin
+      L^.ItemArray[LItem] := PagPtr^.ItemArray[R]; 
+      L^.ItemArray[LItem].PageRef := PagePtr2^.BckwPageRef;
+      for I := 1 to Order - 1 do 
+        L^.ItemArray[I + LItem] := PagePtr2^.ItemArray[I];
+      L^.ItemsOnPage := PageSize; 
+      PagPtr^.ItemsOnPage := PagPtr^.ItemsOnPage - 1; 
+      TaReturnPage(PagePtr2);
+      PageTooSmall := PagPtr^.ItemsOnPage < Order;
+    end;
+    TaUpdatePage(L);
+  end;
+  TaUpdatePage(PagPtr);
+end;
+ 
+(*$A-*)
+
+procedure DelA(PrPgRef2 : Integer);
+var
+  C,
+  XPageRef : Integer;
+  PagePtr2 : TaPagePtr;
+begin
+  TaGetPage(IdxF,PrPgRef2,PagePtr2);
+  with PagePtr2^ do
+  begin
+    XPageRef := ItemArray[ItemsOnPage].PageRef;
+    if XPageRef <> 0 then
+    begin
+      C := ItemsOnPage; 
+      DelA(XPageRef);
+      if PageTooSmall then UnderFlow(PrPgRef2,XPageRef,C);
+    end
+    else
+    begin
+      TaGetPage(IdxF,PrPgRef,PagPtr);
+      ItemArray[ItemsOnPage].PageRef := PagPtr^.ItemArray[K].PageRef; 
+      PagPtr^.ItemArray[K] := ItemArray[ItemsOnPage];
+      ItemsOnPage := ItemsOnPage - 1; 
+      PageTooSmall := ItemsOnPage < Order;
+      TaUpdatePage(PagPtr); 
+      TaUpdatePage(PagePtr2);
+    end;
+  end;
+end;
+
+begin
+  if PrPgRef = 0 then
+  begin
+    OK := false; 
+    PageTooSmall := false;
+  end
+  else
+  begin
+    TaGetPage(IdxF,PrPgRef,PagPtr);
+    with PagPtr^ do
+    begin
+      L := 1; 
+      R := ItemsOnPage;
+      repeat
+        K := (L + R) div 2;
+        C := TaCompKeys(PKey,
+                        ItemArray[K].Key,
+                        ProcDatRef,
+                        ItemArray[K].DataRef,
+                        IdxF.AllowDuplKeys   );
+        if C <= 0 then 
+          R := K - 1;
+        if C >= 0 then 
+          L := K + 1;
+      until L > R;
+      if R = 0 then 
+        XPageRef := BckwPageRef
+      else XPageRef := ItemArray[R].PageRef;
+      if L - R > 1 then
+      begin
+	ProcDatRef := ItemArray[K].DataRef;
+	if XPageRef = 0 then
+	begin
+	  ItemsOnPage := ItemsOnPage - 1; 
+          PageTooSmall := ItemsOnPage < Order;
+	  for I := K to ItemsOnPage do 
+            ItemArray[I] := ItemArray[I + 1];
+	  TaUpdatePage(PagPtr);
+	end
+        else
+	begin
+	  DelA(XPageRef);
+          if PageTooSmall then 
+            UnderFlow(PrPgRef,XPageRef,R);
+	end;
+      end
+      else
+      begin
+        DelB(XPageRef);
+        if PageTooSmall then 
+          UnderFlow(PrPgRef,XPageRef,R);
+      end;
+    end;
+  end;
+end;
+
+begin
+  with IdxF do
+  begin
+    TaXKey(PKey,KeyL); 
+    OK := true; 
+    DelB(RR);
+    if PageTooSmall then
+    begin
+      TaGetPage(IdxF,RR,PagPtr);
+      if PagPtr^.ItemsOnPage = 0 then
+      begin
+        RR := PagPtr^.BckwPageRef; 
+        TaReturnPage(PagPtr);
+      end;
+    end;
+  end;
+end;
+
+

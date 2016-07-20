@@ -1,0 +1,78 @@
+;
+; Patch fuer Turbo-Pascal v2.00a
+; neue Version = v2.01a
+; A.K.	15.03.1986
+;
+; rev	18.10.1987
+; 	fuer cp/m 3.0
+;	neue version = 2.02a
+;
+
+  1. Mark und Release
+     ----------------
+
+  Adresse : 1E65 ist = CD soll ED
+          : 1E70 ist = CD soll ED
+          : 726E ist = CD soll ED
+
+
+  2. Divisions-Rest
+     --------------
+
+  Adresse : 0713 ist = CB soll F0
+          : 0714 ist = 7A soll 18
+          : 0715 ist = C8 soll 37
+          : 0716 ist = 18 soll C7
+
+
+  3. Zeichen groesser 7F als Editor Eingabe
+     --------------------------------------
+
+  Adresse : 2E5B ist = 28 soll 30
+
+
+  4. Diskettenkapazitaet richtig berechnen (cp/m 3.0)
+     ------------------------------------------------
+     ct 1.86 seite 120
+
+	 2b62:	ld	c,1a
+		ld	de,2b95
+		call	5
+		ld	c,19
+		call	5
+		ld	c,2e
+		ld	e,a
+		call	5
+			
+		ld	hl,(2b95)
+		ld	a,(2b97)
+		ld	c,a
+		ld	b,3
+	2b7e:	xor	a,a
+		rr	c
+		rr	h
+		rr	l
+		djnz	2b7e
+		jp	2b98
+
+	2bb2:	nop
+		nop
+		nop
+		nop
+		nop
+
+
+  5. Neue System-Meldung eintragen
+     -----------------------------
+
+  Adresse : 2096 = Patch to Version 2.02A
+
+
+  Alle Daten in HEX.
+-Meldung eintragen
+     -----------------------------
+
+  Adresse : 2096 = Patch to Version 2.02A
+
+
+  Alle Date

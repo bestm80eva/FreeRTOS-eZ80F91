@@ -85,6 +85,8 @@ __trap:
 	ld	a,(ix+33)	; 02 ADL=0, 03 ADL=1
 	cp	02h
 	jr	nz,_trap03
+	ex	af,af'		; for debug orientation only
+	exx
 	call	_z80trap
 	jr	trapret	
 		
@@ -103,8 +105,8 @@ trapret:
 	pop	af
 	exx
 	ex	af,af'
-	pop	ix
 	pop	iy
+	pop	ix
 	pop	hl
 	pop	de
 	pop	bc

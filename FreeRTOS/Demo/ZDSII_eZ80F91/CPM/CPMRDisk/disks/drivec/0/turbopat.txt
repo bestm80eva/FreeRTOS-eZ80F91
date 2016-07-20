@@ -1,0 +1,35 @@
+;
+; Patch fuer Turbo-Pascal v2.00a
+; neue Version = v2.01a
+; A.K. - 15.03.1986
+;
+
+  1. Mark und Release
+     ----------------
+
+  Adresse : 1E65 ist = CD soll ED
+          : 1E70 ist = CD soll ED
+          : 726E ist = CD soll ED
+
+  2. Divisions-Rest
+     --------------
+
+  Adresse : 0713 ist = CB soll F0
+          : 0714 ist = 7A soll 18
+          : 0715 ist = C8 soll 37
+          : 0716 ist = 18 soll C7
+
+  3. Zeichen groesser 7F als Editor Eingabe
+     --------------------------------------
+
+  Adresse : 2E5B ist = 28 soll 30
+
+
+  4. Neue System-Meldung eintragen
+     -----------------------------
+
+  Adresse : 2096 = Patch to Version 2.01A
+
+
+  Alle Daten in HEX.
+

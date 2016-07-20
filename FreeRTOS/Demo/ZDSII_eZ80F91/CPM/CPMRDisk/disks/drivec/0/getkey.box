@@ -1,0 +1,204 @@
+(***********************************************************)
+(*                                                         *)
+(*                 TURBO-access version 1.00               *)
+(*                                                         *)
+(*                       GETKEY module                     *)
+(*                                                         *)
+(*                   Copyright (C) 1984 by                 *)
+(*                        BORLAND Int.                     *)
+(*                                                         *)
+(***********************************************************)
+
+(*$A+,R-,W3*)
+
+procedure NextKey(var IdxF       : IndexFile;
+                  var ProcDatRef : Integer;
+                  var ProcKey                );
+var
+  PKey   : TaKeyStr absolute ProcKey;
+  R      : Integer;
+  PagPtr : TaPagePtr;
+begin
+  with IdxF do
+  begin
+    if PP = 0 then
+      R := RR
+    else
+    with Path[PP] do
+    begin
+      TaGetPage(IdxF,PageRef,PagPtr);
+      R := PagPtr^.ItemArray[ItemArrIndex].PageRef;
+    end;
+    while R <> 0 do
+    begin
+      PP := PP + 1;
+      with Path[PP] do
+      begin
+        PageRef := R;
+        ItemArrIndex := 0;
+      end;
+      TaGetPage(IdxF,R,PagPtr);
+      R := PagPtr^.BckwPageRef;
+    end;
+    if PP <> 0 then
+    begin
+      while (PP > 1) and
+            (Path[PP].ItemArrIndex = PagPtr^.ItemsOnPage) do
+      begin
+        PP := PP - 1;
+        TaGetPage(IdxF,Path[PP].PageRef,PagPtr);
+      end;
+      if Path[PP].ItemArrIndex < PagPtr^.ItemsOnPage then
+        with Path[PP] do
+        begin
+          ItemArrIndex := ItemArrIndex + 1;
+          with PagPtr^.ItemArray[ItemArrIndex] do
+          begin
+            PKey := Key; ProcDatRef := DataRef;
+          end;
+        end
+      else PP := 0;
+    end;
+    OK := PP <> 0;
+  end;
+end;
+
+procedure PrevKey(var IdxF       : IndexFile;
+                  var ProcDatRef : Integer;
+                  var ProcKey                );
+var
+  PKey   : TaKeyStr absolute ProcKey;
+  R      : Integer;
+  PagPtr : TaPagePtr;
+begin
+  with IdxF do
+  begin
+    if PP = 0 then 
+      R := RR
+    else
+      with Path[PP] do
+      begin
+        TaGetPage(IdxF,PageRef,PagPtr); 
+        ItemArrIndex := ItemArrIndex - 1;
+        if ItemArrIndex = 0 then 
+          R := PagPtr^.BckwPageRef
+        else R := PagPtr^.ItemArray[ItemArrIndex].PageRef;
+      end;
+    while R <> 0 do
+    begin
+      TaGetPage(IdxF,R,PagPtr); 
+      PP := PP + 1;
+      with Path[PP] do
+      begin
+        PageRef := R; 
+        ItemArrIndex := PagPtr^.ItemsOnPage;
+      end;
+      with PagPtr^ do 
+        R := ItemArray[ItemsOnPage].PageRef;
+    end;
+    if PP <> 0 then
+    begin
+      while (PP > 1) and (Path[PP].ItemArrIndex = 0) do
+      begin
+        PP := PP - 1; 
+        TaGetPage(IdxF,Path[PP].PageRef,PagPtr);
+      end;
+      if Path[PP].ItemArrIndex > 0 then
+        with PagPtr^.ItemArray[Path[PP].ItemArrIndex] do
+        begin
+          PKey := Key; 
+          ProcDatRef := DataRef;
+        end
+      else PP := 0;
+    end;
+    OK := PP <> 0;
+  end;
+end;
+
+procedure TaFindKey(var IdxF       : IndexFile;
+                    var ProcDatRef : Integer;
+                    var ProcKey                );
+var
+  PKey    : TaKeyStr absolute ProcKey;
+  PrPgRef,
+  C,K,L,R : Integer;
+  RKey    : TaKeyStr;
+  PagPtr  : TaPagePtr;
+begin
+  with IdxF do
+  begin
+    TaXKey(PKey,KeyL); 
+    OK := false; 
+    PP := 0; 
+    PrPgRef := RR;
+    while (PrPgRef <> 0) and not OK do
+    begin
+      PP := PP + 1; 
+      Path[PP].PageRef := PrPgRef; 
+      TaGetPage(IdxF,PrPgRef,PagPtr);
+      with PagPtr^ do
+      begin
+        L := 1; 
+        R := ItemsOnPage;
+        repeat
+          K := (L + R) div 2;
+          C := TaCompKeys(PKey,
+                          ItemArray[K].Key,
+                          0,
+                          ItemArray[K].DataRef,
+                          AllowDuplKeys        );
+          if C <= 0 then 
+            R := K - 1;
+          if C >= 0 then 
+            L := K + 1;
+        until R < L;
+        if L - R > 1 then
+        begin
+          ProcDatRef := ItemArray[K].DataRef; 
+          R := K; 
+          OK := true;
+        end;
+        if R = 0 then 
+          PrPgRef := BckwPageRef
+        else PrPgRef := ItemArray[R].PageRef;
+      end;
+      Path[PP].ItemArrIndex := R;
+    end;
+    if not OK and (PP > 0) then
+    begin
+      while (PP > 1) and (Path[PP].ItemArrIndex = 0) do 
+        PP := PP - 1;
+      if Path[PP].ItemArrIndex = 0 then 
+        PP := 0;
+    end;
+  end;
+end;
+
+procedure FindKey(var IdxF       : IndexFile;
+                  var ProcDatRef : Integer;
+                  var ProcKey                );
+var
+  PKey    : TaKeyStr absolute ProcKey;
+  TempKey : TaKeyStr;
+begin
+  TaFindKey(IdxF,ProcDatRef,PKey);
+  if not OK and IdxF.AllowDuplKeys then
+  begin
+    TempKey := PKey; 
+    NextKey(IdxF,ProcDatRef,PKey);
+    OK := OK and (PKey = TempKey);
+  end;
+end;
+
+procedure SearchKey(var IdxF : IndexFile;
+                    var ProcDatRef : Integer;
+                    var ProcKey);
+var
+  PKey : TaKeyStr absolute ProcKey;
+begin
+  TaFindKey(IdxF,ProcDatRef,PKey);
+  if not OK then 
+    NextKey(IdxF,ProcDatRef,PKey);
+end;
+ 
+

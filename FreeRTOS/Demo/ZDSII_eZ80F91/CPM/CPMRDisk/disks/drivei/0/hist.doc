@@ -1,0 +1,329 @@
+                             -- HIST197.ASM --  
+
+  A CP/M memory-resident program to recall and edit previous commands.
+
+
+CONTENTS
+
+     Introduction
+     A note for CP/M 3.0 users
+     Tutorial
+     Warm Boot survival
+     Other changes
+     Save-CP/M-only option
+     List-device toggle
+     Slimming down the daemon
+     Emulating VAX/VMS
+     Details of changes
+          (1). Use the arrow keys
+          (2). Nondestructive backspace
+          (3). Cut down the buffer size
+          (4). Omit some comments
+          (5). Increase number of command lines saved
+          (6). Use one master buffer
+          (7). Insert/overstrike toggle
+     Reload command
+     Other corrections to version 1.9
+     Size of daemon loaded by HIST197.COM
+     Auto-load of HISTORY on cold boot
+     Difficulties
+
+INTRODUCTION
+
+     HISTORY is a "daemon" (under CP/M 2.2) or an RSX (under CP/M 3.0) 
+which can recall the last 9 command lines for editing and/or replay.  
+The standard editing commands resemble those of WordStar.  You can 
+flip forward or backward through the saved commands or you can get a 
+numbered screen display of all of them, for recall of any one.  
+Multiple commands on one line are allowed.  The public-domain utility 
+EX.COM (usually called EX14 or EX15) is supported.  HISTORY.LBR was 
+written by Stuart Rose, co-sysop of Starling CP/M+ RCPM [(416) 624-
+4935, 300/1200/2400]; version 1.9 was released to the public domain in 
+December 1986.  
+
+     HIST197 is a variant of version 1.9 which occupies less space, 
+yet can recall up to 23 commands.  It offers close emulation of 
+VAX/VMS 4.x; for example, the arrow keys are enabled for cursor 
+movement (left or right) and for flipping forward or backward (down or 
+up).  Additional features provided by HIST197 for CP/M 2.2 users 
+include implementation of CP/M's CTRL-P toggle for printer on/off, and 
+a choice between saving all commands or only those directed to CP/M 
+(CTRL-O toggle).  
+
+     The HIST197.COM file in this library is set up for CP/M 2.2 and 
+Kaypro II arrow keycodes.  (Other arrow keycodes can be substituted -- 
+patch locations are given below.)  To save space in the daemon, 
+multiple commands on one line and certain editing commands were 
+omitted.  These can be restored easily by making minor changes in the 
+source program, HIST197.ASM, reassembling, and loading (ASM.COM and 
+LOAD.COM can do the job).
+
+     The rest of this document explains the rationale and 
+implementation of the new features.  All are optional, selected at 
+assembly time by logical switches grouped near the beginning of the 
+source program.  
+
+A NOTE FOR CP/M 3.0 USERS
+
+     HIST197.ASM includes an assembly-time switch for CP/M 3.0, but 
+HIST197.LBR contains no .COM file for CP/M 3.0 because I lack the 
+software to produce one.  Interested 3.0 users should follow the 
+directions in HIST30.RMF (included in HISTORY.LBR); you will need 
+other program modules contained in HISTORY.LBR.  
+
+     Be careful: some of the methods adopted in HIST197 that are 
+appropriate for CP/M 2.2 may not work with 3.0 (e.g., the save-only-
+CP/M option).  Other options may not be intrinsically incompatible, 
+but with my ignorance of CP/M 3.0 I don't know how to incorporate them 
+correctly.  In particular, I suspect that the setup for the CTRL-P 
+toggle and the one-master-buffer (i.e., the modified code between 
+"gotone:" and "iniend:") will cause problems because this section of 
+the version 1.9 source program is totally omitted when CPM3 equ YES.  
+
+TUTORIAL
+
+     This brief set of instructions for HIST197.COM will help CP/M 
+2.2 users without access to the rather thorough manual included in 
+HISTORY.LBR.  It also tells how to use the new features.  
+
+     Load the daemon by typing HIST197 (with the appropriate disk 
+drive prefix).  Give a few commands to CP/M for a trial.  Now recall 
+your last command with the up arrow (or ^W).  You can keep recalling 
+earlier commands this way up to a maximum of 23.  Go back down the 
+list with the down arrow (or ^Z).  With a single ! command, you can 
+see all of your previous commands, at least as many (23) as will fit 
+on a Kaypro II screen.  The commands are "numbered"; if you want to 
+recall number n, type !n.  
+
+     So now you have a previous command line at your disposal.  To 
+replay it, just press RETURN.  If you want to change some characters 
+before replay, use the left arrow (or ^S) or the right arrow (or ^D) 
+to move the cursor.  ^B takes the cursor to the beginning of the line.  
+Then you can overstrike with the correct character(s).  You can toggle 
+between overstrike mode and insert mode with ^A (or ^V).  To delete 
+the character at the cursor, type ^G.  To get rid of the one to the 
+left of the cursor, use the DEL key.  You can also overstrike with 
+spaces between whole words of a command -- CP/M won't mind the spaces.  
+
+     The standard CP/M printer on/off toggle, ^P, works just as it 
+does in CP/M.  
+  
+     Normally the daemon saves only commands to CP/M.  To enable 
+recall of your responses to an applications program as well, type ^O 
+(even in the middle of a response); type ^O again to toggle back to 
+saving CP/M commands only.   
+
+     When you need to recover the memory space that the daemon and the 
+CCP occupy, you can unload the daemon by typing HIST197 u (or any 
+character, even a space, beyond the 7).  If you type HIST197 when the 
+daemon is still loaded, it will reload the daemon and wipe out all of 
+your saved commands.  (If you do this be sure to give ^C as your first 
+command -- there's a bug lurking here that hasn't been squashed.)  
+
+WARM BOOT SURVIVAL
+
+     When I first tried HIST22.COM (the CP/M 2.2 version of HISTORY 
+1.9) in my Kaypro II '83, the daemon seemed to work perfectly -- that 
+is, until the first Warm Boot, when it disappeared.  I soon discovered 
+what was wrong.  To protect the daemon from being lost on Warm Boot, 
+HIST22.COM is supposed to change the BDOS vector in the BIOS to point 
+to the entry point of the daemon rather than of the true BDOS.  To 
+find this vector, HIST22 does a three-byte search through the BIOS 
+looking for "jmp BDOS".  
+
+     In my computer this fails because the Kaypro II BIOS has instead 
+"lxi H,BDOS".  Since this is the only place the BDOS vector appears in 
+the BIOS, it can be found uniquely by a two-byte search on the BDOS 
+vector alone.  This fix is incorporated in HIST197.ASM; the daemon now 
+survives Warm Boot.  Presumably this will work with the BIOS of other 
+CP/M 2.2 machines; you will find out soon enough.  
+
+OTHER CHANGES
+
+     To suit my special needs and to correct a few problems, I have 
+made a number of other changes to HISTORY.ASM which are detailed 
+below.  Most of them are included or omitted at assembly time by IF 
+tests on logical switches.  A few changes are modifications of certain 
+equates; the original equates remain in the program as comments.  All 
+my changes are flagged by **MLH or ++MLH comments in HIST197.ASM.  
+(Those labeled ++ pertain to the one-master-buffer option described 
+below.)  Thus, some or all of the features of version 1.9 can be 
+recovered easily.  
+ 
+     These revisions work with my Kaypro II '83 version of CP/M 2.2.  
+They have not been tried with other versions or with CP/M 3.0.  
+
+SAVE-CP/M-ONLY OPTION
+
+     HISTORY remembers not only lines typed in as commands to the CP/M 
+operating system, but also those typed as responses to any 
+applications programs invoking the BDOS 10 service.  This may be 
+regarded as a feature or an annoyance.  It's a good feature if typical 
+responses are lengthy and similar to earlier ones so that recall and 
+editing will be useful.  It's an annoyance if the responses are brief 
+and numerous so that the HISTORY buffers fill up with responses that 
+aren't worth recalling, and thereby replace useful material with junk.  
+
+     HIST197.ASM incorporates optional extra code (if C10$A10 equ 
+TRUE) that prevents the daemon from saving responses within 
+applications programs.  The user can toggle between the save-all or 
+save-only-CP/M modes, even in the middle of a command, by typing CTRL-
+O.  The daemon distinguishes CP/M calls to BDOS from applications 
+calls by the return address on the stack -- if it exceeds the start of 
+the CCP, the call came from CP/M.  
+
+     This method will not work with CP/M 3.0 since its CCP starts at 
+the same address as transient programs.  HIST197.ASM therefore 
+requires also CPM3 equ NO for this code to be included.  
+
+LIST-DEVICE TOGGLE
+
+     Version 1.9 of HISTORY does not respond to the usual CTRL-P 
+command of CP/M to turn the list device (printer) on or off.  
+If assembled with LTOG equ TRUE (and CPM3 equ NO), HIST197 searches 
+the BDOS to find the location of the list toggle and includes code to 
+flip it on CTRL-P.  The method is explained in a comment at the front 
+of HIST197.ASM; you may have to change the code to suit your BDOS.  
+Some protection is included against variants in the BDOS code: the 
+candidate for list toggle is tested to see if it is 00 or 01, the only 
+legal possibilities.  If the list toggle cannot be found, you get a 
+warning message and the daemon ignores CTRL-P.  
+
+SLIMMING DOWN THE DAEMON
+
+     The version 1.9 daemon is terminal-independent and includes a 
+very powerful set of editing commands.  This generality comes at some 
+cost in memory space: the daemon loaded by HIST22.COM occupies 3349 
+bytes below the CCP (which itself takes up at least 2048 bytes); with 
+various corrections mentioned below, the daemon takes up 3383 bytes.  
+Neither the daemon nor the CCP can be overwritten (in CP/M 2.2), so 
+there is a substantial loss of space for applications programs.  I 
+felt it would be desirable to slim down the daemon, even at the 
+expense of omitting some features.  
+
+EMULATING VAX/VMS
+
+     Another aim was to make HISTORY emulate the particular recall and 
+edit features of VAX/VMS 4.x that I regularly use.  For example, I 
+wanted the arrow keys on my Kaypro to function exactly as they do on 
+my VAX terminal.  Since the arrow keys on both machines repeat when 
+held down (unlike the CTRL key), I find it easy to do all cursor 
+movement with the arrow keys.  Thus I can save space in the daemon by 
+omitting some editing commands.  
+
+DETAILS OF CHANGES
+
+(1). Use the arrow keys
+
+     The HIST197 daemon recognizes a second set of keycodes for 
+previous command, next command, character left, and character right in 
+addition to the keycodes (^W, ^Z, ^S, ^D) already built into version 
+1.9.  This second set is equated to my Kaypro's keycodes for up, down, 
+left, and right arrow, namely ^K, ^J, ^H, and ^L.  (If one set of 
+keycodes is all you need, you can make the daemon 20 bytes shorter by 
+commenting out the second set of tests.)  
+
+     Note that ^K and ^J are normally assigned to DELCEL1 and DELCBW1, 
+which invoke delete operations.  I don't use these commands; if you 
+want to include them and still retain the Kaypro arrow keycodes, you 
+must equate DELCEL1 and DELCBW1 to other keycodes.  
+
+     If your arrow keys generate codes different from the Kaypro's, 
+you should equate your keycodes for up, down, left, right to PC$CHR2, 
+NC$CHR2, CL$CHR2, and CR$CHR2, respectively, before you assemble.  
+Alternately, you can patch the HIST197.COM supplied in this library; 
+the locations are, respectively, 058Eh, 0598h, 0570h, 057Ah.  
+
+(2). Nondestructive backspace
+
+     HISTORY 1.9 interprets ^H (BS key) as a destructive backspace.  I 
+don't want the daemon to make a destructive backspace when the 
+Kaypro's left arrow (^H) is pressed, so in HIST197.ASM the lines "cpi 
+DELCC1" and the following jz instruction are commented out.  The DEL 
+key is still available to do destructive backspacing when needed.  
+
+(3). Cut down the size of the fixed-length buffers
+
+     In my first attempt to save space (version 1.95), I reduced 
+HISTSIZ from 128 to 32 and saved 970 bytes.  For me this was fairly 
+painless -- 31 characters for a command line is usually plenty.  (The 
+32nd byte is occupied by the end-of-string character, EOS.)  Commands 
+longer than 31 characters are still executed properly, but only the 
+first 31 characters are saved.  
+
+     This method of saving space in the daemon pertains only to fixed-
+length buffers (ONEBUF equ FALSE).  See item (6) below for a 
+preferable alternative method of reducing the space alloted for saving 
+command lines.    
+
+(4). Omit some commands
+
+     If SLIM equ TRUE, the code for move word left/right, delete to 
+beginning of word, move/delete to end of line, and delete line is 
+omitted.  This saves 349 bytes.  Delete to beginning of line (CTRL-U 
+or CTRL-X) is retained because the code it calls is needed for other 
+purposes.  Move to beginning of line (CTRL-B) is useful and occurs in 
+VAX/VMS 4.x; since it costs only 14 bytes, it too has been kept.  
+
+     Setting MULTCOM equ FALSE before assembly saves 195 bytes; this 
+omits code for handling multiple commands on one line.  
+
+(5). Increase number of command lines saved
+
+     On the other hand, I was quite willing to give up some of the 
+savings in exchange for an increase in the number of commands saved.  
+VAX/VMS 4.x can recall up to 20, and at times I find that even that 
+isn't enough.  With the options BUFF23 equ TRUE _and_ ONEBUF equ 
+FALSE, HIST197 reserves 23 history buffers for recalling up to 23 
+command lines, the maximum that will fit on my screen.  This costs 448 
+additional bytes if the buffer size is 32.  
+
+     The recall command "!" now gives an odd-looking list of previous 
+commands "numbered" 1 2 3 4 5 6 7 8 9 : ; < = > ? A B C D E F G, but 
+there is no problem in recalling any of them by using the appropriate 
+symbol after the "!".  (If you can do without the recall feature and 
+want to shorten the daemon by 121 bytes, set INCLREC equ FALSE.)  
+
+(6). Use one master buffer
+
+     If ONEBUF equ TRUE, the assembler implements a more efficient 
+method of saving commands.  This option in HIST197.ASM allows the 
+daemon to save up to 23 command lines without truncation, yet the 
+daemon ends up 441 bytes smaller.  In this method, successive command 
+lines are concatenated into one master buffer, separated by EOS 
+markers.  This master buffer occupies much less space than an array of 
+fixed-length buffers since each of the latter must be large enough to 
+hold the occasional long command line.  Stuart wrote the code for 
+handling EOS markers into version 1.9 with this possibility in mind; 
+my efforts benefitted greatly from his foresight.  
+
+     Another advantage over fixed-length buffers is that extra-long 
+commands are saved without truncation.  Of course, if you give a lot 
+of extra-long commands, there may not be enough room in the master 
+buffer to save all 23 of them.  The default size of the master buffer 
+is 256 bytes, sufficient to hold 23 commands averaging a bit more than 
+10 characters each (plus EOS).  The master buffer size may be changed 
+by modifying the equate for MBUFSIZ before assembly.  
+
+(7). Insert/overstrike toggle
+
+     To emulate VAX/VMS in another respect, the insert/overstrike 
+toggle is reset to the default value before each command is processed.  
+This way I never get a surprise when I start editing a command line.  
+My default setting is overstrike, as in VAX/VMS; that is what I need 
+about 70% of the time.  
+
+     I added a second keycode, CTRL-A, to flip this toggle because 
+it is used in VAX/VMS and I found that out of habit I was often giving 
+CTRL-A instead of HISTORY's CTRL-V.  If the command for word-left 
+movement is active (also CTRL-A), it will take priority.  Should you 
+want both the move-word-left command and the additional 
+insert/overstrike toggle command to be active, you will have to assign 
+them different keycodes.  
+
+RELOAD COMMAND
+
+     HISTORY includes commands to load, unload, and reload the daemon.  
+I found that HIST22 (incorporating the fix for survival on Warm Boot) 
+is unable to reload itself because it is mistakenly looking for the 
+_true_ BDOS vector in the BIOS, which was c

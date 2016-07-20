@@ -17,12 +17,12 @@
       <useAdlMode>false</useAdlMode>
    </ControlReg>
    <ExtFlash>
-      <device />
+      <device>Am29LV008BB</device>
       <externalAddress>100000</externalAddress>
       <externalAutoSelect>true</externalAutoSelect>
       <externalRamLower>B80000</externalRamLower>
       <externalRamUpper>BFFFFF</externalRamUpper>
-      <manufacturer />
+      <manufacturer>AMD</manufacturer>
       <units>1</units>
       <usingExternal>false</usingExternal>
       <usingInternal>true</usingInternal>
@@ -44,7 +44,7 @@
          <CS2>
             <busMode>2</busMode>
             <controlRegister>28</controlRegister>
-            <lower>B8</lower>
+            <lower>80</lower>
             <upper>BF</upper>
          </CS2>
          <CS3>

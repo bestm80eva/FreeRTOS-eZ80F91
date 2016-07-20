@@ -210,10 +210,11 @@ int main( void )
 
 #if INCLUDE_LED5x7	== 1
 	initLED5x7();
-	res = xTaskCreate( TaskLED, "TaskLED", configMINIMAL_STACK_SIZE, (void *)portMAX_DELAY, PRIO_LED5x7, NULL);
+	res = xTaskCreate( TaskLED, "TaskLED", configMINIMAL_STACK_SIZE, (void *)portMAX_DELAY, PRIO_LED, NULL);
 #endif
 
 #ifdef CPM22 
+	memset(cpmmem,0,sizeof(cpmmem));
 	res = xTaskCreate( prvTCPCpmIOTask, "CPMIO", configMINIMAL_STACK_SIZE*2, (void*)cpmmem, PRIO_CPMIO, NULL);
 #endif
 

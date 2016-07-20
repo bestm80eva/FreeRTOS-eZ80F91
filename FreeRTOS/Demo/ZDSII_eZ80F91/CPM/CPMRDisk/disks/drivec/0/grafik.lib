@@ -1,0 +1,181 @@
+
+{ Grafik.lib - V1.0 / April 1986 }
+
+
+type    kommentar       = string (.80.);
+
+var     xscalefaktor    : real;
+        xscaleoffset    : real;
+        yscalefaktor    : real;
+        yscaleoffset    : real;
+        xaufloesung     : real;
+        yaufloesung     : real;
+        xmax,xmin       : real;
+        ymax,ymin       : real;
+        xnull,ynull     : real;
+        teilung         : real;
+        xwoffset        : integer;
+        ywoffset        : integer;
+        laenge,nachkomma: integer;
+        stift           : byte;
+        daten           : array (.1..6.) of byte;
+        benennung       : array (.1..6.) of kommentar;
+        ueberschrift    : kommentar;
+
+const   esc                 = #27;
+
+        televideomodus      = #27#27#65;
+        tektronixmodus      = #27#27#84;
+        tektronixalphamodus = #31;
+
+        vektormodus1        = #29#;
+        vektormodus2        = #29#7;
+        hardcopy            = #27#27#72;
+        zeichnen            = #19;
+        loeschen            = #17;
+        xgmax               = 512;
+        xgmin               = 0;
+        ygmax               = 256;
+        ygmin               = 0;
+        hyoffset            = 32;
+        hxoffset            = 32;
+        lyoffset            = 96;
+        lxoffset            = 64;
+
+
+procedure koordinaten (xwert,ywert:integer);
+ var     hx,lx,hy,ly : char;
+  begin
+    xwert := xwert+xwoffset;
+    ywert := ywert+ywoffset;
+    hx := chr(trunc(xwert/32)+hxoffset);
+    lx := chr(xwert-(trunc(xwert/32)*32)+lxoffset);
+    hy := chr(trunc(ywert/32)+hyoffset);
+    ly := chr(ywert-(trunc(ywert/32)*32)+lyoffset);
+    write (hy,ly,hx,lx)
+  end;
+
+
+procedure drucker(art:byte);
+  begin
+    art:=(art mod 2)+1;
+    case art of
+      1: write(esc,esc,'h','0'); { Epson FX-80 }
+      2: write(esc,esc,'h','1');
+      3: write(esc,esc,'h','2');
+    end
+  end;
+
+
+procedure linie (nummer : byte);
+  begin
+    nummer := (nummer mod 5)+1;
+      write (esc,'d');
+  end;
+
+
+procedure alpha;
+  begin
+    writeln (tektronixalphamodus);
+    writeln (televideomodus);
+    clrscr;
+  end;
+
+
+procedure pen (zustand : byte);
+  begin
+    stift := zustand mod 2;
+    case stift of
+      0 : write (loeschen);
+      1 : write (zeichnen);
+    end
+  end;
+
+
+procedure text (zeichenkette:kommentar);
+  begin
+    write(tektronixalphamodus);
+    write(zeichenkette);
+    write(vektormodus1)
+  end;
+
+
+procedure dump;
+  begin
+    write (hardcopy)
+  end;
+
+
+procedure scale (xzmin,xzmax,yzmin,yzmax : real);
+  begin
+    xmin := xzmin;
+    xmax := xzmax;
+    ymin := yzmin;
+    ymax := yzmax;
+    xscalefaktor := xaufloesung/(xzmax-yzmin);
+    xscaleoffset := xzmin*(-1);
+    yscalefaktor := yaufloesung/(yzmax-yzmin);
+    yscaleoffset := yzmin*(-1)
+  end;
+
+
+procedure window (xwmin,xwmax,ywmin,ywmax : real);
+  begin
+    xaufloesung := (xwmax-xwmin)*xgmax/100;
+    xwoffset    := trunc(xwmin*xgmax/100);
+    yaufloesung := (ywmax-ywmin)*ygmax/100;
+    ywoffset    := trunc(ywmin*ygmax/100);
+    scale(0,100,0,100)
+  end;
+
+
+procedure draw (xkoordinate,ykoordinate : real);
+  var xwert,ywert : integer;
+  begin
+    xwert := trunc((xkoordinate+xscaleoffset)*xscalefaktor);
+    ywert := trunc((ykoordinate+yscaleoffset)*yscalefaktor);
+    if xwert < xgmin then xwert := xgmin;
+    if xwert > xgmax then xwert := xgmax;
+    if ywert < ygmin then ywert := ygmin;
+    if ywert > ygmax then ywert := ygmax;
+    koordinaten (xwert,ywert)
+  end;
+
+
+procedure move (xkoordinate,ykoordinate : real);
+  begin
+    write(vektormodus1);
+    draw(xkoordinate,ykoordinate);
+    pen(stift);
+  end;
+
+
+procedure box (ex1,ey1,ex2,ey2 : real);
+  begin
+    move(ex1,ey1);
+    draw(ex1,ey2);
+    draw(ex2,ey2);
+    draw(ex2,ey1);
+    draw(ex1,ey1)
+  end;
+
+
+procedure grafik;
+  begin
+    write(tektronixmodus);
+    write(vektormodus1);
+    koordinaten(0,0);
+    pen(1);
+    linie(1);
+    window(0,100,0,100);
+    box(0,0,100,100)
+  end;
+
+
+procedure clear;
+  begin
+    alpha;
+    delay(1000);
+    grafik
+  end;
+

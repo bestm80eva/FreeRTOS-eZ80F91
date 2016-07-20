@@ -97,7 +97,6 @@
 #ifdef INCLUDE_LED5x7
 #include "task.h"
 #include "queue.h"
-#include "timers.h"
 #include "semphr.h"	
 #include "ez80_leds.h"
 
@@ -118,7 +117,8 @@
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-static TimerHandle_t ledtimer;
+static SemaphoreHandle_t semsync;
+
 
 /* 5x7 LED matrix character glyphs.  Each glyph consists of 7 bytes, one
  * each row and each containing 5 bits of data, one for each column
@@ -226,7 +226,6 @@ static const CHAR cmatrix[96][7] = {			 // hex- ascii
 static volatile CHAR *currglyph;
 
 static UINT8  frames;	// display refresch delay 
-static UINT8  shift;	// delay between shifts
 static UINT16 chardly;	// delay between letters
 
 /* Display character queue	*/
@@ -315,7 +314,7 @@ static void nextDisplay(void)
 {
 	UCHAR c;
 	
-	if(pdFALSE == xQueueReceive( xLED5x7Queue, &c, shift))
+	if(pdFALSE == xQueueReceive( xLED5x7Queue, &c, 100))
 		c = 0x5F;
 	
 	c &= 0x7F;
@@ -333,30 +332,32 @@ static void nextDisplay(void)
  * Name: LEDTick
  * Timer procedure to display all scan-lines 
  ****************************************************************************/
-void	LEDTick(TimerHandle_t thdl)
+void vApplicationTickHook( )
+//void LEDTick()
 {
-	static uint8_t row=7;
-	uint8_t tmp = CS2_LBR;
-	
-	row--;
-	
-	portENTER_CRITICAL();
-	CS2_LBR = 0x80;
-	LEDMATRIX_ANODE   = (1 << row);	// enable row
+	static int shiftdly = LED5x7_SHIFTT / 7;
+	static uint8_t row=6;
+	static const uint8_t col[7] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40};
+		
 	LEDMATRIX_CATHODE = 0x1F & dply[row].c[1]; 	// set row image
-	CS2_LBR = tmp;
-	portEXIT_CRITICAL();
+	LEDMATRIX_ANODE   = col[row];	// enable row
 	
-	if(!row)
-		row = 7;
-	
+	if(!row--)
+	{
+		row = 6;
+		if(!shiftdly--)
+		{
+			shiftdly = LED5x7_SHIFTT / 7;
+			xSemaphoreGiveFromISR ( semsync,pdFALSE);	
+		}
+	}
 }
 
 /****************************************************************************
  * Name: LED5x7Task
  * Task handle the 5x7 LED Matrix
  ****************************************************************************/
-static void LED5x7Task( void *x)
+static void LED5x7Task( void *arg)
 {
 	int i;
 	
@@ -366,10 +367,9 @@ static void LED5x7Task( void *x)
 		vTaskDelay(chardly);	// delay between chars
 		for(i = 0; i < 6; i++)
 		{
+			xSemaphoreTake( semsync, portMAX_DELAY );
 			shiftDisplay();		// shift in the new char image
-			vTaskDelay(shift);	// shift speed delay				
 		}
-		
 	}
 }
 /****************************************************************************
@@ -412,18 +412,22 @@ BaseType_t LED5x7_putchar(CHAR c, TickType_t tout)
 static int tid;
 void initLED5x7()
 {
-
 	currglyph  	= cmatrix[95];
 	frames		= LED5x7_FRAMES;	// display refresch delay 
-	shift		= LED5x7_SHIFTT;	// LED5x7_FRAMES delays between shifts
 	chardly		= LED5x7_CDELAY;	// LED5x7_FRAMES deleys between letters
 	dir			= SHIFT_LEFT;
 	memset(dply,0xFF,sizeof(dply));
 	
-	xLED5x7Queue= xQueueCreate( LED5x7_QUEUES, sizeof( CHAR));
-	xTaskCreate( LED5x7Task, "LED5x7", configMINIMAL_STACK_SIZE, NULL,PRIO_LED, &ledtimer);
-	ledtimer = xTimerCreate("LED5x7Timer", LED5x7_FRAMES, pdTRUE, &tid, LEDTick);
-	xTimerStart(ledtimer,0);
+	semsync = xSemaphoreCreateBinary();
+	if(semsync)
+	{
+		xLED5x7Queue= xQueueCreate( LED5x7_QUEUES, sizeof( CHAR));
+		xTaskCreate( LED5x7Task, "LED5x7", configMINIMAL_STACK_SIZE, NULL,PRIO_LED5x7, 0);
+	}
+	else
+	{
+		//ToDo: handle error
+	}
 }
 
 /* set shift direction */

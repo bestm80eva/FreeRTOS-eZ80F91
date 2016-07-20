@@ -202,7 +202,7 @@ long uxRand( void )
 
 
 #if defined(MIXEDMODE) 
-#include "CPM2.2/exbios.h"
+#include "CPM/exbios.h"
 
 //void netdump(const char *msg);
 	
