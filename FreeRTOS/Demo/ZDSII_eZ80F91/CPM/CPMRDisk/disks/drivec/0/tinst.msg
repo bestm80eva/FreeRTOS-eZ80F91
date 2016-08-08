@@ -1,14 +1,14 @@
 1                  TURBO Pascal installation menu.
 2           Choose installation item from the following:
-
-3 [S]creen installation   |   [C]ommand installation   |   [Q]uit
-
-4                        Enter S, C, or Q: 
+3 
+4 [S]creen installation   |   [C]ommand installation   |   [Q]uit
+5 
+6                        Enter S, C, or Q:
 10 Duplicate definition. Error occurred between question
 11 Commands starting with the same letter must have the same length.
    Error occurred between question
 12 The total maximum length of commands are execeeded
-13  -> 
+13  ->
 
 
 14 CURSOR MOVEMENTS:
@@ -118,4 +118,6 @@
  Is this definition correct?
                      Hardware dependent information
  Operating frequency of your microprocessor in MHz (for delays):
-
+pendent information
+ Operating frequency of your microprocessor in MHz (for delays):
+

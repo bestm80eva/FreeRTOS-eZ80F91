@@ -1,3 +1,95 @@
+/*
+    FreeRTOS - Copyright (C) 2016 Real Time Engineers Ltd.
+    All rights reserved
+
+    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
+   
+    FreeRTOS is free software; you can redistribute it and/or modify it under
+    the terms of the GNU General Public License (version 2) as published by the
+    Free Software Foundation >>>> AND MODIFIED BY <<<< the FreeRTOS exception.
+
+    ***************************************************************************
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+    ***************************************************************************
+
+    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  Full license text is available on the following
+    link: http://www.freertos.org/a00114.html
+
+    ***************************************************************************
+     *                                                                       *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that is more than just the market leader, it     *
+     *    is the industry's de facto standard.                               *
+     *                                                                       *
+     *    Help yourself get started quickly while simultaneously helping     *
+     *    to support the FreeRTOS project by purchasing a FreeRTOS           *
+     *    tutorial book, reference manual, or both:                          *
+     *    http://www.FreeRTOS.org/Documentation                              *
+     *                                                                       *
+    ***************************************************************************
+
+    http://www.FreeRTOS.org/FAQHelp.html - Having a problem?  Start by reading
+    the FAQ page "My application does not run, what could be wrong?".  Have you
+    defined configASSERT()?
+
+    http://www.FreeRTOS.org/support - In return for receiving this top quality
+    embedded software for free we request you assist our global community by
+    participating in the support forum.
+
+    http://www.FreeRTOS.org/training - Investing in training allows your team to
+    be as productive as possible as early as possible.  Now you can receive
+    FreeRTOS training directly from Richard Barry, CEO of Real Time Engineers
+    Ltd, and the world's leading authority on the world's leading RTOS.
+
+    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
+    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
+    compatible FAT file system, and our tiny thread aware UDP/IP stack.
+
+    http://www.FreeRTOS.org/labs - Where new FreeRTOS products go to incubate.
+    Come and try FreeRTOS+TCP, our new open source TCP/IP stack for FreeRTOS.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd. license FreeRTOS to High
+    Integrity Systems ltd. to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and commercial middleware.
+
+    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
+    engineered and independently SIL3 certified version for use in safety and
+    mission critical applications that require provable dependability.
+
+    1 tab == 4 spaces!
+*/
+
+
+/*
+	FreeRTOS eZ80F91 Acclaim! Port - Copyright (C) 2016 by NadiSoft
+    All rights reserved
+
+	This file is part of the FreeRTOS port for ZiLOG's EZ80F91 Module.
+    Copyright (C) 2016 by Juergen Sievers <JSievers@NadiSoft.de>
+	The Port was made and rudimentary tested on ZiLOG's
+	EZ80F910300ZCOG Developer Kit using ZDSII Acclaim 5.2.1 Developer
+	Environmen and comes WITHOUT ANY WARRANTY to you!
+	
+	
+	File: 	exbios.c
+			extended CBIOS (CP/M 2.2 BIOS) to support CP/M 2.2 tasks
+			Part of FreeRTOS Port for the eZ80F91 Development Kit eZ80F910300ZCOG
+			See www.zilog.com for desciption.
+
+
+	Developer:
+	JSIE	 Juergen Sievers <JSievers@NadiSoft.de>
+
+	150804:	JSIE Start this port.
+	
+*/
+
 #if defined(MIXEDMODE) 
 #if defined(CPM22)
 
@@ -15,17 +107,18 @@
 
 #include "stdint.h"
 #include "exbios.h"
-#include "CPMRDisk/src/interface.h"
+#include "QtCPMRDrive/cpmrdsk.h"
 
 #include <string.h>
 
+// CP/M 2.2 console in queue
 static QueueHandle_t cpminq;
+
 static Socket_t xConnectedSocket = (Socket_t)-1;
 
 static const char pcWelcomeMessage[] = "\n\rEZ80F91 CP/M 2.2 Console " VERSION "\n\r";
 			
 static TaskHandle_t thcpm;
-static req_mount_t	*drive[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static Socket_t xSocketRDisk;
 static struct freertos_sockaddr xRDiskAddress;
 
@@ -180,27 +273,40 @@ void z80BiosConsoleIO(trapargs_t *reg)
 		};
 }
 
-static BaseType_t doRDiskReq(pkt_t *req, pkt_t *rsp)
+static hdr_t *doRDiskReq(hdr_t *req)
 {
 	uint32_t io ;
-	uint16_t rsplen = rsp->hdr.RDSK_Length;
-	BaseType_t res = pdFAIL;
-		
-	req->hdr.RDSK_Sequenz = sequenz++;
-	io = FreeRTOS_sendto( xSocketRDisk, req, req->hdr.RDSK_Length, 0, &xRDiskAddress, sizeof(xRDiskAddress));
-	if(io == req->hdr.RDSK_Length)
+	
+	hdr_t	*rsp = 0;
+	pdutype_t cmd = req->cmdid | RDSK_Response;
+	
+	req->seqnz = sequenz;
+	io = FreeRTOS_sendto( xSocketRDisk, req, req->pdusz, 0, &xRDiskAddress, sizeof(xRDiskAddress));
+
+	if(io == req->pdusz)
 	{
 		struct freertos_sockaddr xFrom;
 		socklen_t xFromLength;
 		xFromLength = sizeof(xFrom);
+		
 		do {
-			io = FreeRTOS_recvfrom( xSocketRDisk, rsp, rsplen, 0, &xFrom, &xFromLength );
+			io = FreeRTOS_recvfrom( xSocketRDisk, &rsp, 0, FREERTOS_ZERO_COPY, &xFrom, &xFromLength );
 		} while( io == -pdFREERTOS_ERRNO_EWOULDBLOCK);
 		
-		if(rsp->hdr.RDSK_Sequenz == sequenz && io == rsplen && rsp->hdr.RDSK_Length == rsplen)
-			res = pdPASS;
+		if(	io >= sizeof(hdr_t) && 
+			io == rsp->pdusz && 
+			rsp->seqnz == (uint16_t) ~sequenz && 
+			(pdutype_t)(rsp->cmdid & ~RDSK_ErrorFlag) == cmd)
+		{
+			sequenz++;
+		}
+		else
+		{
+			FreeRTOS_ReleaseUDPPayloadBuffer( ( void * ) rsp);
+			rsp = 0;
+		}
 	}
-	return res;
+	return rsp;
 }
 
 static void z80BiosDiskIO(trapargs_t *reg)
@@ -234,72 +340,68 @@ static void z80BiosDiskIO(trapargs_t *reg)
 				curdisk = -1;	// invalidate current drive
 				curFDCST = 0xFF;
 			
+				// disk id in range?
 				if(c < 4 || c == 8 || c == 9)
 				{
-					if(!drive[c])	// if not already logged in
+					uint16_t sz;
+					mountreq_t *req;
+					
+					// if disk parameters given
+					if(reg->hl)
 					{
-						req_mount_t *req;
-						
-						// get disk parameters
-						if(reg->hl)
-						{
-							dph_t *dph = (dph_t*) ((reg->hl & 0xFFFF) | (reg->mbase << 16));
-							dpb = (dpb_t*) (dph->dpb | (reg->mbase << 16));
-							xlt = (uint8_t*) (dph->xlt ? (dph->xlt | (reg->mbase << 16)) : 0);
-						}		
-						else {
-							dpb = &defdpb;
-							xlt = defxlt;
-						}
-						
-						// create dist parameter structure
-						req = pvPortMalloc( sizeof(req_mount_t) + dpb->spt);
-						
-						if(req)
-						{
-							int i;
-							req->hdr.RDSK_Code = RDSK_CmdMount;
-							req->hdr.RDSK_Length = sizeof(req_mount_t) + dpb->spt;
-							req->hdr.RDSK_Drive  = c;
-							memcpy(&req->RDSK_Dpb, dpb, sizeof(dpb_t));	// save Disk Parameter Block
-							
-							// append sector translation table	
-							for( i = 0; i < dpb->spt; i++)
-								*(&req->RDSK_Map+i) = xlt ? xlt[i] : i+1;
-							
-							drive[c] = req;
-						}
+						// then setup disk parameters
+						dph_t *dph = (dph_t*) ((reg->hl & 0xFFFF) | (reg->mbase << 16));
+						dpb = (dpb_t*) (dph->dpb | (reg->mbase << 16));
+						xlt = (uint8_t*) (dph->xlt ? (dph->xlt | (reg->mbase << 16)) : 0);
+					}		
+					else {
+						// else use IBM 8" default disk
+						dpb = &defdpb;
+						xlt = defxlt;
 					}
 					
-					if(drive[c])
+					
+					sz = sizeof(mountreq_t) + dpb->spt * sizeof(uint8_t);
+					req = pvPortMalloc(sz);
+					
+					if(req)
 					{
-						rsp_mount_t rsp;
+						int i;
+						uint8_t *_xlt = &req->xlt;
+						hdr_t *rsp;
 						
-						drive[c]->RDSK_Flg = 0;			// read/write
-						rsp.hdr.RDSK_Length = sizeof(rsp_mount_t);
-
+						req->hdr.pdusz = sz;					// size of this request
+						req->hdr.cmdid = RDSK_MountRequest;		// request type
+						req->hdr.devid = c;						// drive id 0=A, 1=B ...
+						memcpy(&req->dpb, dpb, sizeof(dpb_t));	// save Disk Parameter Block
+						snprintf((char*)req->diskid,13U,"drive%c.cpm",'a' + c); // default name
+						req->mode = LINEAR;						// No sector demapping
+						req->secsz = SECSIZE;					// CP/M 128 sector size
+													
+						// append sector translation table	
+						for( i = 0; i < dpb->spt; i++)
+							_xlt[i] = xlt ? xlt[i] : i+1;
+										
 						// Request from server	
-						if(pdPASS == doRDiskReq((pkt_t*)drive[c],(pkt_t*)&rsp))
+						rsp = doRDiskReq((hdr_t*)req);
+						if( rsp )
 						{
-							// OK, save the disk parameters
-							drive[c]->RDSK_Flg = rsp.RDSK_Flg;
+							if(!(rsp->cmdid & RDSK_ErrorFlag))
+							{
+								// OK, set active disk and status OK
+								curdisk = c;
+								curFDCST = 0;
+							}
+							FreeRTOS_ReleaseUDPPayloadBuffer( ( void * ) rsp);
 						}
-						else
-						{
-							// Not mounted
-							vPortFree(drive[c]);	
-							drive[c] = 0;
-						}
+						vPortFree(req);
 					}
 				}
 				
-				if(drive[c])
-				{
-					curdisk = c;
-					curFDCST = 0;
-				}
-				else
+				// return hl=0 (dph) if no drive selected.
+				if(curdisk == -1)
 					reg->hl = 0;
+				
 				break;
 			case FDCTBC:	// fdc-port: # of track
 				curFDCT = *(uint16_t*) &reg->bc;
@@ -315,49 +417,63 @@ static void z80BiosDiskIO(trapargs_t *reg)
 					curFDCST = 1;
 					if(c)	// write
 					{
-						req_write_t req;
-						rsp_write_t rsp;
+						ioreq_t *req = pvPortMalloc(sizeof(ioreq_t) + SECSIZE);
 						
-						req.hdr.RDSK_Code = RDSK_CmdWrite;
-						req.hdr.RDSK_Drive = curdisk;
-						req.hdr.RDSK_Length = sizeof(req_write_t);
-						req.RDSK_Track = curFDCT;
-						req.RDSK_Sec   = curFDCS;
-						memcpy(req.RDSK_Data, dma, RDSK_SecSize);
-						
-						rsp.hdr.RDSK_Length = sizeof(rsp_write_t);
-						
-						if(pdPASS == doRDiskReq((pkt_t*)&req, (pkt_t*)&rsp))
+						if(req)
 						{
-							curFDCST = 0;
-						}	
+							hdr_t *rsp;
+							
+							req->hdr.pdusz = sizeof(ioreq_t) + SECSIZE;
+							req->hdr.cmdid = RDSK_WriteRequest;
+							req->hdr.devid = curdisk;
+							req->track = curFDCT;
+							req->sect = curFDCS;
+							memcpy(&req->data, dma, SECSIZE);
+							
+							rsp = doRDiskReq((hdr_t*)req);
+							
+							if(rsp)
+							{
+								if(!(rsp->cmdid & RDSK_ErrorFlag))
+									curFDCST = 0;
+								FreeRTOS_ReleaseUDPPayloadBuffer( ( void * ) rsp);
+							}	
+							vPortFree(req);
+						}
 					}
 					else	// read
 					{
-						req_read_t req;
-						rsp_read_t rsp;
-						req.hdr.RDSK_Code = RDSK_CmdRead;
-						req.hdr.RDSK_Drive = curdisk;
-						req.hdr.RDSK_Length = sizeof(req_read_t);
-						req.RDSK_Track = curFDCT;
-						req.RDSK_Sec   = curFDCS;
-						
-						rsp.hdr.RDSK_Length = sizeof(rsp_read_t);
-						
-						if(pdPASS == doRDiskReq((pkt_t*)&req, (pkt_t*)&rsp))
+						ioreq_t *req = pvPortMalloc(sizeof(ioreq_t));
+						if(req)
 						{
-							memcpy(dma,&rsp.RDSK_Data, RDSK_SecSize);
-							curFDCST = 0;
-						}	
+							ioreq_t *rsp;
+							
+							req->hdr.pdusz = sizeof(ioreq_t);
+							req->hdr.cmdid = RDSK_ReadRequest;
+							req->hdr.devid = curdisk;
+							req->track = curFDCT;
+							req->sect  = curFDCS;
+							
+							rsp = (ioreq_t*) doRDiskReq((hdr_t*)req);	
+							if(rsp)
+							{
+								if(!(rsp->hdr.cmdid & RDSK_ErrorFlag) && rsp->hdr.pdusz == (sizeof(ioreq_t) + SECSIZE))
+								{
+									memcpy(dma, &rsp->data, SECSIZE);
+									curFDCST = 0;
+								}
+								FreeRTOS_ReleaseUDPPayloadBuffer( ( void * ) rsp);
+							}	
+							vPortFree(req);
+						}
 					}
-				}					
+				}
 				break;
 			case FDCST:	// fdc-port: status
 				curFDCST = c;
 			default:
 				break;
 		};
-	
 }
 
 void z80BiosDMAIO(trapargs_t *reg)
@@ -491,7 +607,7 @@ void prvTCPCpmIOTask( void *ram )
 		so the listening and connecting socket are the same - meaning only one
 		connection will be accepted at a time, and that xListeningSocket must
 		be created on each iteration. */
-		xListeningSocket = prvOpenTCPServerSocket( 4050);
+		xListeningSocket = prvOpenTCPServerSocket( RDSK_PORT);
 
 		/* Nothing for this task to do if the socket cannot be created. */
 		if( xListeningSocket == FREERTOS_INVALID_SOCKET )
@@ -506,7 +622,7 @@ void prvTCPCpmIOTask( void *ram )
 		connected and listening socket should be the same socket. */
 		configASSERT( xConnectedSocket == xListeningSocket );
 		xRDiskAddress.sin_addr = xClient.sin_addr;
-		xRDiskAddress.sin_port = FreeRTOS_htons( RDSK_SvrPort );
+		xRDiskAddress.sin_port = FreeRTOS_htons( RDSK_PORT );
 
 		
 		iosize = xTaskCreate( CPM22Task, "CPM22Task", configMINIMAL_STACK_SIZE*5, ram, PRIO_CPM22,&thcpm);

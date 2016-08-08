@@ -124,11 +124,18 @@ void vApplicationPingReplyHook( ePingReplyStatus_t eStatus, uint16_t usIdentifie
 /* Define the network addressing.  These parameters will be used if either
 ipconfigUDE_DHCP is 0 or if ipconfigUSE_DHCP is 1 but DHCP auto configuration
 failed. */
-static const uint8_t ucIPAddress[ 4 ] = { 192, 168, 1, 2 };
-static const uint8_t ucNetMask[ 4 ] = { 255, 255, 255, 0 };
-static const uint8_t ucGatewayAddress[ 4 ] = { 192, 168, 1, 1 };
+static const uint8_t ucIPAddress[ 4 ] = { 0,0,0,0 };
+static const uint8_t ucNetMask[ 4 ] = { 0,0,0,0 };
+static const uint8_t ucGatewayAddress[ 4 ] = { 0,0,0,0 };
 /* The following is the address of an OpenDNS server. */
-static const uint8_t ucDNSServerAddress[ 4 ] = { 192, 168, 1, 1 };
+static const uint8_t ucDNSServerAddress[ 4 ] = { 0,0,0,0 };
+
+#if ipconfigDHCPREGISTERHOSTNAME == 1
+const char* pcApplicationHostnameHook () 
+{ 
+	return "eZ80F91"; 
+} 
+#endif /* ipconfigDHCPREGISTERHOSTNAME */
 
 #ifdef INCLUDE_LED5x7		
 	void TaskLED( void *pvParameters );
@@ -192,6 +199,7 @@ int main( void )
 	initButtons();
 #endif
 
+#if INCLUDE_NETWORK
 	/* Initialise the RTOS's TCP/IP stack.  The tasks that use the network
     are created in the vApplicationIPNetworkEventHook() hook function
     below.  The hook function is called when the network connects. */
@@ -202,10 +210,13 @@ int main( void )
 	
 	// Commandline interface (Telnet port 5010)
 	vStartTCPCommandInterpreterTask( 2048, 5010, tskIDLE_PRIORITY + 1);
-	
+#endif 
+
+#ifdef INCLUDE_MONITOR
 	// Demo Sysinfo 
 	// Connect putty 115200,8,1,n (ansi terminal) to get the status informations
 	res = xTaskCreate( sysinfo, "SysInfo", configMINIMAL_STACK_SIZE*2, (void *)portMAX_DELAY, PRIO_SYSINFO, NULL);
+#endif
 
 
 #if INCLUDE_LED5x7	== 1

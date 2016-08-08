@@ -103,6 +103,7 @@
 #include <CTYPE.H>	// isdigit tolower ...
 #include <String.h> // memset strlen ...
 
+#if INCLUDE_CONSOLE == 1 || INCLUDE_MODEM == 1
 
 //	use uart 0 or 1 for console output/input
 UARTID_t consoleport;
@@ -146,8 +147,6 @@ typedef struct params_s {
 
 
 // uarts used ?
-
-#if INCLUDE_CONSOLE == 1 || INCLUDE_MODEM == 1
 
 // helper macrus for MPU reister IO
 #define GETUART(x,p)	(p)? UART1_##x:UART0_##x	
@@ -359,7 +358,6 @@ BaseType_t initSerial()
 #endif
 	return pdPASS;
 }
-#endif
 
 int uart_putch (UARTID_t port, int c)
 {
@@ -822,6 +820,23 @@ int snprintf(char* str, unsigned n, const char* fmt, ...)
 	return res;
 }
 
+int vsnprintf(char* str, unsigned n, const char* fmt, va_list argp)
+{
+	int res = -1;
+	params_t par;
+	
+	if(str && n)
+	{
+		par.o.pstr = str;
+		par.o.max = n-1;
+		par.o.top = 0;
+		
+		res = xprintf( &par, fmt, argp);
+		par.o.pstr[par.o.top] = '\0';
+	}
+	return res;
+}
+
 int sprintf(char* str, const char* fmt, ...)
 {
 	int res = -1;
@@ -861,3 +876,4 @@ int printf(const char* fmt, ...)
 	return res;
 }
 
+#endif 

@@ -188,6 +188,6 @@ int puts (const char *s);
 int printf(const char* fmt, ...);
 int sprintf(char* s, const char* fmt, ...);
 int snprintf(char* s, size_t sz, const char *fmt, ...);
-
+int vsnprintf(char* str, unsigned n, const char* fmt, va_list argp);
 
 #endif /* _EZ80_TTY_H_ */

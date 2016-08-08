@@ -220,7 +220,7 @@ static const CHAR cmatrix[96][7] = {			 // hex- ascii
 	{0x17, 0x1b, 0x1b, 0x1d, 0x1b, 0x1b, 0x17},  // 7d - }
 	{0x1f, 0x1a, 0x15, 0x1f, 0x1f, 0x1f, 0x1f},  // 7e - ~
 	{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}   // 7f - block
-};
+}; 
 	
 /* The current selected glyph 7 rows*/
 static volatile CHAR *currglyph;
@@ -232,7 +232,7 @@ static UINT16 chardly;	// delay between letters
 static QueueHandle_t xLED5x7Queue;
 
 /* current shift direction */
-static dir_e	dir;
+static dir_e dir;
 
 /* display shift buffer */
 static volatile union {
@@ -252,7 +252,6 @@ static volatile union {
 static void setDisplay(const CHAR* src)
 {
 	int i;
-	portENTER_CRITICAL();
 	switch(dir)
 	{
 		case SHIFT_LEFT:
@@ -271,40 +270,37 @@ static void setDisplay(const CHAR* src)
 			}
 			break;
 	}
-	portEXIT_CRITICAL();
 }
 
 /* Shift displa buffer */
 static void shiftDisplay()
 {
-	int i;
-	BYTE msk;
-	
-	
-	switch(dir)
-	{
-		case SHIFT_LEFT:
-			portENTER_CRITICAL();
-			for(i = 0; i < 7; i++)
-			{
-				dply[i].i <<= 1;
-				dply[i].c[0]  |= 0x1;
-			}
-			portEXIT_CRITICAL();
-			break;
-		case SHIFT_NONE:
-			break;
-		case SHIFT_RIGHT:
-			portENTER_CRITICAL();
-			for(i = 0; i < 7; i++)
-			{
-				dply[i].i >>= 1;
-				dply[i].c[2]  |= 0x80;
-			}
-			portEXIT_CRITICAL();
-			break;
-	}
-	
+#pragma asm "				\n\t\
+	ld	hl,_dply			\n\t\
+	ld	b,7					\n\t\
+	ld	a,(_dir)			\n\t\
+	or	a					\n\t\
+	jr	z,retsh				\n\t\
+	dec	a					\n\t\
+	jr	nz,r00				\n\
+l00:scf						\n\t\
+	rl	(hl)				\n\t\
+	inc	hl					\n\t\
+	rl	(hl)				\n\t\
+	inc	hl					\n\t\
+	rl	(hl)				\n\t\
+	inc	hl					\n\t\
+	djnz l00				\n\t\
+	jr	retsh				\n\
+r00:scf						\n\t\
+	rr	(hl)				\n\t\
+	inc	hl					\n\t\
+	rr	(hl)				\n\t\
+	inc	hl					\n\t\
+	rr	(hl)				\n\t\
+	inc	hl					\n\t\
+	djnz r00				\n\
+retsh:"
 }
 
 /* get ascii-char from queue and 
@@ -332,24 +328,31 @@ static void nextDisplay(void)
  * Name: LEDTick
  * Timer procedure to display all scan-lines 
  ****************************************************************************/
+
 void vApplicationTickHook( )
-//void LEDTick()
 {
-	static int shiftdly = LED5x7_SHIFTT / 7;
-	static uint8_t row=6;
-	static const uint8_t col[7] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40};
+	static uint8_t shiftdly = configTICK_RATE_HZ / LED5x7_SHIFTT / 7;
+	static uint8_t row=0;
+	static const uint8_t col[7] = {0x81, 0x82, 0x84, 0x88, 0x90, 0xA0, 0xC0};
 		
-	LEDMATRIX_CATHODE = 0x1F & dply[row].c[1]; 	// set row image
-	LEDMATRIX_ANODE   = col[row];	// enable row
-	
-	if(!row--)
+	if(row > 6)
 	{
-		row = 6;
-		if(!shiftdly--)
+		row = 0;
+		if(!--shiftdly)
 		{
-			shiftdly = LED5x7_SHIFTT / 7;
-			xSemaphoreGiveFromISR ( semsync,pdFALSE);	
+			shiftdly = configTICK_RATE_HZ / LED5x7_SHIFTT / 7;
+			xSemaphoreGiveFromISR ( semsync, pdFALSE);	
+			LEDMATRIX_CATHODE = 0xFF;
+			LEDMATRIX_ANODE   = 0;
 		}
+	}	
+	else
+	{
+		uint8_t c = 0xE0 | dply[row].c[1];
+		uint8_t b = col[row];
+		LEDMATRIX_CATHODE = c;		// set row image
+		LEDMATRIX_ANODE   = b;		// enable row
+		row++;
 	}
 }
 
@@ -360,7 +363,6 @@ void vApplicationTickHook( )
 static void LED5x7Task( void *arg)
 {
 	int i;
-	
 	while(1)
 	{
 		nextDisplay();			// get next character image to displaybuffer

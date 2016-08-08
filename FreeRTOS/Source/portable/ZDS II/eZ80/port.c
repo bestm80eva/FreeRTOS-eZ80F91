@@ -208,9 +208,7 @@ long uxRand( void )
 	
 void dumptrap(const trapargs_t *ta)
 {
-	static char trapbuffer[1024];
-	
-	snprintf(trapbuffer,1024,
+	printf(
 	    "\nTRAP:     AF,     BC,     DE,     HL,     IX,     IY,mbase,flag,ret\n"
 	    "      %6X, %6X, %6X, %6X, %6X, %6X,   %2X,  %2X,%6X\n"
 		"      %6X, %6X, %6X, %6X\n",
@@ -229,7 +227,6 @@ void dumptrap(const trapargs_t *ta)
 		ta->de_, 
 		ta->hl_
 		);	
-	//netdump(trapbuffer);
 }
 
 void z80trap(trapargs_t* arg)

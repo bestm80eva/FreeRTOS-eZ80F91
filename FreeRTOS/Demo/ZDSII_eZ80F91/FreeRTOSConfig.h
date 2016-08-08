@@ -117,6 +117,7 @@ typedef int F91_EMAC_CONF_t;
 #define INCLUDE_MONITOR	1		// Include Demo-Monitor
 #define INCLUDE_RTC		1		// Include Realtime Clock
 #define INCLUDE_SNTP	0		// NTP Client
+#define INCLUDE_NETWORK 1
 #define MKQUOTE(x)	#x
 #define MKVERSION(x)	MKQUOTE(x)
 
@@ -135,12 +136,12 @@ typedef int F91_EMAC_CONF_t;
  * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE. 
  *----------------------------------------------------------*/
 
-
-#define PRIO_LED 		tskIDLE_PRIORITY + 2
-#define PRIO_SYSINFO   	tskIDLE_PRIORITY + 0
-#define PRIO_LED5x7	  	tskIDLE_PRIORITY + 3
-#define PRIO_CPMIO 	  	tskIDLE_PRIORITY + 2
-#define PRIO_CPM22		tskIDLE_PRIORITY + 1
+// Task prioritäten
+#define PRIO_LED 		tskIDLE_PRIORITY + 2	// LED demo task
+#define PRIO_SYSINFO   	tskIDLE_PRIORITY + 0	// Sysinfo demo task
+#define PRIO_LED5x7	  	tskIDLE_PRIORITY + 3	// 5x7 LED-Matrix driver task
+#define PRIO_CPMIO 	  	tskIDLE_PRIORITY + 2	// CP/M 2.2 IO demo task
+#define PRIO_CPM22		tskIDLE_PRIORITY + 1	// CP/M 2.2 Z80 (mixed-mode) demo task 
 
 #if INCLUDE_LED5x7 == 1 
 #define LED5x7_FRAMES	pdMS_TO_TICKS(  5)	// display refresch delay 
@@ -150,19 +151,18 @@ typedef int F91_EMAC_CONF_t;
 #endif	/* INCLUDE_LED5x7 */
 
 #if INCLUDE_BUTTONS
-#define BUTTON_PRELL 	pdMS_TO_TICKS(50)	// Entprellung
+#define BUTTON_PRELL 	pdMS_TO_TICKS(50)	// Entprellung for plattform switches
 #endif
 
-
 // Console setting
-#define DEF_PRINTFSIZE		32767			// for the fucking sprintf uses snprintf
+#define DEF_PRINTFSIZE		32767			// for the fucking sprintf. Uses snprintf!
 #define CLOCK_DIVISOR_16	16				// baudrate generator setting
 
 #if INCLUDE_CONSOLE	== 1
-#define CONOUTWAIT			pdMS_TO_TICKS(0)	// max wait for console output queue
-#define CONINWAIT			pdMS_TO_TICKS(0)	// max wait for console input queue
+#define CONOUTWAIT			pdMS_TO_TICKS( 5)	// max wait for console output queue
+#define CONINWAIT			pdMS_TO_TICKS(10)	// max wait for console input queue
 #define CONBAUDRATE			BAUD_115200			// console baud rate
-#define CONFIFO_TRGLVL		FIFO_TRGLVL_8		// 16byte fifo trigger level	
+#define CONFIFO_TRGLVL		FIFO_TRGLVL_8		// 16 byte fifo trigger level	
 #define CONDATABITS			DATABITS_8		
 #define CONSTOPBITS			STOPBITS_1
 #define CONPARITY			PAR_NOPARITY
@@ -188,10 +188,9 @@ extern uint8_t _heaptop;
 extern uint8_t _heapbot;
 
 /* MPU IDE II specifics		*/
-void * set_vector(unsigned int vector, void(*isp)(void));
+extern void * set_vector(unsigned int vector, void(*isp)(void));
 /* Missing stdc functions	*/
 int strcasecmp(const char *s1, const char *s2);
-
 
 /* CLI configuration								*/
 #define configINCLUDE_TRACE_RELATED_CLI_COMMANDS 0
@@ -209,7 +208,7 @@ int strcasecmp(const char *s1, const char *s2);
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 0
 #define configCPU_CLOCK_HZ                      50000000UL
-#define configTICK_RATE_HZ                      500
+#define configTICK_RATE_HZ                      500	// works up to 1000Hz and above
 #define configMAX_PRIORITIES                    16
 #define configMINIMAL_STACK_SIZE                256
 #define configMAX_TASK_NAME_LEN                 16

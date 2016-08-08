@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>res/listen_on.png</file>
+        <file>res/listen_off.png</file>
+    </qresource>
+</RCC>

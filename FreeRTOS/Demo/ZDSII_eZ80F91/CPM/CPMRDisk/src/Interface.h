@@ -10,6 +10,9 @@
 
 
 #include <stdint.h>
+#if 1
+#include "QtCPMRDrive/cpmrdsk.h"
+#else
 
 // This file implements a remote disk API for CPM.
 // This code implements the client side of the API.
@@ -177,5 +180,5 @@ typedef enum {
 
 #pragma pack(pop)
 
-
+#endif
 #endif /* INTERFACE_H_ */

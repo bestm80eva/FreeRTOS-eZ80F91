@@ -97,10 +97,10 @@
 #include "stdint.h"		// ez80 Typen
 
 typedef enum {
-	SHIFT_LEFT=0,
-	SHIFT_NONE=1,
+	SHIFT_NONE=0,
+	SHIFT_LEFT=1,
 	SHIFT_RIGHT=2
-} dir_e ;
+} char dir_e ;
 	
 void 		initLED5x7();
 BaseType_t 	LED5x7_putchar(CHAR c, TickType_t tout);

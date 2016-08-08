@@ -12,9 +12,9 @@
    </Clock>
    <ControlReg>
       <pc>000000</pc>
-      <splStackPtr>c80000</splStackPtr>
-      <spsStackPtr>FFFF</spsStackPtr>
-      <useAdlMode>true</useAdlMode>
+      <splStackPtr>0</splStackPtr>
+      <spsStackPtr>0</spsStackPtr>
+      <useAdlMode>false</useAdlMode>
    </ControlReg>
    <ExtFlash>
       <device />
@@ -37,14 +37,14 @@
          </CS0>
          <CS1>
             <busMode>02</busMode>
-            <controlRegister>28</controlRegister>
+            <controlRegister>8</controlRegister>
             <lower>c0</lower>
             <upper>c7</upper>
          </CS1>
          <CS2>
             <busMode>2</busMode>
-            <controlRegister>28</controlRegister>
-            <lower>B8</lower>
+            <controlRegister>48</controlRegister>
+            <lower>80</lower>
             <upper>bf</upper>
          </CS2>
          <CS3>

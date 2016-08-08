@@ -97,6 +97,10 @@
 #include "task.h"
 
 /* FreeRTOS+CLI includes. */
+/* FreeRTOS+TCP includes. */
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_Sockets.h"
+
 #include "FreeRTOS_IP.h"
 #include "FreeRTOS_CLI.h"
 #include "ez80_rtc.h"
@@ -111,20 +115,34 @@
 #include <CTYPE.H>
 #include <String.h>
 
+#define TRACE_PORT	4060
+
 static int alarmflg = 0;
 static int alarms = 0;
+
+static Socket_t xSocketTrace = (Socket_t)-1;
+static struct freertos_sockaddr xTraceAddress;
+
+static int sockPrintf(const char *fmt, ...)
+{
+	static char buffer[1024];
+	int res = -1;
+	va_list argp;
+	va_start( argp, fmt);
+
+	res = vsnprintf(buffer, sizeof(buffer), fmt, argp);
+	va_end(argp);
+	return FreeRTOS_sendto( xSocketTrace, buffer, strlen(buffer), 0, &xTraceAddress, sizeof(xTraceAddress));
+}
 
 void nested_interrupt rtc_alarm(void)
 {
 	char dummy = RTC_CTRL;
 	vTraceStoreISRBegin(TIID_rtc);
 	alarmflg = 5;
-
-	lockcons();
-	printf( ANSI_SCUR ANSI_COFF);
-	printf( ANSI_SCUR ANSI_SATT(7,31,40) ANSI_GXY(62,8) ">>> ALARM %6u <<<"ANSI_RCUR, ++alarms);
-	printf( ANSI_RCUR ANSI_CON) ;
-	unlockcons();
+	sockPrintf( ANSI_SCUR ANSI_COFF);
+	sockPrintf( ANSI_SCUR ANSI_SATT(7,31,40) ANSI_GXY(62,8) ">>> ALARM %6u <<<"ANSI_RCUR, ++alarms);
+	sockPrintf( ANSI_RCUR ANSI_CON) ;
 	vTraceStoreISREnd(0);
 	RETISP();
 }
@@ -134,13 +152,12 @@ void sys_heapinfo()
 size_t xPortGetFreeHeapSize( void );
 size_t xPortGetMinimumEverFreeHeapSize( void );
 	
-	lockcons();
-	printf( ANSI_SCUR ANSI_COFF);
-	printf( ANSI_SATT(0,34,43) ANSI_GXY(85,4) " Heap                 ");
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(85,5) "cur free Heap: " ANSI_SATT(0,32,40) "%7u", xPortGetFreeHeapSize());
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(85,6) "min free Heap: " ANSI_SATT(0,32,40) "%7u", xPortGetMinimumEverFreeHeapSize());
-	printf( ANSI_RCUR ANSI_CON) ;
-	unlockcons();
+
+	sockPrintf( ANSI_SCUR ANSI_COFF);
+	sockPrintf( ANSI_SATT(0,34,43) ANSI_GXY(85,4) " Heap                 ");
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(85,5) "cur free Heap: " ANSI_SATT(0,32,40) "%7u", xPortGetFreeHeapSize());
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(85,6) "min free Heap: " ANSI_SATT(0,32,40) "%7u", xPortGetMinimumEverFreeHeapSize());
+	sockPrintf( ANSI_RCUR ANSI_CON) ;
 }
 
 void sys_netinfo()
@@ -149,7 +166,6 @@ void sys_netinfo()
 	uint32_t ulNetMask;
     uint32_t ulGatewayAddress;
     uint32_t ulDNSServerAddress;
-	BaseType_t nwstat;
 	uint16_t phyData;
 	const char *att;
 	char mod[40] = "NO LINK";
@@ -193,40 +209,36 @@ void sys_netinfo()
 		ulDNSServerAddress = 0UL;
 	}
 	
-	nwstat = FreeRTOS_IsNetworkUp() == pdTRUE ? 1:0;
-	if(nwstat)
-		att = ANSI_SATT(0,32,40);
-	lockcons();
-	printf( ANSI_SCUR ANSI_COFF);
-	printf( ANSI_SATT(0,34,43) ANSI_GXY( 5,4) " Ethernet                                      ");
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,5) "Network: %s%s, %-23s", att, (char*)(nwstat? "Up  ":"Down"),mod);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,6) "IP     : %s%-15lxip ", att, FreeRTOS_ntohl(ulIPAddress ));
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,6) "Mask   : %s%-15lxip ", att, FreeRTOS_ntohl(ulNetMask));
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,7) "Gateway: %s%-15lxip ", att, FreeRTOS_ntohl(ulGatewayAddress) );
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,7) "DNS    : %s%-15lxip ", att, FreeRTOS_ntohl(ulDNSServerAddress) );
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,8) "txsz   : %s%-15u "	, att, stats->txsz);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,8) "rxsz   : %s%-15u "	, att, stats->rxsz);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,9) "txdone : %s%-15u "	, att, stats->txdone);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,9) "rxdone : %s%-15u "	, att, stats->rxdone);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,10)"txover : %s%-15u "	, att, stats->txover);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,10)"rxover : %s%-15u "	, att, stats->rxover);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,11)"txpcf  : %s%-15u "	, att, stats->txpcf);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,11)"rxpcf  : %s%-15u "	, att, stats->rxpcf);
+
+	sockPrintf( ANSI_SCUR ANSI_COFF);
+	sockPrintf( ANSI_SATT(0,34,43) ANSI_GXY( 5,4) " Ethernet                                      ");
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,5) "Network: %s%s, %-23s", att, "Up  ",mod);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,6) "IP     : %s%-15lxip ", att, FreeRTOS_ntohl(ulIPAddress ));
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,6) "Mask   : %s%-15lxip ", att, FreeRTOS_ntohl(ulNetMask));
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,7) "Gateway: %s%-15lxip ", att, FreeRTOS_ntohl(ulGatewayAddress) );
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,7) "DNS    : %s%-15lxip ", att, FreeRTOS_ntohl(ulDNSServerAddress) );
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,8) "txsz   : %s%-15u "	, att, stats->txsz);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,8) "rxsz   : %s%-15u "	, att, stats->rxsz);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,9) "txdone : %s%-15u "	, att, stats->txdone);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,9) "rxdone : %s%-15u "	, att, stats->rxdone);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,10)"txover : %s%-15u "	, att, stats->txover);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,10)"rxover : %s%-15u "	, att, stats->rxover);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,11)"txpcf  : %s%-15u "	, att, stats->txpcf);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,11)"rxpcf  : %s%-15u "	, att, stats->rxpcf);
 	
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,12)"txabort: %s%-15u "	, att, stats->txabort);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,12)"rxnotok: %s%-15u "	, att, stats->rxnotok);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,13)"txfsmer: %s%-15u "	, att, stats->txfsmerr);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,13)"mgdone : %s%-15u "	, att, stats->mgdone);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,14)"rxnospc: %s%-15u "	, att, stats->rxnospace);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,14)"rxinvsz: %s%-15u "	, att, stats->rxinvsize);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,12)"txabort: %s%-15u "	, att, stats->txabort);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,12)"rxnotok: %s%-15u "	, att, stats->rxnotok);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,13)"txfsmer: %s%-15u "	, att, stats->txfsmerr);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,13)"mgdone : %s%-15u "	, att, stats->mgdone);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,14)"rxnospc: %s%-15u "	, att, stats->rxnospace);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,14)"rxinvsz: %s%-15u "	, att, stats->rxinvsize);
 	
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,15)"rxcrcer: %s%-15u "	, att, stats->rxcrcerr);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,15)"rxalign: %s%-15u "	, att, stats->rxalignerr);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,16)"rxlongs: %s%-15u "	, att, stats->rxlongevent);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(30,16)"rxok   : %s%-15u "	, att, stats->rxok);
-	printf( ANSI_SATT(0,36,40) ANSI_GXY( 5,17)"rxcf   : %s%-15u "	, att, stats->rxcf);
-	printf( ANSI_RCUR ANSI_CON) ;
-	unlockcons();
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,15)"rxcrcer: %s%-15u "	, att, stats->rxcrcerr);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,15)"rxalign: %s%-15u "	, att, stats->rxalignerr);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,16)"rxlongs: %s%-15u "	, att, stats->rxlongevent);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(30,16)"rxok   : %s%-15u "	, att, stats->rxok);
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY( 5,17)"rxcf   : %s%-15u "	, att, stats->rxcf);
+	sockPrintf( ANSI_RCUR ANSI_CON) ;
 }		
 
 
@@ -235,17 +247,15 @@ void sys_rtcinfo()
 	char clock[21];
 	const char* att = chkRTCPowerLost() ? ANSI_SATT(1,31,40):ANSI_SATT(0,32,40);
 
-	lockcons();
-	printf( ANSI_SCUR ANSI_COFF);
-	printf( ANSI_SATT(0,34,43) ANSI_GXY(55,4) " Real Time Clock           ");
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(55,5) "Date : %s%-22s", att, getsDate(clock,sizeof(clock)));
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(55,6) "Time : %s%-22s", att, getsTime(clock,sizeof(clock)));
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(55,7) "Alarm: %s%-22s", att, getsAlarm(clock,sizeof(clock)));
+	sockPrintf( ANSI_SCUR ANSI_COFF);
+	sockPrintf( ANSI_SATT(0,34,43) ANSI_GXY(55,4) " Real Time Clock           ");
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(55,5) "Date : %s%-22s", att, getsDate(clock,sizeof(clock)));
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(55,6) "Time : %s%-22s", att, getsTime(clock,sizeof(clock)));
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(55,7) "Alarm: %s%-22s", att, getsAlarm(clock,sizeof(clock)));
 	if(alarmflg > 0 && !--alarmflg)
-		printf( ANSI_SATT(0,31,40) ANSI_GXY(62,8) ">>> ALARM %6u <<<", alarms);
+		sockPrintf( ANSI_SATT(0,31,40) ANSI_GXY(62,8) ">>> ALARM %6u <<<", alarms);
 		
-	printf( ANSI_RCUR ANSI_CON) ;
-	unlockcons();
+	sockPrintf( ANSI_RCUR ANSI_CON) ;
 }
 
 void sys_buttoninfo()
@@ -256,10 +266,9 @@ void sys_buttoninfo()
 	const char* att;
 	int i;
 	
-	lockcons();
-	printf( ANSI_SCUR ANSI_COFF);
-	printf( ANSI_SATT(0,34,43) ANSI_GXY(55,10) " Platform buttons                               ");
-	printf( ANSI_SATT(0,36,40) ANSI_GXY(62,11) "   n  ,  T-1   ,   T    , State ");
+	sockPrintf( ANSI_SCUR ANSI_COFF);
+	sockPrintf( ANSI_SATT(0,34,43) ANSI_GXY(55,10) " Platform buttons                               ");
+	sockPrintf( ANSI_SATT(0,36,40) ANSI_GXY(62,11) "   n  ,  T-1   ,   T    , State ");
 	
 	for( i=BUTTON_LEFT; i<=BUTTON_RIGTH; i++)
 	{
@@ -271,19 +280,34 @@ void sys_buttoninfo()
 		, ANSI_SATT(0,36,40) "\x1b[%i;55f%s: %s%4u,%8u,%8u %s",12+i, label[i]
 		,(char*) ((cnt[i] != but->changes)? ANSI_SATT(1,31,40):ANSI_SATT(0,32,40))
 		,(cnt[i] = but->changes), but->privT, but->lastT, s);
-		printf(b);
+		sockPrintf(b);
 		
 	}
-	printf( ANSI_RCUR ANSI_CON) ;
-	unlockcons();
+	sockPrintf( ANSI_RCUR ANSI_CON) ;
 }
 
 void sysinfo(void* param)
 {
-	lockcons();
-	printf(ANSI_NORM ANSI_CLRS ANSI_SATT(0,34,47) ANSI_GXY(1,1)  " FreeRTOS " tskKERNEL_VERSION_NUMBER " Demo V" VERSION " on ZiLOG\'s " DEVKIT " Kit / " ZIDE ANSI_DEOL);
-	printf(                    ANSI_SATT(0,34,47) ANSI_GXY(1,2)  " Autor " AUTOR " www.NadiSoft.de <" AUTORMAIL ">" ANSI_DEOL ANSI_NORM);
-	unlockcons();
+	BaseType_t iosize;
+	uint32_t ulIPAddress;
+	
+	while(FreeRTOS_IsNetworkUp() == pdFALSE)
+		vTaskDelay(3000);
+	
+	/* Create the socket. */
+	xSocketTrace = FreeRTOS_socket( FREERTOS_AF_INET,
+                              FREERTOS_SOCK_DGRAM,
+                              FREERTOS_IPPROTO_UDP );
+
+	ulIPAddress = 0xC0A8B21A; // FreeRTOS_gethostbyname( "nadhh" );
+	 /* Check the socket was created. */
+	configASSERT( xSocketTrace != FREERTOS_INVALID_SOCKET );
+	xTraceAddress.sin_addr = FreeRTOS_htonl(ulIPAddress);
+	xTraceAddress.sin_port = FreeRTOS_htons( TRACE_PORT );
+	
+	sockPrintf("\n\n\n\n\n\n\n\n\n\n");
+	sockPrintf(ANSI_NORM ANSI_CLRS ANSI_SATT(0,34,47) ANSI_GXY(1,1)  " FreeRTOS " tskKERNEL_VERSION_NUMBER " Demo V" VERSION " on ZiLOG\'s " DEVKIT " Kit / " ZIDE ANSI_DEOL);
+	sockPrintf(                    ANSI_SATT(0,34,47) ANSI_GXY(1,2)  " Autor " AUTOR " www.NadiSoft.de <" AUTORMAIL ">" ANSI_DEOL ANSI_NORM);
 
 	setAlarm(rtc_alarm,1,0, 0, 0, 30);
 	
@@ -293,6 +317,7 @@ void sysinfo(void* param)
 		sys_rtcinfo();
 		sys_heapinfo();
 		sys_buttoninfo();
+		vTaskDelay(300);
 	}
 }
 
