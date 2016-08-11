@@ -34,6 +34,7 @@ private:
     QString                  _host;
     QMap< quint8, CPMDrive*> _drive;
     qint16                   _seqnz;
+    QTextStream              _log;
 };
 
 // Q_DECLARE_METATYPE(CPMClient);

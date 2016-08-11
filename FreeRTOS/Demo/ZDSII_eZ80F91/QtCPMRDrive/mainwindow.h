@@ -37,6 +37,7 @@ protected:
 private slots:
     void processDatagrams();
     void itemClicked(QTreeWidgetItem *item, int column);
+    void mountA();
 private:
     Ui::MainWindow *ui;
     QTextStream _log;

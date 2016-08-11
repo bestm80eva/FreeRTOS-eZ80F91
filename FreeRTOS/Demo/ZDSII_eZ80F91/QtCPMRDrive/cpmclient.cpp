@@ -6,6 +6,7 @@ CPMClient::CPMClient(const QString &host, QWidget *parent)
     ,_reqdata(0)
     ,_rspdata(0)
     ,_host(host)
+    ,_log(stdout)
 {
 
 }
@@ -38,18 +39,17 @@ bool CPMClient::req(const hdr_t &request, QByteArray &resp)
             if(!drive)
             {
                 const uint8_t *xlt = mreq.xlt ? &mreq.xlt:0;
-
-                drive = _drive[mreq.hdr.devid] = new CPMDrive((const char*)mreq.diskid,
-                                                                 mreq.secsz, mreq.dpb,
-                                                                 xlt,
-                                                                 (iomode_t)mreq.mode);
+                QString p("../CPM/disks/");
+                p.append('A' + mreq.hdr.devid);
+                drive = _drive[mreq.hdr.devid] = new CPMDrive(p, mreq.secsz, mreq.dpb,
+                                                              xlt, (iomode_t)mreq.mode);
                 Q_ASSERT(drive);
                 emit adddrive(this, drive);
             }
-
-
             result = drive->open();
             _seqnz = result ? request.seqnz : 0;
+            _log << "DSK trk=" << drive->tracks() << ", spt=" << drive->secptrk() << ", blk=" << drive->blkmax()
+                 << ", dir=" << drive->dirmax() << ", sys=" << drive->sysmax() << endl;
         }
         break;
 
@@ -70,6 +70,7 @@ bool CPMClient::req(const hdr_t &request, QByteArray &resp)
             rsp = (ioreq_t*) resp.data();
             rsp->track = req.track;
             rsp->sect  = req.sect;
+            //_log << "Read:  s/t " << req.track << '/' << req.sect << endl;
             result = drive->read(req.track, req.sect, (char*)&rsp->data);
         }
         break;
@@ -78,6 +79,7 @@ bool CPMClient::req(const hdr_t &request, QByteArray &resp)
         if(drive && request.seqnz == _seqnz)
         {
             ioreq_t &req = (ioreq_t&) request;
+            //_log << "Write: s/t " << req.track << '/' << req.sect << endl;
             result = drive->write(req.track, req.sect, (const char*)&req.data);
         }
         break;

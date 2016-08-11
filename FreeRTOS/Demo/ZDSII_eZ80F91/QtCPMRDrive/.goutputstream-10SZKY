@@ -7,32 +7,7 @@
 extern "C"  {
 #endif
 
-#pragma pack(push,1)
-	
-#define RDSK_PORT	4050
-
-typedef enum {
-    // used for file, status is the user number
-    USER0,USER1,USER2,USER3,USER4,USER5,USER6,USER7,
-    USER8,USER9,USER01,USER11,USER12,USER13,USER14,USER15,
-    // status is the user number (P2DOS) or used for password extent (CP/M 3 or higher)
-    USER16_31,
-    LABEL = 32, // disc label
-    TIMEST,     // 33: time stamp (P2DOS)
-    UNUSED = 0xE5   // unused
-  } dirstat_t;
-
-typedef struct {
-    uint8_t status;
-    uint8_t name[8];
-    uint8_t next[3];
-    uint8_t Xl,Bc,Xh,Rc;
-    union {
-        uint8_t  b[16];
-        uint16_t w[ 8];
-    }Al;
-} dir_t;
-
+//#define SECSIZE 128
 
 // Disk Parameter Header (the DPH)
 typedef struct {
@@ -58,7 +33,7 @@ typedef struct {
 } dpb_t;
 
 
-typedef enum {
+typedef enum {secsz   
     // Requests
     RDSK_MountRequest       = 0x01,
     RDSK_UnmountRequest     = 0x02,
@@ -76,35 +51,35 @@ typedef enum {
 
     // Error indicator
     RDSK_ErrorFlag          = 0x80
-} pdutype_t;
+}pdutype_t;
 
-typedef enum {
-    READONLY    = 0x01,
-    LINEAR      = 0x02
-} iomode_t;
+#pragma pack(push,1)
 
 typedef struct {
-    uint16_t    pdusz;  // total size of pdu
-    uint8_t     cmdid;  // command / status
-    uint8_t     devid;  // device id 0=A. 1=B ...
-    uint16_t    seqnz;  // sequenz
-} hdr_t;
-
-typedef struct {
-    hdr_t hdr;	
-    uint8_t  diskid[12];    // Disk identifiecation 8.3
+    uint8_t  diskid[13];    // Disk identifier (filename 8.3 on server)
     uint8_t  mode;          // != 0 then writeable
     uint16_t secsz;         // Sector size
     dpb_t    dpb;           // Disk parameter block
-    uint8_t  xlt;        	// Start of Sector translation table if not 0
-} mountreq_t;
+    uint16_t xlt;           // Start of Sector translation table if not 0
+} mount_t;
 
 typedef struct {
-    hdr_t hdr;	
     uint16_t    track;
     uint16_t    sect;
-    uint8_t     data;
-} ioreq_t;
+    uint8_t     _data;
+} io_t;
+
+
+typedef struct {
+    uint16_t    pdusz;
+    uint8_t     cmdid;
+    uint8_t     devid;
+    uint16_t    seqnz;
+    union {
+    mount_t     dsk;
+     io_t       dta;
+    }params;
+} pdu_t;
 
 #pragma pack(pop)
 

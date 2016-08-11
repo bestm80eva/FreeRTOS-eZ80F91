@@ -184,8 +184,6 @@ int main( void )
 	/* Seed the random number generator. */
 	xTimeNow = xTaskGetTickCount();
 	prvSRand( ( uint32_t ) xTimeNow );
-
-	
 	
 #if INCLUDE_CONSOLE == 1 || INCLUDE_MODEM == 1  		// Include serial port 0 or serial port 1
 	initSerial();
@@ -276,7 +274,7 @@ void vApplicationStackOverflowHook( TaskHandle_t xTask,signed char *pcTaskName )
 {
 	printf("Stack overflow at task %s\n",pcTaskName);
 	while(1)
-		asm("nop");
+		vTaskDelay(300);
 	asm("nop");
 }
 #endif
@@ -286,7 +284,7 @@ void vAssertCalled( const char* file, int line )
 {
 	printf("ASSERTION %s, %i\n",file, line);
 	while(1)
-		asm("nop");
+		vTaskDelay(300);
 	asm("nop");
 }
 #endif

@@ -375,7 +375,7 @@ static void z80BiosDiskIO(trapargs_t *reg)
 						req->hdr.devid = c;						// drive id 0=A, 1=B ...
 						memcpy(&req->dpb, dpb, sizeof(dpb_t));	// save Disk Parameter Block
 						snprintf((char*)req->diskid,13U,"drive%c.cpm",'a' + c); // default name
-						req->mode = LINEAR;						// No sector demapping
+						req->mode = 0;							// Sector mapping
 						req->secsz = SECSIZE;					// CP/M 128 sector size
 													
 						// append sector translation table	
@@ -638,7 +638,7 @@ void prvTCPCpmIOTask( void *ram )
 		
 		
 		/* Process the socket as long as it remains connected. */
-		while( iosize >= 0 )
+		while( iosize > 0 )
 		{
 			char c;
 			/* Receive data on the socket. */
@@ -648,13 +648,9 @@ void prvTCPCpmIOTask( void *ram )
 			{
 				xQueueSend(cpminq,&c,0);		
 			}
-			else
-			{
-				/* Socket closed? */
-				break;
-			}
 		}
 		/* Close the socket correctly. */
+		vTaskDelete( thcpm);
 		prvGracefulShutdown( xListeningSocket );
 	}
 }

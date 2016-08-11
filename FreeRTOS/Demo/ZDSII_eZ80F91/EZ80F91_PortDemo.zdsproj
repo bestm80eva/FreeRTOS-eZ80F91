@@ -42,7 +42,6 @@
 <file filter-key="">..\..\Source\portable\ZDS II\eZ80\portmacro.h</file>
 <file filter-key="flash">Debug-Flash\EZ80F91_PortDemo.hex</file>
 <file filter-key="">.\cstartup.asm</file>
-<file filter-key="">.\startup.asm</file>
 <file filter-key="">.\vectors24.asm</file>
 <file filter-key="">.\init_params_f91.asm</file>
 <file filter-key="">CPM\exbios.c</file>
@@ -131,7 +130,7 @@
 <option name="directives" type="string" change-action="build"></option>
 <option name="createnew" type="boolean" change-action="build">true</option>
 <option name="exeform" type="string" change-action="build">OMF695,INTEL32</option>
-<option name="linkctlfile" type="string" change-action="build">.\EZ80F91_PortDemo_Debug-Ram-Mixedmode.linkcmd</option>
+<option name="linkctlfile" type="string" change-action="build">Debug-Ram-Mixedmode\EZ80F91_PortDemo_Debug-Ram-Mixedmode.linkcmd</option>
 <option name="map" type="boolean" change-action="none">true</option>
 <option name="maxhexlen" type="integer" change-action="build">64</option>
 <option name="objlibmods" type="string" change-action="build"></option>

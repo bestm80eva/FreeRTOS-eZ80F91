@@ -43,6 +43,7 @@
     <property name="title">
      <string>&amp;Disks</string>
     </property>
+    <addaction name="actionMount_A"/>
    </widget>
    <widget class="QMenu" name="menu_Clients">
     <property name="title">
@@ -61,6 +62,11 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionMount_A">
+   <property name="text">
+    <string>Mount &amp;A</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
@@ -81,8 +87,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionMount_A</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>mountA()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>450</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>itemClicked(QTreeWidgetItem*,int)</slot>
+  <slot>mountA()</slot>
  </slots>
 </ui>
