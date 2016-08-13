@@ -13,13 +13,16 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowTabbedDocks</set>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QTreeWidget" name="treeWidget">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>10</y>
-      <width>191</width>
+      <x>9</x>
+      <y>9</y>
+      <width>301</width>
       <height>571</height>
      </rect>
     </property>

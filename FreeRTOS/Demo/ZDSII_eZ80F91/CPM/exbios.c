@@ -345,7 +345,17 @@ static void z80BiosDiskIO(trapargs_t *reg)
 				{
 					uint16_t sz;
 					mountreq_t *req;
-					
+					if(!(reg->de & 1))
+					{
+						hdr_t hdr,*rsp;
+						hdr.pdusz = sizeof(hdr_t);			// size of this request
+						hdr.cmdid = RDSK_UnmountRequest;	// request type
+						hdr.devid = c;						// drive id 0=A, 1=B ...
+						rsp = doRDiskReq(&hdr);
+						if(rsp)
+							FreeRTOS_ReleaseUDPPayloadBuffer( ( void * ) rsp);
+					}
+						
 					// if disk parameters given
 					if(reg->hl)
 					{

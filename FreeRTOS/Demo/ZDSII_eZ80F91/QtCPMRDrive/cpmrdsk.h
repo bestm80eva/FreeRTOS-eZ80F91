@@ -19,7 +19,7 @@ typedef enum {
     USER16_31,
     LABEL = 32, // disc label
     TIMEST,     // 33: time stamp (P2DOS)
-    UNUSED = 0xE5   // unused
+    UNUSED = 0xE5   // unused/deleted
   } dirstat_t;
 
 typedef struct {

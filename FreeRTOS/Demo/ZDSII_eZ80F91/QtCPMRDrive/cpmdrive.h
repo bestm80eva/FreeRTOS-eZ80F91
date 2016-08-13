@@ -9,47 +9,16 @@
 #include <QMutex>
 #include <QFile>
 #include <QTextStream>
-
-class CPMDir : public dir_t
-{
-public:
-    CPMDir();
-    virtual ~CPMDir();
-    virtual quint16 DType() const = 0;
-    virtual void setblk(quint16 idx, quint16 blk) = 0;
-    virtual quint16 getblk(quint16 idx) const = 0;
-    operator dir_t&() { return (dir_t&) *this;}
-    friend QTextStream& operator << (QTextStream& ots, const CPMDir &dir);
-};
-
-class CPMDir8 : public CPMDir
-{
-public:
-    CPMDir8();
-    ~CPMDir8();
-    virtual quint16 DType() const { return 8; }
-    virtual void setblk(quint16 idx, quint16 blk) { Q_ASSERT( idx < DType()); Al.w[idx] = blk;}
-    virtual quint16 getblk(quint16 idx) const { Q_ASSERT( idx < DType()); return Al.w[idx];}
-};
-
-class CPMDir16 : public CPMDir
-{
-public:
-    CPMDir16();
-    ~CPMDir16();
-    virtual quint16 DType() const { return 16; }
-    virtual void setblk(quint16 idx, quint16 blk) { Q_ASSERT( idx < DType()); Al.b[idx] = blk;}
-    virtual quint16 getblk(quint16 idx) const { Q_ASSERT( idx < DType()); return Al.b[idx];}
-};
+#include <QFileSystemWatcher>
 
 class CPMDrive : public QObject
 {
     Q_OBJECT
 public:
-    CPMDrive(const QString &path, uint16_t sectsz, const dpb_t &dpb, const uint8_t *xlt, iomode_t mode);
+    CPMDrive(const QString &path, uint16_t sectsz, const dpb_t &dpb, const uint8_t *xlt, iomode_t mode, QObject *parent=0);
     virtual ~CPMDrive();
 
-    bool    isOpen() const { return _open;}
+    bool    isOpen() const { return _cache != 0;}
     quint16 secptrk()const { return _dpb.spt;}
     quint16 dirmax() const { return _dpb.drm + 1;}
     quint16 blkmax() const { return _dpb.dsm + 1;}
@@ -73,19 +42,43 @@ protected:
     bool writesys(quint16 track, quint16 sectr, const char *data);
     bool readabs(quint16 block, quint16 offs, char* data, quint16 sz);
     bool writeabs(quint16 block, quint16 offs, const char* data, quint16 sz);
+    bool writedir(quint16 block, quint16 offs, const char* data, quint16 sz);
 
     quint16 getblk( qint16 track, qint16 sectr) const { return ( (track - sysmax()) * secptrk() + sectr) >> _dpb.bsh; }
     quint16 getoff( qint16 track, qint16 sectr) const { return (((track - sysmax()) * secptrk() + sectr) &  _dpb.blm) * secsz() ;}
+
+    int addHostname(const QByteArray &cpmname, const QString& hostname);
+    int addHostname(const QByteArray &cpmname);
+    bool delHostname(const QByteArray &cpmname);
+    bool renHostname(const QByteArray &cpmfrom, const QByteArray &cpmto);
+
+    QString getHostname(const QByteArray &cpmname);
+
+    qint32 findBlock(QString& hostfile, quint16 block);
+
+private slots:
+    void directoryChanged(const QString &path);
+
 private:
+    void watch( bool x)
+    {
+        if(x)
+            connect(&_watch,SIGNAL(directoryChanged(QString)),this,SLOT(directoryChanged(QString)));
+        else
+            disconnect(&_watch,SIGNAL(directoryChanged(QString)),this,SLOT(directoryChanged(QString)));
+    }
+
     iomode_t            _mode;
     const QString       _path;
     const dpb_t         _dpb;
     QVector<quint16>    _xlt;
     QMutex              _mutex;
-    bool                _open;
     qint16              _sectsz;
-    QVector<char*>      _cache;
+    QMap<quint16,char*> *_cache;
+    QMap<QByteArray, QString> *_hostname;
     QTextStream         _log;
+    QFileSystemWatcher  _watch;
+    bool                _changed;
 };
 
 #endif // CPMDRIVE_H
