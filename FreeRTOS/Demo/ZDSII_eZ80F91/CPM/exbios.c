@@ -108,6 +108,7 @@
 #include "stdint.h"
 #include "exbios.h"
 #include "QtCPMRDrive/cpmrdsk.h"
+#include "CPM/CPM22/CPM64.h"
 
 #include <string.h>
 
@@ -218,7 +219,9 @@ _BOOTSTRAPEND: 									\n\t\
 
 void z80Monitor(trapargs_t *reg)
 {
-	// ToDo: inject and run an Z80 Mashine-Monitor
+	
+extern const unsigned long CPM64_length;
+extern const unsigned char CPM64[];
 	while(1);
 }
 

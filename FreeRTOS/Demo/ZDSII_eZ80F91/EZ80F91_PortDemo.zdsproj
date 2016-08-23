@@ -46,6 +46,8 @@
 <file filter-key="">.\init_params_f91.asm</file>
 <file filter-key="">CPM\exbios.c</file>
 <file filter-key="">CPM\exbios.h</file>
+<file filter-key="">CPM\CPM22\CPM64.c</file>
+<file filter-key="">CPM\CPM22\CPM64.h</file>
 </files>
 
 <!-- configuration information -->

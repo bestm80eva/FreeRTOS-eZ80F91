@@ -60,8 +60,8 @@ void MainWindow::mountA()
           3,	// block shift factor
           7,	// block mask
           0,	// extent mask
-        242,	// disk size-1
-         63,	// directory max
+        242,	// disk block size-1 0-242
+         63,	// directory max - 1 0-63
         192,	// alloc 0
           0,	// alloc 1
          16,	// check size
@@ -144,9 +144,10 @@ void MainWindow::processDatagrams()
 
         res = client->req(*request, rdatagram);
         hdr_t  *response = (hdr_t*)rdatagram.data();
-        // _log << "= " << res << ", Res:" << *response << endl;
 
-        Q_ASSERT(res);
+
+        if(!res)
+            _log << "ERR:" << *response << endl;
 
         sz = _udpSocket.writeDatagram((const char*)response, (qint64)response->pdusz, host, port);
         if(_clientwidget)

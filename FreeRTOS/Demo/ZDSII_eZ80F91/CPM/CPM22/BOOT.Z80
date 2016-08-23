@@ -1,4 +1,4 @@
-include 'cpm.inc'
+include 'CPM.INC'
 
 SIZE:    EQU     (10000h-CCP)  	; size of cp/m system
 SECTS:   EQU     32h			;(SIZE / 128)   ; # of sectors to load

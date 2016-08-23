@@ -1,5 +1,7 @@
 #include "cpmclient.h"
 
+#include <QFileInfo>
+
 CPMClient::CPMClient(const QString &host, QWidget *parent)
     : QWidget(parent)
     ,_requests(0)
@@ -41,15 +43,38 @@ bool CPMClient::req(const hdr_t &request, QByteArray &resp)
                 const uint8_t *xlt = mreq.xlt ? &mreq.xlt:0;
                 QString p("../CPM/disks/");
                 p.append('A' + mreq.hdr.devid);
-                drive = _drive[mreq.hdr.devid] = new CPMDrive(p, mreq.secsz, mreq.dpb,
-                                                              xlt, (iomode_t)mreq.mode);
-                Q_ASSERT(drive);
-                emit adddrive(this, drive);
+                QFileInfo fi(p);
+                result = fi.exists();
+                if(!result)
+                {
+                    p.append(".cpm");
+                    fi.setFile(p);
+                    result = fi.exists();
+                }
+                if(result)
+                {
+                    if( fi.isDir())
+                        drive = _drive[mreq.hdr.devid] = new HostDirDrive(p, mreq.secsz, mreq.dpb, xlt, (iomode_t)mreq.mode);
+                  //  if( fi.isFile())
+                  //      drive = _drive[mreq.hdr.devid] = new CPMImgDrive(p, mreq.secsz, mreq.dpb, xlt, (iomode_t)(mreq.mode));
+
+                }
+                if(drive)
+                    emit adddrive(this, drive);
             }
-            result = drive->open();
-            _seqnz = result ? request.seqnz : 0;
-            _log << "DSK trk=" << drive->tracks() << ", spt=" << drive->secptrk() << ", blk=" << drive->blkmax()
-                 << ", dir=" << drive->dirmax() << ", sys=" << drive->sysmax() << endl;
+
+            if(drive)
+            {
+                result = drive->open();
+                _seqnz = result ? request.seqnz : 0;
+                _log << "DSK trk=" << drive->maxtrk() << ", spt=" << drive->maxsec() << ", blk=" << drive->maxblk()
+                     << ", dir=" << drive->maxdir() << ", sys=" << drive->maxsys() << endl;
+            }
+            else
+            {
+                result = false;
+                _log << "Drive can't open." << endl;
+            }
         }
         break;
 

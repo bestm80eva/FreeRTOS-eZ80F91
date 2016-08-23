@@ -10,7 +10,7 @@ SmartCableServer::SmartCableServer(QObject *parent)
 
     _port = settings.value("Port", (quint16) 4040U).toUInt();
     _addr = settings.value("Address", QHostAddress(QHostAddress::LocalHost).toString()).toString();
-    boot accept = settings.value("Accept", false).toBool();
+    bool accept = settings.value("Accept", false).toBool();
     if(!listen(_addr, _port) && accept)
     {
         QMessageBox::critical(this, tr("SmartCable Server")

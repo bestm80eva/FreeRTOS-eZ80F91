@@ -1,7 +1,7 @@
 #ifndef CPMCLIENT_H
 #define CPMCLIENT_H
 
-#include "cpmdrive.h"
+#include "hostdirdrive.h"
 
 #include <QWidget>
 #include <QHostAddress>

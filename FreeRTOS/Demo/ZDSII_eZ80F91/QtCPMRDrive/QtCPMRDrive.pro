@@ -14,17 +14,19 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    cpmdrive.cpp \
     cpmclient.cpp \
     clientgui.cpp \
-    cdrivegui.cpp
+    cdrivegui.cpp \
+    hostdirdrive.cpp \
+    drive.cpp
 
 HEADERS  += mainwindow.h \
     cpmrdsk.h \
-    cpmdrive.h \
     cpmclient.h \
     clientgui.h \
-    cdrivegui.h
+    cdrivegui.h \
+    hostdirdrive.h \
+    drive.h
 
 FORMS    += mainwindow.ui \
     clientgui.ui \

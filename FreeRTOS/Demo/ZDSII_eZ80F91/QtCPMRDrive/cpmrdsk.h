@@ -8,7 +8,7 @@ extern "C"  {
 #endif
 
 #pragma pack(push,1)
-	
+
 #define RDSK_PORT	4050
 
 typedef enum {
@@ -24,15 +24,14 @@ typedef enum {
 
 typedef struct {
     uint8_t status;
-    uint8_t name[8];
-    uint8_t next[3];
+    char    name[8];
+    char    next[3];
     uint8_t Xl,Bc,Xh,Rc;
     union {
         uint8_t  b[16];
         uint16_t w[ 8];
     }Al;
 } dir_t;
-
 
 // Disk Parameter Header (the DPH)
 typedef struct {
@@ -91,7 +90,7 @@ typedef struct {
 } hdr_t;
 
 typedef struct {
-    hdr_t hdr;	
+    hdr_t hdr;
     uint8_t  diskid[12];    // Disk identifiecation 8.3
     uint8_t  mode;          // != 0 then writeable
     uint16_t secsz;         // Sector size
@@ -100,7 +99,7 @@ typedef struct {
 } mountreq_t;
 
 typedef struct {
-    hdr_t hdr;	
+    hdr_t hdr;
     uint16_t    track;
     uint16_t    sect;
     uint8_t     data;
