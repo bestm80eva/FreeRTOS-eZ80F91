@@ -36,8 +36,8 @@ public:
     quint16         xlt(quint16 s) const;
     quint16         getBlock( quint32 abssec) const { return abssec >> bshift();}
     bool            isDir(quint32 abssec) const;
-    quint16         dirsec(quint16 diridx) const { return diridx * sizeof(dir_t) / secsz();}
-    quint16         diroff(quint16 diridx) const { return (diridx * sizeof(dir_t)) % secsz();}
+    //quint16         dirsec(quint16 diridx) const { return diridx * sizeof(dir_t) / secsz();}
+    //quint16         diroff(quint16 diridx) const { return (diridx * sizeof(dir_t)) % secsz();}
 
     virtual bool open() = 0;
     virtual bool close()= 0;

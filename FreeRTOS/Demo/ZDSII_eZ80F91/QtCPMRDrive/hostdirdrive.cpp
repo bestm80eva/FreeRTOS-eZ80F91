@@ -39,20 +39,20 @@ QString HostDirDrive::getHostname(const dir_t& ext)
 
 dir_t &HostDirDrive::dir(quint16 idx)
 {
+    Q_ASSERT(idx < maxdir());
 
-    quint16 sec = dirsec(idx);
-    quint16 off = diroff(idx);
-    if(!_cache[sec])
+    quint16 sec = (idx * sizeof(dir_t)) / secsz();
+    quint16 off = (idx * sizeof(dir_t)) % secsz();
+    QMap<quint32, char*>::iterator it = _cache.find(sec);
+
+    if(it == _cache.end())
     {
-        quint16 dirpersec = secsz() / sizeof(dir_t);
-        dir_t  *sdir = new dir_t[dirpersec]();
-
-        // init directory
-        for(int i = 0; i < dirpersec; i++)
-           sdir[i].status = UNUSED;
-        _cache[sec] = (char*) sdir;
+        _cache[sec] = new char [secsz()]();
+        it = _cache.find(sec);
     }
-    return *(dir_t*)(_cache[sec]+off);
+    Q_ASSERT(it != _cache.end());
+
+    return *(dir_t*) (it.value() + off);
 }
 
 bool HostDirDrive::open()
@@ -253,12 +253,13 @@ bool HostDirDrive::write(quint16 track, quint16 sect, const char* data)
 
 bool HostDirDrive::readsec(quint32 abssec, char* data)
 {
-    bool result = _cache[abssec] != 0;
+    QMap<quint32, char*>::iterator it = _cache.find(abssec);
+    bool result = it != _cache.end();
     QString hostname;
     if(result)
     {
         log() << ", CACHE";
-        memcpy(data, _cache[abssec], secsz());
+        memcpy(data, it.value(), secsz());
     }
     else
     {
@@ -272,8 +273,12 @@ bool HostDirDrive::readsec(quint32 abssec, char* data)
             if(result && (result = f.open(QIODevice::ReadOnly)))
             {
                 if((result = f.seek(offset)))
-                    result = f.read(data,secsz()) == secsz();
-                f.close();
+                {
+                    qint32 w = f.read(data,secsz());
+                    result = w >= 0;
+                    if(result && w < secsz())
+                        memset(data+w, 0x1A,secsz()-w);
+                }
             }
         }
     }
@@ -296,8 +301,10 @@ bool HostDirDrive::writedir(quint32 abssec, const dir_t *data)
 {
     log() << ", dir " << secsz() / sizeof(dir_t) * abssec << ", ...";
     dir_t *odata = (dir_t*) new char[secsz()]();
+    QMap<quint32, char*>::iterator it = _cache.find(abssec);
+    Q_ASSERT(it != _cache.end() && odata);
 
-    memcpy(odata, _cache[abssec], secsz());
+    memcpy(odata, it.value(), secsz());
     bool result = writesec(abssec,(const char*)data);
 
     // for each dir on sector.
@@ -381,7 +388,7 @@ bool HostDirDrive::writesec(quint32 abssec, const char *data)
 {
      bool result = false;
      QString hostname;
-     quint16 block = getBlock(abssec);
+     quint16 block  = getBlock(abssec);
      qint32  offset = findBlock(block, hostname);
 
      if(offset >= 0)
@@ -399,14 +406,16 @@ bool HostDirDrive::writesec(quint32 abssec, const char *data)
      }
      else
      {
-         char *tmp = _cache[abssec];
-         if(!tmp)
-            _cache[abssec] = tmp = new char[secsz()]();
-         result = tmp != 0;
-
+         log() << ", CACHE";
+         QMap<quint32, char*>::iterator it = _cache.find(abssec);
+         if(it == _cache.end())
+         {
+             _cache[abssec] = new char[secsz()]();
+             it = _cache.find(abssec);
+         }
+         result = it != _cache.end();
          if(result)
-            memcpy(tmp,data,secsz());
-
+            memcpy(it.value(), data, secsz());
      }
      return result;
 }

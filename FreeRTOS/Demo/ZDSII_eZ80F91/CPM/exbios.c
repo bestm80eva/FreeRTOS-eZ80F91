@@ -186,7 +186,7 @@ _BOOTSTRAP:										\n\t\
 	OR	A 					; selected?			\n\t\
 	JR	Z,LSEC				; yes try loading	\n\t\
 EXMON:											\n\t\
-	EXBIOS MONITOR, 0, 0	; no disk go monitor\n\
+	EXBIOS MONITOR, 0, 0	; no disk run monitor\n\
 LSEC: 											\n\t\
  	LD	BC,0									\n\t\
 	EXBIOS DMAIO, 0, DMABC	; set DMA			\n\t\
