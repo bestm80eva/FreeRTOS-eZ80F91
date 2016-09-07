@@ -31,10 +31,13 @@ public:
     quint16         maxtrk() const { return (maxblk() * blksz() / secsz() + maxsec() -1) / maxsec() + maxsys();}
     quint16         datablk()const { return (maxdir() * sizeof(dir_t) + blksz() -1 ) / blksz();}
     quint16         dataidx()const { return datablk() / secsz() + maxsys() * maxsec();}
-    quint16         secidx(quint16 track, quint16 sect) const { return ((track - maxsys()) * maxsec() + sect) & blkmsk();}
+    quint32         abssec(quint16 track, quint16 sect) const { return (track - maxsys()) * maxsec() + sect;}
+    quint16         secidx(quint32 abssec) const { return abssec & blkmsk();}
     quint16         xlt(quint16 s) const;
-    quint16         getBlockNo( quint16 track, quint16 sec) const { return ((track - maxsys()) * maxsec() + sec) >> bshift();}
-    bool            isDir( quint16 block) const { return block < 16 && (_dpb.al1 | (_dpb.al0 << 8)) & (0x8000 >> block);}
+    quint16         getBlock( quint32 abssec) const { return abssec >> bshift();}
+    bool            isDir(quint32 abssec) const;
+    quint16         dirsec(quint16 diridx) const { return diridx * sizeof(dir_t) / secsz();}
+    quint16         diroff(quint16 diridx) const { return (diridx * sizeof(dir_t)) % secsz();}
 
     virtual bool open() = 0;
     virtual bool close()= 0;

@@ -26,11 +26,12 @@ public slots:
 protected:
     bool        _open;
     QString     getHostname(const dir_t& ext);
-    bool        readdir(quint16 block, quint16 sec, dir_t* data);
-    bool        readsec(quint16 block, quint16 sec, char* data);
+    dir_t &     dir(quint16 idx);
+    bool        readdir(quint32 abssec, dir_t* data);
+    bool        readsec(quint32 abssec, char* data);
     bool        readsys(quint16 offset, char *data);
-    bool        writedir(quint16 idx, const dir_t* data);
-    bool        writesec(quint16 block, quint16 sec, const char *data);
+    bool        writedir(quint32 abssec, const dir_t *data);
+    bool        writesec(quint32 abssec, const char *data);
     bool        writesys(quint16 offset, const char *data);
 
     qint64 findBlock(quint16 block, QString& hostname);
@@ -39,7 +40,6 @@ private:
 
     QMutex          _mutex;
 
-    QVector<dir_t>              _dir;
     QMap<quint32,char*>         _cache;
     QMap<QByteArray, QString>   _hostname;
 

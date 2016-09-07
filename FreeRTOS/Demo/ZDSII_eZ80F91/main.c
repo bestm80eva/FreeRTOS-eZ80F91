@@ -163,6 +163,10 @@ int main( void )
 	BaseType_t	res = pdPASS;
 	rtc_t	rtc;
 	TickType_t xTimeNow;
+	/* Seed the random number generator. */
+	xTimeNow = 0;//xTaskGetTickCount();
+	prvSRand( 0);
+
 #if configUSE_TRACE_FACILITY == 1
 	vTraceInitTraceData();
 	vTraceSetISRProperties(TIID_EthRx, "i_EthRx", IPRI_EthRx);
@@ -180,11 +184,7 @@ int main( void )
 	// uiTraceStart(); 
 	// vTraceStop()
 #endif
-	
-	/* Seed the random number generator. */
-	xTimeNow = xTaskGetTickCount();
-	prvSRand( ( uint32_t ) xTimeNow );
-	
+		
 #if INCLUDE_CONSOLE == 1 || INCLUDE_MODEM == 1  		// Include serial port 0 or serial port 1
 	initSerial();
 #endif

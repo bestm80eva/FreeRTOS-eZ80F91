@@ -108,7 +108,6 @@
 #include "stdint.h"
 #include "exbios.h"
 #include "QtCPMRDrive/cpmrdsk.h"
-#include "CPM/CPM22/CPM64.h"
 
 #include <string.h>
 
@@ -219,9 +218,7 @@ _BOOTSTRAPEND: 									\n\t\
 
 void z80Monitor(trapargs_t *reg)
 {
-	
-extern const unsigned long CPM64_length;
-extern const unsigned char CPM64[];
+	// ToDo: inject and run an Z80 Mashine-Monitor
 	while(1);
 }
 
@@ -348,17 +345,7 @@ static void z80BiosDiskIO(trapargs_t *reg)
 				{
 					uint16_t sz;
 					mountreq_t *req;
-					if(!(reg->de & 1))
-					{
-						hdr_t hdr,*rsp;
-						hdr.pdusz = sizeof(hdr_t);			// size of this request
-						hdr.cmdid = RDSK_UnmountRequest;	// request type
-						hdr.devid = c;						// drive id 0=A, 1=B ...
-						rsp = doRDiskReq(&hdr);
-						if(rsp)
-							FreeRTOS_ReleaseUDPPayloadBuffer( ( void * ) rsp);
-					}
-						
+					
 					// if disk parameters given
 					if(reg->hl)
 					{
@@ -388,7 +375,7 @@ static void z80BiosDiskIO(trapargs_t *reg)
 						req->hdr.devid = c;						// drive id 0=A, 1=B ...
 						memcpy(&req->dpb, dpb, sizeof(dpb_t));	// save Disk Parameter Block
 						snprintf((char*)req->diskid,13U,"drive%c.cpm",'a' + c); // default name
-						req->mode = 0;							// Sector mapping
+						req->mode = 0;//LINEAR;						// No sector demapping
 						req->secsz = SECSIZE;					// CP/M 128 sector size
 													
 						// append sector translation table	
@@ -651,7 +638,7 @@ void prvTCPCpmIOTask( void *ram )
 		
 		
 		/* Process the socket as long as it remains connected. */
-		while( iosize > 0 )
+		while( iosize >= 0 )
 		{
 			char c;
 			/* Receive data on the socket. */
@@ -661,9 +648,13 @@ void prvTCPCpmIOTask( void *ram )
 			{
 				xQueueSend(cpminq,&c,0);		
 			}
+			else
+			{
+				/* Socket closed? */
+				break;
+			}
 		}
 		/* Close the socket correctly. */
-		vTaskDelete( thcpm);
 		prvGracefulShutdown( xListeningSocket );
 	}
 }

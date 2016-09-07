@@ -45,16 +45,17 @@ QTextStream& operator << (QTextStream& ots, const dir_t &dir)
     name[12] = 0;
 
     ots << "St=" << qSetFieldWidth(2) << hex << (unsigned short) dir.status << dec << qSetFieldWidth(0);
-    ots << ", Fn=" << qSetFieldWidth(13) << name << qSetFieldWidth(0);
-    ots << ", Xh/l=" << dir.Xh << "/" << dir.Xl;
-    ots << ", Rc/Bc=" << dir.Rc << "/" << dir.Bc;
-    ots << qSetFieldWidth(4);
+    ots << "h, Fn=" << qSetFieldWidth(13) << name << qSetFieldWidth(0);
+    ots << ", Xhl=" << qSetFieldWidth(5) << dec << ((dir.Xh << 5) | dir.Xl);
+    ots << ", Rc/Bc=" << qSetFieldWidth(3) << dec << dir.Rc << qSetFieldWidth(0) << "/" << qSetFieldWidth(3) << dec << dir.Bc;
+    ots << ", blks=" << qSetFieldWidth(4);
 
     for(int i = 0; i < 16; i++)
     {
         ots << (quint16) dir.Al.b[i];
     }
-    ots << " / ";
+    ots << qSetFieldWidth(0) << " / ";
+    ots << qSetFieldWidth(6);
     for(int i = 0; i < 8; i++)
     {
         ots << dir.Al.w[i];
@@ -64,3 +65,10 @@ QTextStream& operator << (QTextStream& ots, const dir_t &dir)
     return ots;
 }
 
+bool CPMDrive::isDir(quint32 abssec) const
+{
+    quint16 al = _dpb.al1 | (_dpb.al0 << 8);
+    quint16 block = getBlock(abssec);
+    quint16 msk = block < 16 ? (0x8000 >> block):0;
+    return (msk & al) != 0;
+}
