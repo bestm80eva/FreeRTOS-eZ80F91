@@ -1,6 +1,7 @@
 #include "cpmclient.h"
 
 #include <QFileInfo>
+#include <QProcessEnvironment>
 
 CPMClient::CPMClient(const QString &host, QWidget *parent)
     : QWidget(parent)
@@ -41,8 +42,11 @@ bool CPMClient::req(const hdr_t &request, QByteArray &resp)
             if(!drive)
             {
                 const uint8_t *xlt = mreq.xlt ? &mreq.xlt:0;
-                QString p("../CPM/disks/");
+
+                QString p= QProcessEnvironment::systemEnvironment().value(QString("CPMRoot"),QString("~/.cpm"));
+                p.append("/disks/");
                 p.append('A' + mreq.hdr.devid);
+
                 QFileInfo fi(p);
                 result = fi.exists();
                 if(!result)
@@ -120,6 +124,7 @@ bool CPMClient::req(const hdr_t &request, QByteArray &resp)
     if(!result)
     {
         response->cmdid |= RDSK_ErrorFlag;
+        _seqnz = response->seqnz;
     }
     else
         _seqnz++;
